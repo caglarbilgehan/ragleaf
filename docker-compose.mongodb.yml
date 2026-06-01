@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # MongoDB Database - Sadece ChatUI için
+  mongodb:
+    image: mongo:7
+    container_name: rag-webui-mongodb
+    restart: unless-stopped
+    ports:
+      - "1202:27017"
+    environment:
+      MONGO_INITDB_DATABASE: rag-webui-chat
+      # Production için authentication eklenebilir
+      # MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      # MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongodb/init:/docker-entrypoint-initdb.d
+    networks:
+      - rag-webui-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  rag-webui-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16

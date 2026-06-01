@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  landing-page:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: ragleaf-landing-page
+    restart: unless-stopped
+    ports:
+      - "1301:80"
+    mem_limit: 64m
+    cpus: 0.25

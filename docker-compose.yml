@@ -1,0 +1,269 @@
+# =====================================================================
+# Ragleaf Docker Compose - Unified (Dev + Production)
+#
+# KULLANIM:
+#   Tüm servisleri başlat:     docker-compose up -d
+#   Belirli servisleri başlat: docker-compose up -d postgres mongodb redis
+#   Durdur:                    docker-compose down
+#   Logları izle:              docker-compose logs -f
+#
+# PORT ŞEMASI (1300-1307):
+#   1300 - PostgreSQL
+#   1301 - Landing Page (ragleaf.com)
+#   1303 - Redis
+#   1304 - OCR Service
+#   1305 - Embedding Service
+#   1306 - API Gateway
+#   1307 - Platform (app.ragleaf.com)
+#
+# GPU otomatik algılanır - ayrı komut gerektirmez!
+# =====================================================================
+
+services:
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ragleaf_postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+        reservations:
+          memory: 200M
+    mem_swappiness: 10
+    oom_score_adj: "-900"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ragleaf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ragleaf_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-ragleaf_db}
+    ports:
+      - "1300:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ragleaf} -d ${POSTGRES_DB:-ragleaf_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Redis Cache
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: ragleaf_redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 50M
+    mem_swappiness: 10
+    oom_score_adj: "-900"
+    ports:
+      - "1303:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # OCR Service (PDF/Text Extraction)
+  # ===========================================
+  ocr-service:
+    build:
+      context: .
+      dockerfile: docker/ocr-service/Dockerfile
+    container_name: ragleaf_ocr
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 800M
+        reservations:
+          memory: 400M
+    mem_swappiness: 100
+    oom_score_adj: "850"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "1304:8001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Embedding Service (ML/Vector Generation)
+  # GPU/CPU otomatik algılanır!
+  # ===========================================
+  embedding-service:
+    build:
+      context: .
+      dockerfile: docker/embedding-service/Dockerfile
+    container_name: ragleaf_embedding
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1800M
+        reservations:
+          memory: 800M
+    mem_swappiness: 80
+    oom_score_adj: "700"
+    environment:
+      REDIS_URL: redis://redis:6379/1
+      DEVICE: auto # Otomatik GPU/CPU algılama
+      DEFAULT_MODEL: intfloat/multilingual-e5-base # 768 boyut - DB ile uyumlu
+    ports:
+      - "1305:8002"
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+    # GPU desteği: DEVICE=auto ayarı sayesinde runtime'da otomatik algılanır
+    # NVIDIA driver yoksa CPU kullanılır, ayrı yapılandırma gerektirmez
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # API Gateway (Main Backend)
+  # ===========================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api-gateway/Dockerfile
+    container_name: ragleaf_api
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    mem_swappiness: 80
+    oom_score_adj: "600"
+    env_file:
+      - .env
+    environment:
+      TZ: Europe/Istanbul # Turkey local time
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ragleaf}:${POSTGRES_PASSWORD:-ragleaf_pass}@postgres:5432/${POSTGRES_DB:-ragleaf_db}
+      REDIS_URL: redis://redis:6379/2
+      OCR_SERVICE_URL: http://ocr-service:8001
+      EMBEDDING_SERVICE_URL: http://embedding-service:8002
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.ragleaf.com}
+      PUBLIC_CHAT_URL: ${PUBLIC_CHAT_URL:-https://chat.ragleaf.com}
+    ports:
+      - "1306:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./documents:/app/documents
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Platform (React/Vite — app.ragleaf.com)
+  # ===========================================
+  platform:
+    build:
+      context: ./platform
+      dockerfile: Dockerfile
+    container_name: ragleaf_platform
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 100M
+    mem_swappiness: 100
+    oom_score_adj: 500
+    ports:
+      - "1307:5174"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5174" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ragleaf-network
+
+
+  # ===========================================
+  # Landing Page (ragleaf.com)
+  # ===========================================
+  landing-page:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: ragleaf-landing-page
+    restart: unless-stopped
+    ports:
+      - "1301:80"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+    networks:
+      - ragleaf-network
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres_data:
+  redis_data:
+  huggingface_cache:
+
+    # ===========================================
+    # Networks
+    # ===========================================
+networks:
+  ragleaf-network:
+    driver: bridge

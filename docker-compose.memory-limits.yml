@@ -1,0 +1,83 @@
+# EMERGENCY MEMORY LIMITS - Sistem Kapanmasın!
+# API Gateway'i ZORLA sınırla
+
+services:
+  api-gateway:
+    deploy:
+      resources:
+        limits:
+          memory: 800M      # 1.5GB → 800MB (ZORLA SINIRLA)
+        reservations:
+          memory: 400M
+    mem_swappiness: 100     # SWAP'a geç
+    oom_score_adj: 900      # İlk bu ölsün (sistem kapanmasın)
+
+  embedding-service:
+    deploy:
+      resources:
+        limits:
+          memory: 1200M
+        reservations:
+          memory: 600M
+    mem_swappiness: 80
+    oom_score_adj: 800
+
+  ocr-service:
+    deploy:
+      resources:
+        limits:
+          memory: 800M      # 1.2GB → 800MB
+        reservations:
+          memory: 400M
+    mem_swappiness: 100
+    oom_score_adj: 850
+
+  chat-ui:
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 100M
+    mem_swappiness: 100
+    oom_score_adj: 500
+
+  platform:
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 100M
+    mem_swappiness: 100
+    oom_score_adj: 500
+
+  postgres:
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+        reservations:
+          memory: 200M
+    mem_swappiness: 10
+    oom_score_adj: -900     # ASLA ÖLMESIN
+
+  mongodb:
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+        reservations:
+          memory: 200M
+    mem_swappiness: 10
+    oom_score_adj: -900
+
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 50M
+    mem_swappiness: 10
+    oom_score_adj: -900

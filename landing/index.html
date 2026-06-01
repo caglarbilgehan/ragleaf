@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ragleaf — Dokümanlarınızı Yapay Zeka Gücüne Dönüştürün</title>
+  <meta name="description" content="Ragleaf ile dokümanlarınızdan özel AI ajanlar oluşturun. WordPress eklentisi, JavaScript widget veya API ile her yere entegre edin." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">
+      <svg class="leaf" width="30" height="30" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4));">
+        <defs>
+          <linearGradient id="logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="50%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#06b6d4" />
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <path d="M32 6C48 18 52 36 44 48C38 56 32 58 32 58C32 58 26 56 20 48C12 36 16 18 32 6Z" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="M32 58V14" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" />
+        <path d="M32 44L18 34" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 36L46 26" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 26L20 16" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 20L44 10" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round" />
+        <circle cx="32" cy="14" r="3" fill="#06b6d4" filter="url(#glow)" />
+        <circle cx="18" cy="34" r="2.5" fill="#22c55e" />
+        <circle cx="46" cy="26" r="2.5" fill="#06b6d4" />
+        <circle cx="20" cy="16" r="2.5" fill="#22c55e" />
+        <circle cx="44" cy="10" r="2.5" fill="#06b6d4" filter="url(#glow)" />
+      </svg>
+      Ragleaf
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#features" data-i18n="nav_features">Özellikler</a>
+      <a href="#how-it-works" data-i18n="nav_how">Nasıl Çalışır</a>
+      <a href="#integrations" data-i18n="nav_integrations">Entegrasyonlar</a>
+      <a href="#pricing" data-i18n="nav_packages">Paketler</a>
+      <a href="#demo" data-i18n="nav_demo">Demo</a>
+      <button class="lang-globe-btn" id="langGlobeBtn" aria-label="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10A15 15 0 0 1 12 2z"></path></svg></button>
+      <a href="javascript:void(0)" onclick="openLoginModal()" class="btn btn-ghost" style="padding:8px 20px;">Giriş Yap</a>
+      <a href="javascript:void(0)" onclick="openSignupWizard()" class="btn btn-primary" style="padding:8px 20px;">Şimdi Başla →</a>
+    </div>
+    <button class="nav-hamburger" id="navToggle" aria-label="Menü">☰</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="hero-badge">
+      <span class="pulse-dot"></span>
+      <span data-i18n="hero_badge">Beta — Şimdi Kullanılabilir</span>
+    </div>
+    <h1 data-i18n-html="hero_h1">Dokümanlarınızı<br/><span class="gradient-text">AI Gücüne</span> Dönüştürün</h1>
+    <p data-i18n="hero_p">Dokümanlarınızı yükleyin, özel AI ajanlar oluşturun ve tek satır kodla her yere embed edin. WordPress, Shopify veya herhangi bir website — hepsi destekleniyor.</p>
+    <div class="hero-buttons">
+      <a href="javascript:void(0)" onclick="openLoginModal()" class="btn btn-ghost" data-i18n="hero_login">Giriş Yap</a>
+      <a href="javascript:void(0)" onclick="openSignupWizard()" class="btn btn-primary" data-i18n="hero_btn1">Şimdi Başla →</a>
+      <a href="#how-it-works" class="btn btn-ghost" data-i18n="hero_btn2">Nasıl Çalışır?</a>
+    </div>
+
+    <div class="code-window reveal">
+      <div class="code-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div class="code-content">
+        <div class="cm" data-i18n="code_c1">// Tek satır kodla AI ajanınızı sitenize ekleyin</div>
+        <div>
+          <span class="tag">&lt;script</span>
+          <span class="attr"> src</span>=<span class="str">"https://cdn.ragleaf.com/widget.js"</span>
+        </div>
+        <div>
+          &nbsp;&nbsp;<span class="attr">data-agent-id</span>=<span class="str">"ag_your_agent"</span>
+        </div>
+        <div>
+          &nbsp;&nbsp;<span class="attr">data-api-key</span>=<span class="str">"rk_live_xxxxx"</span>
+        </div>
+        <div><span class="tag">&gt;&lt;/script&gt;</span></div>
+        <br/>
+        <div class="cm" data-i18n="code_c2">// Hepsi bu kadar. AI ajanınız hazır! 🍃</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" class="section how-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label">Canlı Demo</span>
+      <h2>Widget Böyle Görünür</h2>
+      <p>Herhangi bir website üzerinde çalışan chat widget</p>
+    </div>
+    <div class="demo-container reveal">
+      <div class="demo-mockup">
+        <div class="demo-browser">
+          <div class="demo-browser-bar">
+            <span class="dot" style="width:8px;height:8px;background:#ff5f57;border-radius:50%;"></span>
+            <span class="dot" style="width:8px;height:8px;background:#febc2e;border-radius:50%;"></span>
+            <span class="dot" style="width:8px;height:8px;background:#28c840;border-radius:50%;"></span>
+            <span class="url-bar">yourwebsite.com</span>
+          </div>
+          <div class="site-placeholder">
+            <div class="line" style="width:60%;height:16px;"></div>
+            <div class="line" style="width:90%;"></div>
+            <div class="line" style="width:80%;"></div>
+            <div class="line" style="width:70%;"></div>
+            <br/>
+            <div class="line" style="width:45%;height:14px;"></div>
+            <div class="line" style="width:85%;"></div>
+            <div class="line" style="width:75%;"></div>
+          </div>
+          <div class="demo-chat-widget">
+            <div class="demo-chat-header">
+              <span>🍃 AI Asistan</span>
+              <span style="opacity:0.7;font-size:16px;">—</span>
+            </div>
+            <div class="demo-chat-messages" id="demoMessages">
+              <div class="demo-msg bot">Merhaba! Size nasıl yardımcı olabilirim? 👋</div>
+              <div class="demo-msg user">İade politikanız nedir?</div>
+              <div class="demo-msg bot">30 gün içinde ücretsiz iade yapabilirsiniz. Detaylı bilgi için İade Politikası sayfamıza göz atabilirsiniz. 📋</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="logos-section">
+  <div class="container">
+    <p data-i18n="logos">Her platformda çalışır</p>
+    <div class="logos-row">
+      <span>🌐 WordPress</span>
+      <span>🛒 Shopify</span>
+      <span>⚡ Webflow</span>
+      <span>📦 Wix</span>
+      <span>🔧 Custom Sites</span>
+      <span>📱 React / Vue</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label" data-i18n="fl">Özellikler</span>
+      <h2 data-i18n="ft">Her Şey Tek Platformda</h2>
+      <p data-i18n="fd">Doküman yükleme, AI eğitimi ve entegrasyona kadar tüm süreç tek çatı altında</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>Çoklu Doküman Desteği</h3>
+        <p>PDF, DOCX, Markdown, TXT ve daha fazlası. OCR desteği ile taranmış belgeler bile işlenir.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
+        <h3>Hibrit Arama Motoru</h3>
+        <p>Semantik arama, BM25 ve Reciprocal Rank Fusion ile en doğru sonuçlar. pgvector altyapısı.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h3>Tek Satır Embed</h3>
+        <p>Shadow DOM izolasyonu ile herhangi bir websiteye chat widget ekleyin. 3KB gzipped, sıfır bağımlılık.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg></div>
+        <h3>WordPress Eklentisi</h3>
+        <p>Tek tıkla WordPress sitenize kurun. WooCommerce, elementor ve tüm temalarla uyumlu.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg></div>
+        <h3>OpenAI-Uyumlu API</h3>
+        <p>Mevcut OpenAI entegrasyonlarınıza direkt bağlanın. Drop-in replacement, sıfır migrasyon.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h3>Kurumsal Güvenlik</h3>
+        <p>JWT auth, domain kısıtlama, rate limiting ve tam tenant izolasyonu. KVKK/GDPR uyumlu.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <h3>Analitik Dashboard</h3>
+        <p>Konuşmaları takip edin, yanıt kalitesini ölçün ve müşterilerinizin ne sorduğunu anlayın.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20 14.5 14.5 0 000-20"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+        <h3>Tam Özelleştirme</h3>
+        <p>Renk, logo, karşılama mesajı, dil, ton — her şeyi markanıza göre ayarlayın.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg></div>
+        <h3>Çoklu Dil Desteği</h3>
+        <p>Türkçe, İngilizce, Almanca ve 20+ dilde doğal yanıtlar. Multilingual embedding desteği.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="section how-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label">Nasıl Çalışır</span>
+      <h2>3 Adımda AI Ajanınız Hazır</h2>
+      <p>Karmaşık kurulum yok, teknik bilgi gerekmez</p>
+    </div>
+    <div class="steps-container">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h3>Dokümanları Yükleyin</h3>
+        <p>PDF, DOCX veya metin dosyalarınızı sürükle-bırak ile yükleyin. Otomatik chunk, embed ve indeksleme.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h3>Ajanı Yapılandırın</h3>
+        <p>Kişilik, ton, dil ve bilgi tabanını ayarlayın. Dashboard'da canlı test edin.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h3>Her Yere Deploy Edin</h3>
+        <p>Embed kodu, WordPress eklentisi veya API key ile saniyeler içinde yayına alın.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section id="integrations" class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label">Entegrasyonlar</span>
+      <h2>Her Platforma Bağlanın</h2>
+      <p>Hazır eklentiler ve özel entegrasyon seçenekleri</p>
+    </div>
+    <div class="integrations-visual">
+      <div class="integration-cards">
+        <div class="int-card reveal">
+          <div class="int-icon">WP</div>
+          <div>
+            <h4>WordPress Eklentisi</h4>
+            <p>Tek tıkla kur, admin panelden yönet</p>
+          </div>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-icon">SH</div>
+          <div>
+            <h4>Shopify App</h4>
+            <p>Ürün bilgisi ile eğitilmiş müşteri desteği</p>
+          </div>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-icon">JS</div>
+          <div>
+            <h4>JavaScript Widget</h4>
+            <p>Tek script tag ile herhangi bir siteye ekle</p>
+          </div>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-icon">{}</div>
+          <div>
+            <h4>REST API</h4>
+            <p>OpenAI-uyumlu API ile özel entegrasyonlar</p>
+          </div>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-icon">⚛</div>
+          <div>
+            <h4>React / Vue / Svelte</h4>
+            <p>NPM paketi ile modern framework desteği</p>
+          </div>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-icon">⚙</div>
+          <div>
+            <h4>Özel Entegrasyon</h4>
+            <p>Webhook, n8n, Zapier ile iş akışlarınıza bağlayın</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-window reveal">
+        <div class="code-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div class="code-content">
+          <div class="cm">// WordPress — functions.php'ye ekleyin</div>
+          <div><span class="kw">add_action</span>(<span class="str">'wp_footer'</span>, <span class="kw">function</span>() {</div>
+          <div>&nbsp;&nbsp;echo <span class="str">'&lt;script src="cdn.ragleaf.com/widget.js"</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">data-agent-id="ag_xxx"&gt;&lt;/script&gt;'</span>;</div>
+          <div>});</div>
+          <br/>
+          <div class="cm">// veya API ile</div>
+          <div><span class="kw">const</span> res = <span class="kw">await</span> fetch('api.ragleaf.com/v1/chat', {</div>
+          <div>&nbsp;&nbsp;<span class="attr">method</span>: <span class="str">'POST'</span>,</div>
+          <div>&nbsp;&nbsp;<span class="attr">headers</span>: { 'Authorization': `Bearer ${apiKey}` },</div>
+          <div>&nbsp;&nbsp;<span class="attr">body</span>: JSON.stringify({ messages })</div>
+          <div>});</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PACKAGES -->
+<section id="pricing" class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label">Paketler</span>
+      <h2>İhtiyacınıza Uygun Çözüm</h2>
+      <p>Her ölçekteki işletme için esnek paketler</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <h3>Başlangıç</h3>
+        <div class="price" style="font-size:24px;">Küçük İşletmeler</div>
+        <ul class="pricing-features">
+          <li>1 AI Ajan</li>
+          <li>Doküman yükleme</li>
+          <li>Widget embed</li>
+          <li>Temel analitik</li>
+          <li>E-posta desteği</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="openSignupWizard(0,'free')" class="btn btn-ghost" style="width:100%;justify-content:center;">Ücretsiz Başla</a>
+      </div>
+      <div class="pricing-card featured reveal">
+        <h3>Profesyonel</h3>
+        <div class="price" style="font-size:24px;">Büyüyen Ekipler</div>
+        <ul class="pricing-features">
+          <li>Çoklu AI Ajan</li>
+          <li>API erişimi</li>
+          <li>WordPress eklentisi</li>
+          <li>Özel marka & tema</li>
+          <li>Gelişmiş analitik</li>
+          <li>Öncelikli destek</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="openSignupWizard(0,'pro')" class="btn btn-primary" style="width:100%;justify-content:center;">Bu Paketi Seç</a>
+      </div>
+      <div class="pricing-card reveal">
+        <h3>Kurumsal</h3>
+        <div class="price" style="font-size:24px;">Büyük Organizasyonlar</div>
+        <ul class="pricing-features">
+          <li>Sınırsız ajan & doküman</li>
+          <li>Self-hosted seçenek</li>
+          <li>SSO & SAML</li>
+          <li>SLA garantisi</li>
+          <li>Özel entegrasyon</li>
+          <li>Dedicated destek</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="openSignupWizard(0,'enterprise')" class="btn btn-ghost" style="width:100%;justify-content:center;">Bu Paketi Seç</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginOverlay"></div>
+<div class="modal-box modal-sm" id="loginModal">
+  <div class="modal-header">
+    <h3>🍃 Giriş Yap</h3>
+    <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>E-posta</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="ornek@firma.com" required />
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <div class="pw-input-wrap">
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required />
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPassword',this)" tabindex="-1">👁️</button>
+        </div>
+      </div>
+      <div id="loginError" class="form-error" style="display:none;margin-bottom:12px;"></div>
+      <button type="submit" class="btn btn-primary" id="loginBtn" style="width:100%;justify-content:center;padding:14px;">Giriş Yap</button>
+    </form>
+    <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text-muted);">
+      Hesabınız yok mu? <a class="modal-link" onclick="closeLoginModal();openSignupWizard()">Kayıt olun</a>
+    </p>
+  </div>
+</div>
+
+<!-- SIGNUP WIZARD MODAL -->
+<div class="modal-overlay" id="signupOverlay"></div>
+<div class="modal-box modal-lg" id="signupModal">
+  <div class="modal-header">
+    <h3>🍃 Hesap Oluştur</h3>
+    <button class="modal-close" onclick="closeSignupWizard()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <!-- Step Indicator -->
+    <div class="wizard-steps">
+      <div class="wizard-step active" data-step="0">
+        <div class="step-dot">1</div>
+        <span class="step-label">Kişisel Bilgiler</span>
+      </div>
+      <div class="wizard-step" data-step="1">
+        <div class="step-dot">2</div>
+        <span class="step-label">Şifre</span>
+      </div>
+      <div class="wizard-step" data-step="2">
+        <div class="step-dot">3</div>
+        <span class="step-label">Firma Bilgileri</span>
+      </div>
+      <div class="wizard-step" data-step="3">
+        <div class="step-dot">4</div>
+        <span class="step-label">Paket Seçimi</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Personal Info -->
+    <div class="wizard-page active" id="wizPage0">
+      <div class="form-row">
+        <div class="form-group"><label>Ad *</label><input type="text" class="form-input" id="regName" placeholder="Adınız" required /></div>
+        <div class="form-group"><label>Soyad *</label><input type="text" class="form-input" id="regSurname" placeholder="Soyadınız" required /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>İl</label><input type="text" class="form-input" id="regCity" placeholder="Şehir" /></div>
+        <div class="form-group"><label>İlçe</label><input type="text" class="form-input" id="regDistrict" placeholder="İlçe" /></div>
+      </div>
+      <div class="form-group"><label>E-posta *</label><input type="email" class="form-input" id="regEmail" placeholder="ornek@firma.com" required /></div>
+      <div class="form-group"><label>Telefon</label><input type="tel" class="form-input" id="regPhone" placeholder="+90 5XX XXX XX XX" /></div>
+    </div>
+
+    <div class="wizard-page" id="wizPage1">
+      <div class="form-group">
+        <label>Şifre *</label>
+        <div class="pw-input-wrap">
+          <input type="password" class="form-input" id="regPassword" placeholder="En az 8 karakter" required oninput="checkPwStrength()" />
+          <button type="button" class="pw-toggle" onclick="togglePw('regPassword',this)" tabindex="-1">👁️</button>
+        </div>
+        <div class="pw-strength"><div class="pw-bar"><div class="pw-bar-fill" id="pwBarFill"></div></div><div class="pw-label" id="pwLabel"></div></div>
+      </div>
+      <div class="form-group">
+        <label>Şifre Tekrar *</label>
+        <div class="pw-input-wrap">
+          <input type="password" class="form-input" id="regPasswordConfirm" placeholder="Şifreyi tekrar girin" required />
+          <button type="button" class="pw-toggle" onclick="togglePw('regPasswordConfirm',this)" tabindex="-1">👁️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Company Info -->
+    <div class="wizard-page" id="wizPage2">
+      <div class="form-group"><label>Firma Adı</label><input type="text" class="form-input" id="regCompany" placeholder="Firma adınız" /></div>
+      <div class="form-group"><label>Website</label><input type="url" class="form-input" id="regWebsite" placeholder="https://www.firmaniz.com" /></div>
+      <div class="form-group">
+        <label>Sektör</label>
+        <select class="form-input" id="regSector">
+          <option value="">Sektör seçin</option>
+          <option value="teknoloji">Teknoloji</option>
+          <option value="e-ticaret">E-Ticaret</option>
+          <option value="egitim">Eğitim</option>
+          <option value="saglik">Sağlık</option>
+          <option value="finans">Finans</option>
+          <option value="hukuk">Hukuk</option>
+          <option value="uretim">Üretim</option>
+          <option value="medya">Medya</option>
+          <option value="turizm">Turizm</option>
+          <option value="diger">Diğer</option>
+        </select>
+      </div>
+      <p class="form-hint" style="margin-top:8px;">💡 Bu bilgiler opsiyoneldir, daha sonra da tamamlayabilirsiniz.</p>
+    </div>
+
+    <!-- Step 4: Plan Selection -->
+    <div class="wizard-page" id="wizPage3">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">İhtiyacınıza uygun planı seçin. Daha sonra değiştirebilirsiniz.</p>
+      <div class="plan-grid">
+        <div class="plan-card selected" onclick="selectPlan(this,'free')">
+          <h4>Ücretsiz</h4>
+          <div class="plan-price">₺0 <span>/ay</span></div>
+          <div class="plan-limits">1 Agent • 10 Doküman<br/>100 Sorgu/ay • 50 MB</div>
+        </div>
+        <div class="plan-card" onclick="selectPlan(this,'starter')">
+          <div class="plan-badge">Popüler</div>
+          <h4>Başlangıç</h4>
+          <div class="plan-price">₺499 <span>/ay</span></div>
+          <div class="plan-limits">3 Agent • 100 Doküman<br/>5.000 Sorgu/ay • 500 MB</div>
+        </div>
+        <div class="plan-card" onclick="selectPlan(this,'pro')">
+          <h4>Profesyonel</h4>
+          <div class="plan-price">₺1.499 <span>/ay</span></div>
+          <div class="plan-limits">10 Agent • 500 Doküman<br/>25.000 Sorgu/ay • 2 GB</div>
+        </div>
+        <div class="plan-card" onclick="selectPlan(this,'enterprise')">
+          <h4>Kurumsal</h4>
+          <div class="plan-price">Özel</div>
+          <div class="plan-limits">Sınırsız Agent & Doküman<br/>SLA • SSO • Özel Entegrasyon</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="signupError" class="form-error" style="display:none;margin-top:12px;"></div>
+
+    <!-- Wizard Actions -->
+    <div class="wizard-actions">
+      <button class="btn btn-ghost" id="wizBack" onclick="wizardBack()" style="display:none;">← Geri</button>
+      <div></div>
+      <button class="btn btn-primary" id="wizNext" onclick="wizardNext()">Devam →</button>
+    </div>
+
+    <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--text-muted);">
+      Zaten hesabınız var mı? <a class="modal-link" onclick="closeSignupWizard();openLoginModal()">Giriş yapın</a>
+    </p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-logo">
+      <svg class="leaf" width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.3));">
+        <defs>
+          <linearGradient id="logo-grad-footer" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="50%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#06b6d4" />
+          </linearGradient>
+          <filter id="glow-footer" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <path d="M32 6C48 18 52 36 44 48C38 56 32 58 32 58C32 58 26 56 20 48C12 36 16 18 32 6Z" stroke="url(#logo-grad-footer)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="M32 58V14" stroke="url(#logo-grad-footer)" stroke-width="2" stroke-linecap="round" />
+        <path d="M32 44L18 34" stroke="url(#logo-grad-footer)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 36L46 26" stroke="url(#logo-grad-footer)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 26L20 16" stroke="url(#logo-grad-footer)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M32 20L44 10" stroke="url(#logo-grad-footer)" stroke-width="1.5" stroke-linecap="round" />
+        <circle cx="32" cy="14" r="3" fill="#06b6d4" filter="url(#glow-footer)" />
+        <circle cx="18" cy="34" r="2.5" fill="#22c55e" />
+        <circle cx="46" cy="26" r="2.5" fill="#06b6d4" />
+        <circle cx="20" cy="16" r="2.5" fill="#22c55e" />
+        <circle cx="44" cy="10" r="2.5" fill="#06b6d4" filter="url(#glow-footer)" />
+      </svg>
+      Ragleaf
+    </div>
+    <div class="footer-links">
+      <a href="#">Gizlilik</a>
+      <a href="#">Koşullar</a>
+      <a href="#">Dokümantasyon</a>
+      <a href="#">API</a>
+      <a href="mailto:hello@ragleaf.com">İletişim</a>
+    </div>
+    <div class="footer-copy">© 2026 Ragleaf. Tüm hakları saklıdır.</div>
+  </div>
+</footer>
+
+<!-- LANGUAGE MODAL -->
+<div class="lang-overlay" id="langOverlay"></div>
+<div class="lang-modal" id="langModal">
+  <div class="lang-modal-header">
+    <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--accent-glow);color:var(--accent);font-size:16px;">⊕</span> <span id="langModalTitle">Dil Seçin</span></h3>
+    <button class="lang-modal-close" id="langClose">&times;</button>
+  </div>
+  <input type="text" class="lang-search" id="langSearch" placeholder="Dil ara..." />
+  <div class="lang-grid" id="langGrid"></div>
+</div>
+
+<script src="i18n.js?v=3" charset="utf-8"></script>
+<script>
+const API_BASE = window.location.hostname.includes('ragleaf.com') ? 'https://api.ragleaf.com' : 'http://localhost:1306';
+const APP_URL = window.location.hostname.includes('ragleaf.com') ? 'https://app.ragleaf.com' : 'http://localhost:5173';
+
+let currentLang = localStorage.getItem('ragleaf_lang') || (navigator.language.startsWith('tr') ? 'tr' : 'en');
+
+// Selector-based mapping for elements without data-i18n
+const selectorMap = {
+  '#features .feature-card:nth-child(1) h3':'f1t','#features .feature-card:nth-child(1) p':'f1d',
+  '#features .feature-card:nth-child(2) h3':'f2t','#features .feature-card:nth-child(2) p':'f2d',
+  '#features .feature-card:nth-child(3) h3':'f3t','#features .feature-card:nth-child(3) p':'f3d',
+  '#features .feature-card:nth-child(4) h3':'f4t','#features .feature-card:nth-child(4) p':'f4d',
+  '#features .feature-card:nth-child(5) h3':'f5t','#features .feature-card:nth-child(5) p':'f5d',
+  '#features .feature-card:nth-child(6) h3':'f6t','#features .feature-card:nth-child(6) p':'f6d',
+  '#features .feature-card:nth-child(7) h3':'f7t','#features .feature-card:nth-child(7) p':'f7d',
+  '#features .feature-card:nth-child(8) h3':'f8t','#features .feature-card:nth-child(8) p':'f8d',
+  '#features .feature-card:nth-child(9) h3':'f9t','#features .feature-card:nth-child(9) p':'f9d',
+  '#how-it-works .section-header .label':'hl','#how-it-works .section-header h2':'ht','#how-it-works .section-header p':'hd',
+  '#how-it-works .step:nth-child(1) h3':'h1t','#how-it-works .step:nth-child(1) p':'h1d',
+  '#how-it-works .step:nth-child(2) h3':'h2t','#how-it-works .step:nth-child(2) p':'h2d',
+  '#how-it-works .step:nth-child(3) h3':'h3t','#how-it-works .step:nth-child(3) p':'h3d',
+  '#integrations .section-header .label':'il','#integrations .section-header h2':'it','#integrations .section-header p':'id',
+  '#integrations .int-card:nth-child(1) h4':'i1t','#integrations .int-card:nth-child(1) p':'i1d',
+  '#integrations .int-card:nth-child(2) h4':'i2t','#integrations .int-card:nth-child(2) p':'i2d',
+  '#integrations .int-card:nth-child(3) h4':'i3t','#integrations .int-card:nth-child(3) p':'i3d',
+  '#integrations .int-card:nth-child(4) h4':'i4t','#integrations .int-card:nth-child(4) p':'i4d',
+  '#integrations .int-card:nth-child(5) h4':'i5t','#integrations .int-card:nth-child(5) p':'i5d',
+  '#integrations .int-card:nth-child(6) h4':'i6t','#integrations .int-card:nth-child(6) p':'i6d',
+  '#integrations .code-content .cm:nth-of-type(1)':'ic1','#integrations .code-content .cm:nth-of-type(2)':'ic2',
+  '#demo .section-header .label':'dl','#demo .section-header h2':'dt','#demo .section-header p':'dd',
+  '.demo-chat-header span:first-child':'_demo_chat_title',
+  '#pricing .section-header .label':'pl','#pricing .section-header h2':'pt','#pricing .section-header p':'pd',
+  '#pricing .pricing-card:nth-child(1) h3':'p1n','#pricing .pricing-card:nth-child(1) .price':'p1t',
+  '#pricing .pricing-card:nth-child(2) h3':'p2n','#pricing .pricing-card:nth-child(2) .price':'p2t',
+  '#pricing .pricing-card:nth-child(3) h3':'p3n','#pricing .pricing-card:nth-child(3) .price':'p3t',
+  '.footer-copy':'fcopy',
+};
+
+function applyLang(lang) {
+  currentLang = lang;
+  const t = T[lang] || T.tr;
+  document.documentElement.lang = lang;
+  document.title = t.meta_title || document.title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc && t.meta_desc) metaDesc.setAttribute('content', t.meta_desc);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (t[key]) el.innerHTML = t[key];
+  });
+  for (const [sel, key] of Object.entries(selectorMap)) {
+    const el = document.querySelector(sel);
+    if (el && t[key]) el.textContent = t[key];
+  }
+  const pkgCards = document.querySelectorAll('#pricing .pricing-card');
+  [['p1f',0],['p2f',1],['p3f',2]].forEach(([k,i]) => {
+    if (pkgCards[i] && t[k]) {
+      const lis = pkgCards[i].querySelectorAll('.pricing-features li');
+      t[k].forEach((txt,j) => { if(lis[j]) lis[j].textContent = txt; });
+    }
+  });
+  const featCard = document.querySelector('.pricing-card.featured');
+  if (featCard) featCard.setAttribute('data-pop', t.ppop);
+  const demoWel = document.querySelector('#demoMessages .demo-msg.bot');
+  if (demoWel) demoWel.textContent = t.dw;
+  const chatTitle = document.querySelector('.demo-chat-header span:first-child');
+  if (chatTitle) chatTitle.textContent = '🍃 ' + ({tr:'AI Asistan', en:'AI Assistant'}[lang] || 'AI Asistan');
+  const flinks = document.querySelectorAll('.footer-links a');
+  if (flinks.length >= 5) {
+    flinks[0].textContent=t.fpriv; flinks[1].textContent=t.fterms;
+    flinks[2].textContent=t.fdocs; flinks[3].textContent=t.fapi; flinks[4].textContent=t.fcont;
+  }
+  const mt = MODAL_TEXT[lang] || MODAL_TEXT.en;
+  const mtEl = document.getElementById('langModalTitle');
+  if (mtEl) mtEl.textContent = mt.title;
+  const lsEl = document.getElementById('langSearch');
+  if (lsEl) lsEl.placeholder = mt.search;
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  localStorage.setItem('ragleaf_lang', lang);
+}
+
+function buildLangGrid(filter = '') {
+  const grid = document.getElementById('langGrid');
+  grid.innerHTML = '';
+  const q = filter.toLowerCase();
+  LANGS.filter(l => !q || l.name.toLowerCase().includes(q) || l.native.toLowerCase().includes(q) || l.code.includes(q))
+    .forEach(l => {
+      const btn = document.createElement('button');
+      btn.className = 'lang-option' + (l.code === currentLang ? ' active' : '');
+      btn.dataset.lang = l.code;
+      btn.innerHTML = `<span class="flag">${l.flag}</span><span class="lang-name">${l.native}</span>`;
+      btn.addEventListener('click', () => { applyLang(l.code); closeLangModal(); });
+      grid.appendChild(btn);
+    });
+}
+function openLangModal() {
+  document.getElementById('langOverlay').classList.add('open');
+  document.getElementById('langModal').classList.add('open');
+  document.getElementById('langSearch').value = '';
+  buildLangGrid();
+  setTimeout(() => document.getElementById('langSearch').focus(), 100);
+}
+function closeLangModal() {
+  document.getElementById('langOverlay').classList.remove('open');
+  document.getElementById('langModal').classList.remove('open');
+}
+document.getElementById('langGlobeBtn').addEventListener('click', openLangModal);
+document.getElementById('langOverlay').addEventListener('click', closeLangModal);
+document.getElementById('langClose').addEventListener('click', closeLangModal);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeLangModal(); closeLoginModal(); closeSignupWizard(); }
+});
+document.getElementById('langSearch').addEventListener('input', e => buildLangGrid(e.target.value));
+applyLang(currentLang);
+
+// Password toggle
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.background = window.scrollY > 50 ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
+});
+document.getElementById('navToggle')?.addEventListener('click', () => {
+  const links = document.getElementById('navLinks');
+  const isOpen = links.style.display === 'flex';
+  Object.assign(links.style, isOpen ? {display:'none'} : {
+    display:'flex', flexDirection:'column', position:'absolute',
+    top:'60px', left:'0', right:'0', background:'rgba(10,10,15,0.98)',
+    padding:'24px', gap:'16px', borderBottom:'1px solid rgba(255,255,255,0.06)'
+  });
+});
+
+// ===== LOGIN MODAL =====
+function openLoginModal() {
+  document.getElementById('loginOverlay').classList.add('open');
+  document.getElementById('loginModal').classList.add('open');
+  document.getElementById('loginError').style.display = 'none';
+  setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+}
+function closeLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('open');
+  document.getElementById('loginModal').classList.remove('open');
+}
+document.getElementById('loginOverlay').addEventListener('click', closeLoginModal);
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  btn.disabled = true; btn.textContent = 'Giriş yapılıyor...';
+  errEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Giriş başarısız');
+    localStorage.setItem('ragleaf_token', data.access_token);
+    localStorage.setItem('ragleaf_user', JSON.stringify(data.user));
+    // Pass token to app.ragleaf.com via URL (different domain = different localStorage)
+    window.location.href = `${APP_URL}/login?token=${encodeURIComponent(data.access_token)}`;
+  } catch(err) {
+    errEl.textContent = err.message; errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Giriş Yap';
+  }
+}
+
+// ===== SIGNUP WIZARD =====
+let wizardStep = 0;
+let selectedPlan = 'free';
+
+function openSignupWizard(step, plan) {
+  wizardStep = step || 0;
+  if (plan) selectedPlan = plan;
+  updateWizardUI();
+  document.getElementById('signupOverlay').classList.add('open');
+  document.getElementById('signupModal').classList.add('open');
+  document.getElementById('signupError').style.display = 'none';
+  // Pre-select plan
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  const planMap = {free:0, starter:1, pro:2, enterprise:3};
+  const idx = planMap[selectedPlan] ?? 0;
+  document.querySelectorAll('.plan-card')[idx]?.classList.add('selected');
+}
+function closeSignupWizard() {
+  document.getElementById('signupOverlay').classList.remove('open');
+  document.getElementById('signupModal').classList.remove('open');
+}
+document.getElementById('signupOverlay').addEventListener('click', closeSignupWizard);
+
+function updateWizardUI() {
+  // Update step indicators
+  document.querySelectorAll('.wizard-step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i < wizardStep) s.classList.add('done');
+    if (i === wizardStep) s.classList.add('active');
+  });
+  // Show/hide pages
+  document.querySelectorAll('.wizard-page').forEach((p, i) => {
+    p.classList.toggle('active', i === wizardStep);
+  });
+  // Back button
+  document.getElementById('wizBack').style.display = wizardStep > 0 ? 'inline-flex' : 'none';
+  // Next button text
+  const nextBtn = document.getElementById('wizNext');
+  if (wizardStep === 3) {
+    nextBtn.textContent = 'Üyeliği Tamamla ✓';
+  } else {
+    nextBtn.textContent = 'Devam →';
+  }
+}
+
+function wizardBack() {
+  if (wizardStep > 0) { wizardStep--; updateWizardUI(); }
+}
+
+function wizardNext() {
+  const errEl = document.getElementById('signupError');
+  errEl.style.display = 'none';
+
+  // Validate current step
+  if (wizardStep === 0) {
+    const name = document.getElementById('regName').value.trim();
+    const surname = document.getElementById('regSurname').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    if (!name || !surname) { showSignupErr('Ad ve soyad zorunludur.'); return; }
+    if (!email || !email.includes('@')) { showSignupErr('Geçerli bir e-posta adresi girin.'); return; }
+  } else if (wizardStep === 1) {
+    const pw = document.getElementById('regPassword').value;
+    const pw2 = document.getElementById('regPasswordConfirm').value;
+    if (pw.length < 8) { showSignupErr('Şifre en az 8 karakter olmalıdır.'); return; }
+    if (pw !== pw2) { showSignupErr('Şifreler eşleşmiyor.'); return; }
+  } else if (wizardStep === 3) {
+    // Final: submit
+    submitRegistration();
+    return;
+  }
+
+  wizardStep++;
+  updateWizardUI();
+}
+
+function showSignupErr(msg) {
+  const el = document.getElementById('signupError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function selectPlan(el, plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function checkPwStrength() {
+  const pw = document.getElementById('regPassword').value;
+  const fill = document.getElementById('pwBarFill');
+  const label = document.getElementById('pwLabel');
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  fill.className = 'pw-bar-fill';
+  if (score <= 1) { fill.classList.add('weak'); label.textContent = 'Zayıf'; }
+  else if (score === 2) { fill.classList.add('fair'); label.textContent = 'Orta'; }
+  else if (score === 3) { fill.classList.add('good'); label.textContent = 'İyi'; }
+  else { fill.classList.add('strong'); label.textContent = 'Güçlü'; }
+}
+
+async function submitRegistration() {
+  const btn = document.getElementById('wizNext');
+  btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+  const errEl = document.getElementById('signupError');
+  errEl.style.display = 'none';
+
+  const body = {
+    name: document.getElementById('regName').value.trim(),
+    surname: document.getElementById('regSurname').value.trim(),
+    email: document.getElementById('regEmail').value.trim(),
+    password: document.getElementById('regPassword').value,
+    phone: document.getElementById('regPhone').value.trim() || null,
+    city: document.getElementById('regCity').value.trim() || null,
+    district: document.getElementById('regDistrict').value.trim() || null,
+    company_name: document.getElementById('regCompany').value.trim() || null,
+    website: document.getElementById('regWebsite').value.trim() || null,
+    sector: document.getElementById('regSector').value || null,
+    plan: selectedPlan
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Kayıt başarısız');
+    // Auto-login
+    localStorage.setItem('ragleaf_token', data.access_token);
+    localStorage.setItem('ragleaf_user', JSON.stringify(data.user));
+    // Pass token to app.ragleaf.com via URL (different domain = different localStorage)
+    window.location.href = `${APP_URL}/login?token=${encodeURIComponent(data.access_token)}`;
+  } catch(err) {
+    showSignupErr(err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Üyeliği Tamamla ✓';
+  }
+}
+
+// Demo chat animation
+let demoIdx = 0;
+function addDemoMsg() {
+  const t = T[currentLang] || T.tr;
+  const msgs = t.demo_loop;
+  const container = document.getElementById('demoMessages');
+  if (!container || demoIdx >= msgs.length) {
+    demoIdx = 0;
+    setTimeout(() => {
+      if (container) container.innerHTML = `<div class="demo-msg bot">${(T[currentLang]||T.tr).dw}</div>`;
+      setTimeout(addDemoMsg, 2000);
+    }, 4000);
+    return;
+  }
+  const msg = msgs[demoIdx];
+  const div = document.createElement('div');
+  div.className = `demo-msg ${msg.role === 'user' ? 'user' : 'bot'}`;
+  div.textContent = msg.text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  demoIdx++;
+  setTimeout(addDemoMsg, msg.role === 'user' ? 1500 : 2500);
+}
+setTimeout(addDemoMsg, 4000);
+</script>
+
+</body>
+</html>

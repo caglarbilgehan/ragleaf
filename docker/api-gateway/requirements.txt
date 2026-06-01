@@ -1,0 +1,40 @@
+# API Gateway Requirements - Lightweight version without ML
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.9
+
+# Database
+sqlalchemy==2.0.35
+alembic==1.13.2
+psycopg2-binary==2.9.9
+pgvector==0.2.5
+pymongo==4.6.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-decouple==3.8
+PyJWT==2.10.1
+
+# Redis
+redis==5.0.1
+
+# AI Provider APIs (no local ML, just API calls)
+openai==1.50.0
+anthropic==0.34.0
+tiktoken==0.7.0
+
+# Langchain for RAG orchestration
+langchain==0.2.16
+langchain-community==0.2.16
+
+# Utilities
+requests==2.32.3
+aiofiles==24.1.0
+pydantic==2.9.0
+pydantic-settings==2.5.0
+email-validator==2.3.0
+aiohttp==3.10.5
+httpx==0.27.2
+psutil==6.0.0
+python-magic==0.4.27

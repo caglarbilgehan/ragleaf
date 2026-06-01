@@ -1,0 +1,168 @@
+# Backups
+chat-ui-backup-20251110-153630/
+backups/
+
+# Archive
+archive/
+.archive/
+
+# Agent config
+.agent/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+articles/
+eggs/
+.eggs/
+lib/
+!chat-ui/src/lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Database
+*.db
+
+# Logs
+logs/
+*.log
+log/
+
+# Uploads and Documents
+uploads/
+documents/
+static/
+output/
+vector_stores/
+
+# Test files and folders
+tests/
+test_*.py
+*_test.py
+quick_*.py
+cleanup_*.py
+check_*.py
+create_*.py
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# SSL Certificates
+nginx/ssl/
+*.pem
+*.key
+*.crt
+
+# Monitoring Data
+prometheus_data/
+grafana_data/
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Redis dump
+dump.rdb
+
+# Temporary files
+temp/
+tmp/
+*.temp
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Local development
+local_settings.py
+.local
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/__init__.py
+
+# Matriks AIA specific
+models/
+*.pkl
+*.json.bak
+
+# Reports
+# reports/
+
+# Docs
+docs/others/HUGGINGFACE-TOKENS.md
+
+# Megaignore
+.megaignore
