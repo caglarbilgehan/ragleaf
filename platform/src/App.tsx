@@ -34,6 +34,7 @@ import TagsPage from './pages/TagsPage';
 // Agentik Platform Pages
 import AgentsPage from './pages/AgentsPage';
 import AgentBuilderPage from './pages/AgentBuilderPage';
+import TemplateWizardPage from './pages/TemplateWizardPage';
 import IntegrationPage from './pages/IntegrationPage';
 // Tenant Pages
 import TenantDashboard from './pages/tenant/TenantDashboard';
@@ -41,6 +42,7 @@ import TenantConversations from './pages/tenant/TenantConversations';
 import TenantWidget from './pages/tenant/TenantWidget';
 import TenantDocuments from './pages/tenant/TenantDocuments';
 import TenantUsers from './pages/tenant/TenantUsers';
+import TenantAppointments from './pages/tenant/TenantAppointments';
 import { authApi, adminApi } from '@/services/api';
 import type { User } from '@/types';
 
@@ -134,6 +136,7 @@ function App() {
 
         {/* Shared Routes */}
         <Route path="/agents" element={<AgentsPage />} />
+        <Route path="/agents/new/template" element={<TemplateWizardPage />} />
         <Route path="/agents/:agentId/edit" element={<AgentBuilderPage />} />
         <Route path="/agents/:agentId/integrate" element={<IntegrationPage />} />
 
@@ -143,6 +146,7 @@ function App() {
         <Route path="/tenant/widget" element={<TenantWidget />} />
         <Route path="/tenant/documents" element={<TenantDocuments />} />
         <Route path="/tenant/users" element={<TenantUsers />} />
+        <Route path="/tenant/appointments" element={<TenantAppointments />} />
 
         <Route path="/login" element={<Navigate to={defaultPath} replace />} />
         <Route path="*" element={<Navigate to={defaultPath} replace />} />

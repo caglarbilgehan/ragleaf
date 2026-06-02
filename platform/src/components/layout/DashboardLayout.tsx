@@ -32,6 +32,7 @@ import {
   Settings,
   ArrowLeftRight,
   Shield,
+  CalendarDays,
 } from 'lucide-react';
 import { authApi } from '@/services/api';
 import toast from 'react-hot-toast';
@@ -103,6 +104,7 @@ const tenantNavigation = [
     isHeader: true
   },
   { name: 'Agent\'larım', href: '/agents', icon: Bot },
+  { name: 'Randevular', href: '/tenant/appointments', icon: CalendarDays },
   { name: 'Dokümanlar', href: '/tenant/documents', icon: Upload },
   { name: 'Konuşmalar', href: '/tenant/conversations', icon: MessageSquare },
   { name: 'Kullanıcılar', href: '/tenant/users', icon: Users },

@@ -14,6 +14,7 @@ import {
   ClipboardDocumentIcon,
   EyeIcon,
   EyeSlashIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 export default function AgentsPage() {
@@ -86,13 +87,22 @@ export default function AgentsPage() {
             Firmanız için AI temsilciler oluşturun ve yönetin
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <PlusIcon className="h-5 w-5" />
-          Yeni Agent
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/agents/new/template')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
+          >
+            <SparklesIcon className="h-5 w-5" />
+            Hazır Şablon
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <PlusIcon className="h-5 w-5" />
+            Sıfırdan Oluştur
+          </button>
+        </div>
       </div>
 
       {/* Create Form */}
