@@ -155,3 +155,133 @@ export const agentApi = {
     await api.delete(`/api/agents/${agentId}/api-keys/${keyId}`);
   },
 };
+
+// ============================================================================
+// Template API (Sektörel Şablonlar)
+// ============================================================================
+
+export interface TemplateConfigField {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'phone' | 'tag_list' | 'schedule' | 'number';
+  required?: boolean;
+  placeholder?: string;
+  suggestions?: string[];
+  default?: any;
+}
+
+export interface AgentTemplate {
+  id: number;
+  slug: string;
+  category: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  is_featured: boolean;
+  preview_questions: string[] | null;
+  config_schema: TemplateConfigField[];
+  default_system_prompt?: string;
+  default_welcome_message?: string | null;
+  default_personality?: Record<string, any> | null;
+  default_appearance?: Record<string, any> | null;
+}
+
+export interface CreateFromTemplateRequest {
+  template_slug: string;
+  config_data: Record<string, any>;
+  agent_name?: string;
+}
+
+export const templateApi = {
+  list: async (category?: string): Promise<AgentTemplate[]> => {
+    const params = category ? `?category=${category}` : '';
+    const res = await api.get(`/api/templates${params}`);
+    return res.data;
+  },
+
+  get: async (slug: string): Promise<AgentTemplate> => {
+    const res = await api.get(`/api/templates/${slug}`);
+    return res.data;
+  },
+
+  createFromTemplate: async (data: CreateFromTemplateRequest): Promise<Agent & { api_key?: string }> => {
+    const res = await api.post('/api/agents/from-template', data);
+    return res.data;
+  },
+};
+
+// ============================================================================
+// Appointment API (Randevu Yönetimi)
+// ============================================================================
+
+export interface Appointment {
+  id: number;
+  public_id: string;
+  organization_id: number;
+  agent_id: number | null;
+  customer_name: string;
+  customer_phone: string | null;
+  customer_email: string | null;
+  customer_notes: string | null;
+  service_type: string | null;
+  service_details: Record<string, any> | null;
+  appointment_date: string;
+  appointment_end: string | null;
+  duration_minutes: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+  cancelled_reason: string | null;
+  sync_status: string;
+  created_at: string;
+  confirmed_at: string | null;
+}
+
+export interface AppointmentStats {
+  total: number;
+  pending: number;
+  confirmed: number;
+  completed: number;
+  cancelled: number;
+  today: number;
+  this_week: number;
+}
+
+export const appointmentApi = {
+  list: async (params?: {
+    status?: string;
+    agent_id?: number;
+    date_from?: string;
+    date_to?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Appointment[]> => {
+    const res = await api.get('/api/appointments', { params });
+    return res.data;
+  },
+
+  get: async (publicId: string): Promise<Appointment> => {
+    const res = await api.get(`/api/appointments/${publicId}`);
+    return res.data;
+  },
+
+  updateStatus: async (publicId: string, status: string, reason?: string): Promise<Appointment> => {
+    const res = await api.patch(`/api/appointments/${publicId}/status`, {
+      status,
+      cancelled_reason: reason,
+    });
+    return res.data;
+  },
+
+  update: async (publicId: string, data: Partial<Appointment>): Promise<Appointment> => {
+    const res = await api.put(`/api/appointments/${publicId}`, data);
+    return res.data;
+  },
+
+  delete: async (publicId: string): Promise<void> => {
+    await api.delete(`/api/appointments/${publicId}`);
+  },
+
+  stats: async (): Promise<AppointmentStats> => {
+    const res = await api.get('/api/appointments/stats/summary');
+    return res.data;
+  },
+};

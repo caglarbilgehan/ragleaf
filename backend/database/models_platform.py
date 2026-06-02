@@ -21,6 +21,55 @@ from .connection_v2 import Base
 
 
 # ============================================================================
+# Agent Templates (Sektörel Şablonlar)
+# ============================================================================
+
+class AgentTemplate(Base):
+    """
+    Sektörel hazır AI asistan şablonları.
+    Kullanıcılar bir şablon seçip firma bilgilerini girerek hızlıca agent oluşturabilir.
+    """
+    __tablename__ = "agent_templates"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String(100), unique=True, nullable=False, index=True)  # "kuafor"
+    category = Column(String(100), nullable=False)                        # "beauty", "health", "ecommerce"
+    name = Column(String(200), nullable=False)                            # "Kuaför Asistanı"
+    description = Column(Text, nullable=True)
+    icon = Column(String(50), nullable=True)                              # "✂️"
+    
+    # Template defaults
+    default_system_prompt = Column(Text, nullable=False)                  # {{firma_adi}} placeholders
+    default_welcome_message = Column(Text, nullable=True)
+    default_personality = Column(JSONB, default={}, nullable=True)
+    default_appearance = Column(JSONB, default={}, nullable=True)
+    
+    # Wizard config — defines which fields to ask the user
+    # Array of: {"key": "firma_adi", "label": "Salon Adı", "type": "text", "required": true, "placeholder": "..."}
+    config_schema = Column(JSONB, nullable=False, default=[])
+    
+    # Preview/marketing
+    preview_questions = Column(JSONB, default=[], nullable=True)  # Example questions shown in preview
+    
+    # Status & ordering
+    is_active = Column(Boolean, default=True)
+    is_featured = Column(Boolean, default=False)
+    sort_order = Column(Integer, default=0)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    __table_args__ = (
+        Index('idx_template_category', 'category'),
+        Index('idx_template_active', 'is_active'),
+    )
+    
+    def __repr__(self):
+        return f"<AgentTemplate {self.slug} name={self.name}>"
+
+
+# ============================================================================
 # Organization & Team Tables
 # ============================================================================
 
@@ -454,3 +503,134 @@ class UsageLog(Base):
     
     def __repr__(self):
         return f"<UsageLog {self.id} type={self.event_type} org={self.organization_id}>"
+
+
+# ============================================================================
+# Appointment System (Randevu Yönetimi)
+# ============================================================================
+
+class Appointment(Base):
+    """
+    Randevu kaydı.
+    AI asistan chat üzerinden bilgileri toplar ve bu tabloya yazar.
+    Google Calendar vb. entegrasyonlarla senkronize edilebilir.
+    """
+    __tablename__ = "appointments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    public_id = Column(String(36), unique=True, nullable=False, index=True,
+                       default=lambda: f"apt_{uuid.uuid4().hex[:12]}")
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"), nullable=True, index=True)
+    
+    # Conversation link (which chat created this appointment)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("public_conversations.id", ondelete="SET NULL"), nullable=True)
+    
+    # Customer info (collected by AI)
+    customer_name = Column(String(200), nullable=False)
+    customer_phone = Column(String(50), nullable=True)
+    customer_email = Column(String(200), nullable=True)
+    customer_notes = Column(Text, nullable=True)  # "Saçımı kısa kestirmek istiyorum"
+    
+    # Appointment details
+    service_type = Column(String(200), nullable=True)     # "Saç Kesimi + Fön"
+    service_details = Column(JSONB, default={}, nullable=True)  # {"services": ["Saç Kesimi", "Fön"], "duration_min": 60}
+    
+    # Scheduling
+    appointment_date = Column(DateTime(timezone=True), nullable=False, index=True)
+    appointment_end = Column(DateTime(timezone=True), nullable=True)       # Calculated from duration
+    duration_minutes = Column(Integer, default=60)
+    
+    # Status workflow: pending → confirmed → completed / cancelled / no_show
+    status = Column(String(30), default="pending", nullable=False, index=True)
+    # pending    — AI tarafından oluşturuldu, onay bekliyor
+    # confirmed  — İşletme onayladı
+    # completed  — Randevu gerçekleşti
+    # cancelled  — İptal edildi
+    # no_show    — Müşteri gelmedi
+    
+    cancelled_reason = Column(Text, nullable=True)
+    cancelled_by = Column(String(20), nullable=True)  # "customer", "business", "system"
+    
+    # External calendar sync
+    external_calendar_id = Column(String(200), nullable=True)   # Google Calendar event ID etc.
+    external_calendar_type = Column(String(50), nullable=True)  # "google", "outlook", "ical"
+    sync_status = Column(String(20), default="not_synced")      # not_synced, synced, sync_error
+    
+    # Reminders
+    reminder_sent = Column(Boolean, default=False)
+    reminder_sent_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Extra data
+    extra_data = Column(JSONB, default={}, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    confirmed_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Relationships
+    organization = relationship("Organization")
+    agent = relationship("Agent")
+    conversation = relationship("PublicConversation")
+    
+    __table_args__ = (
+        Index('idx_apt_org', 'organization_id'),
+        Index('idx_apt_agent', 'agent_id'),
+        Index('idx_apt_date', 'appointment_date'),
+        Index('idx_apt_status', 'status'),
+        Index('idx_apt_org_date', 'organization_id', 'appointment_date'),
+        Index('idx_apt_org_status', 'organization_id', 'status'),
+    )
+    
+    def __repr__(self):
+        return f"<Appointment {self.public_id} customer={self.customer_name} date={self.appointment_date}>"
+
+
+class CalendarIntegration(Base):
+    """
+    External calendar integration settings per organization.
+    Supports Google Calendar, Outlook Calendar, iCal.
+    """
+    __tablename__ = "calendar_integrations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Integration type
+    provider = Column(String(50), nullable=False)  # "google", "outlook", "ical", "caldav"
+    name = Column(String(200), nullable=False)      # "Google Takvim — Ana Hesap"
+    
+    # Auth credentials (encrypted in production)
+    credentials = Column(JSONB, default={}, nullable=True)
+    # For Google: {"access_token": "...", "refresh_token": "...", "token_uri": "..."}
+    # For iCal:   {"calendar_url": "https://..."}
+    
+    # Calendar settings
+    calendar_id = Column(String(300), nullable=True)  # Google: "primary" or specific calendar ID
+    
+    # Sync settings
+    sync_enabled = Column(Boolean, default=True)
+    sync_direction = Column(String(20), default="push")  # "push" (write only), "pull" (read only), "both"
+    last_sync_at = Column(DateTime(timezone=True), nullable=True)
+    sync_error = Column(Text, nullable=True)
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    organization = relationship("Organization")
+    
+    __table_args__ = (
+        Index('idx_cal_org', 'organization_id'),
+        Index('idx_cal_provider', 'provider'),
+        UniqueConstraint('organization_id', 'provider', 'calendar_id', name='uq_cal_integration'),
+    )
+    
+    def __repr__(self):
+        return f"<CalendarIntegration {self.provider} org={self.organization_id}>"

@@ -476,6 +476,14 @@ def create_app() -> FastAPI:
     # Public Chat API (widget and external integrations)
     from backend.api.public_chat import public_chat_router
     app.include_router(public_chat_router, prefix="/v1", tags=["public-chat"])
+    
+    # Agent Templates API (sektörel şablonlar)
+    from backend.api.agent_templates import templates_router
+    app.include_router(templates_router, prefix="/api", tags=["templates"])
+    
+    # Appointments API (randevu yönetimi)
+    from backend.api.appointments import appointments_router
+    app.include_router(appointments_router, prefix="/api", tags=["appointments"])
 
     # --- Widget CDN ---
     import os
