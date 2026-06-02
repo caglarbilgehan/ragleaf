@@ -24,7 +24,12 @@ class VectorStoreManager:
     
     def __init__(self, base_dir: Optional[Path] = None):
         # base_dir kept for signature compatibility but not used for storage
-        self.base_dir = base_dir or Path(__file__).parent.parent.parent.parent / "documents"
+        if base_dir is None:
+            from backend.services.storage_service import get_storage
+            _storage = get_storage()
+            import os
+            base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
+        self.base_dir = base_dir
         
         # PostgreSQL vector store
         self._pg_store: Optional[PgVectorStore] = None

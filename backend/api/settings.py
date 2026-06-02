@@ -79,7 +79,7 @@ async def get_environment_config(
             APP_NAME=config("APP_NAME", default="Ragleaf AI"),
             APP_VERSION=config("APP_VERSION", default="4.0.0"),
             MAX_FILE_SIZE_MB=config("MAX_FILE_SIZE_MB", default=100, cast=int),
-            DOCUMENTS_DIR=config("DOCUMENTS_DIR", default="./documents"),
+            DOCUMENTS_DIR=config("DOCUMENTS_DIR", default=os.getenv("STORAGE_ROOT", "./storage")),
             CHATUI_API_BASE=config("CHATUI_API_BASE", default="http://localhost:3001/api/v2"),
             PUBLIC_APP_NAME=config("PUBLIC_APP_NAME", default="Ragleaf AI"),
             PUBLIC_APP_DESCRIPTION=config("PUBLIC_APP_DESCRIPTION", default="Belge zekasına sahip gelişmiş RAG ve Sohbet sistemi"),

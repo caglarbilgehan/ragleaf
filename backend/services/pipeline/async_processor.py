@@ -102,8 +102,12 @@ class AsyncPipelineProcessor:
                 self._update_error(document_id, "Could not acquire processing slot")
                 return
             
-            # Construct file path
-            file_path = Path(f"./documents/{folder_name}/original/{original_filename}").resolve()
+            # Construct file path using StorageService (multi-tenant)
+            import os
+            from backend.services.storage_service import get_storage
+            _storage = get_storage()
+            org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+            file_path = _storage.get_original_file_path(org_slug, folder_name, original_filename).resolve()
             
             if not file_path.exists():
                 logger.error(f"❌ File not found: {file_path}")

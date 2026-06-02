@@ -29,7 +29,10 @@ def reset_chromadb():
         import chromadb
         from chromadb.config import Settings
         
-        chroma_db_path = Path("./documents/database/chroma_db").resolve()
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        org_slug = os.getenv('DEFAULT_TENANT_SLUG', 'default')
+        chroma_db_path = _storage.get_chroma_dir(org_slug)
         
         if chroma_db_path.exists():
             logger.info(f"🗑️  ChromaDB temizleniyor: {chroma_db_path}")
@@ -60,7 +63,10 @@ def reset_chromadb():
 
 def clean_vector_files():
     """Tüm vector dosyalarını ve metadata'yı temizle"""
-    documents_dir = Path("./documents")
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    org_slug = os.getenv('DEFAULT_TENANT_SLUG', 'default')
+    documents_dir = _storage.get_document_root(org_slug)
     
     if not documents_dir.exists():
         logger.warning("⚠️  Documents klasörü bulunamadı")

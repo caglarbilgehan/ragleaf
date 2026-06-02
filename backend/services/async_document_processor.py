@@ -147,8 +147,11 @@ class AsyncDocumentProcessor:
                         raise Exception("Document not found")
                     
                     folder_name, original_filename = result[0], result[1]
-                    # Construct file path from folder_name and original_filename
-                    file_path = Path(f"./documents/{folder_name}/original/{original_filename}").resolve()
+                    # Construct file path using StorageService (multi-tenant)
+                    from backend.services.storage_service import get_storage
+                    _storage = get_storage()
+                    org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+                    file_path = _storage.get_original_file_path(org_slug, folder_name, original_filename).resolve()
                     
                     print(f"📁 [Doc:{document_id}] Dosya yolu: {file_path}")
                     
@@ -612,13 +615,11 @@ class AsyncDocumentProcessor:
                     """), {"doc_id": document_id})
                     db_session.commit()
                     
-                    # Read cached text - try all possible locations
-                    possible_paths = [
-                        Path(f"./documents/{folder_name}/processed/full_text.txt"),
-                        Path(f"./documents/{folder_name}/processed/ocr_results/full_text.txt"),
-                        Path(f"./documents/{folder_name}/processed/extracted_text.txt"),
-                        Path(f"./documents/{folder_name}/text/extracted_text.txt"),
-                    ]
+                    # Read cached text - use StorageService for multi-tenant paths
+                    from backend.services.storage_service import get_storage
+                    _storage = get_storage()
+                    org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+                    possible_paths = _storage.get_full_text_paths(org_slug, folder_name)
                     
                     actual_text_path = None
                     for path in possible_paths:

@@ -28,7 +28,10 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
-DOCUMENTS_DIR = "/app/documents"
+import os as _os
+from backend.services.storage_service import get_storage
+_storage = get_storage()
+DOCUMENTS_DIR = str(_storage.get_document_root(_os.getenv('DEFAULT_TENANT_SLUG', 'default')))
 
 DEPARTMENTS = [
     "Teknik Servis", "Proje", "Uygulama", "Arge",

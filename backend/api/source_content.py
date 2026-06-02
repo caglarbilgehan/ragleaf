@@ -15,7 +15,10 @@ from ..database.models import Document
 source_router = APIRouter()
 
 # Use absolute path to root documents folder
-DOCUMENTS_DIR = Path(__file__).parent.parent.parent / "documents"
+from backend.services.storage_service import get_storage as _get_storage
+_storage = _get_storage()
+import os
+DOCUMENTS_DIR = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
 
 @source_router.get("/source/{document_id}/chunk/{chunk_id}")
 async def get_chunk_content(

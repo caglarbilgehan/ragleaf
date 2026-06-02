@@ -427,12 +427,11 @@ async def sync_document_assets(
         
         logger.info(f"🔍 Syncing assets for document {document_id}, folder: {document.folder_name}")
         
-        # Build images path - try multiple path structures (prioritize new path)
-        possible_paths = [
-            os.path.join("documents", document.folder_name, "images"),  # Primary: new path
-            os.path.join("documents", document.folder_name, "images", "extracted"),  # Legacy: old path
-            os.path.join("documents", document.folder_name),
-        ]
+        # Build images path - use StorageService for multi-tenant
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+        possible_paths = _storage.get_asset_search_paths(org_slug, document.folder_name)
         
         base_path = None
         checked_paths = []
@@ -552,9 +551,11 @@ async def sync_all_document_assets(
         processed_docs = 0
         
         for document in documents:
-            # Try both new and old path structures (prioritize new path)
-            new_path = os.path.join("documents", document.folder_name, "images")
-            old_path = os.path.join("documents", document.folder_name, "images", "extracted")
+            # Try both new and old path structures (multi-tenant)
+            from backend.services.storage_service import get_storage
+            _storage = get_storage()
+            org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+            new_path, old_path = _storage.get_asset_sync_paths(org_slug, document.folder_name)
             
             # Use new path if it exists, otherwise fallback to old path
             base_path = new_path if os.path.exists(new_path) else old_path
@@ -665,9 +666,11 @@ async def upload_external_asset(
                 detail=f"Invalid file type. Allowed: {', '.join(allowed_types)}"
             )
         
-        # Create external images folder
-        external_folder = os.path.join("documents", document.folder_name, "images", "external")
-        os.makedirs(external_folder, exist_ok=True)
+        # Create external images folder (multi-tenant)
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+        external_folder = str(_storage.get_external_images_dir(org_slug, document.folder_name))
         
         # Generate unique filename
         file_ext = os.path.splitext(file.filename)[1] or '.png'

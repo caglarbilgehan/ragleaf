@@ -1,4 +1,5 @@
 # backend/database/models.py
+import os
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Float, JSON
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
@@ -67,16 +68,20 @@ class Document(Base):
     
     @property
     def file_path(self):
-        """Get original file path from folder structure"""
+        """Get original file path from folder structure (multi-tenant aware)"""
         if self.folder_name:
-            return f"./documents/{self.folder_name}/original/{self.original_filename}"
+            from backend.services.storage_service import get_storage
+            org_slug = getattr(self, '_org_slug', None) or os.getenv("DEFAULT_TENANT_SLUG", "default")
+            return str(get_storage().get_original_file_path(org_slug, self.folder_name, self.original_filename))
         return None
     
     @property
     def metadata_path(self):
-        """Get metadata file path"""
+        """Get metadata file path (multi-tenant aware)"""
         if self.folder_name:
-            return f"./documents/{self.folder_name}/metadata.json"
+            from backend.services.storage_service import get_storage
+            org_slug = getattr(self, '_org_slug', None) or os.getenv("DEFAULT_TENANT_SLUG", "default")
+            return str(get_storage().get_metadata_path(org_slug, self.folder_name))
         return None
 
 class ModelConfig(Base):

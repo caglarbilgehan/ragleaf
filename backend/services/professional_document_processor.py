@@ -42,8 +42,11 @@ class ProfessionalDocumentProcessor:
     """Professional document processor with OCR and image extraction"""
     
     def __init__(self):
-        # Use absolute path to root documents folder
-        self.base_dir = Path(__file__).parent.parent.parent / "documents"
+        # Use StorageService for multi-tenant document paths
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+        self.base_dir = _storage.get_document_root(org_slug)
         
         # OCR settings
         self.ocr_languages = "tur+eng"  # Turkish and English

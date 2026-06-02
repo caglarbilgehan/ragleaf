@@ -1,6 +1,5 @@
-# Backups
+# Backups (legacy - now under storage/)
 chat-ui-backup-20251110-153630/
-backups/
 
 # Archive
 archive/
@@ -57,12 +56,9 @@ logs/
 *.log
 log/
 
-# Uploads and Documents
-uploads/
-documents/
-static/
-output/
-vector_stores/
+# Uploads and Documents (multi-tenant storage)
+storage/
+!storage/.gitkeep
 
 # Test files and folders
 tests/

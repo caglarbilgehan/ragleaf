@@ -66,9 +66,11 @@ def initialize_chromadb():
     from chromadb.config import Settings # Moved from inside try block
     
     logger = logging.getLogger(__name__)
-    # Use absolute path to root documents folder
-    documents_base = Path(__file__).parent.parent / "documents"
-    chroma_db_path = documents_base / "database" / "chroma_db"
+    # Use StorageService for multi-tenant ChromaDB path
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+    chroma_db_path = _storage.get_chroma_dir(org_slug)
     
     try:
         # Create directory if it doesn't exist

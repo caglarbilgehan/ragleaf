@@ -4,6 +4,7 @@ Refactored to use new chunking and vectorstore services
 """
 
 import json
+import os
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -32,7 +33,9 @@ class ProfessionalEmbeddingServiceV2:
     """
     
     def __init__(self):
-        self.base_dir = Path(__file__).parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        self.base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
         
         # Default chunking config
         from .chunking import ChunkingConfig

@@ -161,7 +161,10 @@ class DocumentProcessor:
             if success:
                 # Save index to disk
                 from .vector_service import vector_service
-                index_path = f"/app/documents/indexes/{index_name}"
+                from backend.services.storage_service import get_storage
+                _storage = get_storage()
+                org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+                index_path = str(_storage.get_tenant_indexes_dir(org_slug) / index_name)
                 vector_service.save_index(index_name, index_path)
                 
                 return {

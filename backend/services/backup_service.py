@@ -64,8 +64,11 @@ class BackupService:
     Backups are stored as compressed JSON files (.json.gz) in /backups/ directory.
     """
     
-    BACKUP_DIR = Path("./backups")
-    LOG_FILE = Path("./backups/backup_logs.json")
+    # Use StorageService for multi-tenant backup paths
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    BACKUP_DIR = _storage.get_backup_dir()  # System-level backups
+    LOG_FILE = _storage.get_backup_log_path()
     MAX_LOGS = 100
     
     def __init__(self):

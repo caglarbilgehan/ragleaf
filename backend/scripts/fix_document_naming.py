@@ -28,7 +28,10 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 # Documents base path
-DOCUMENTS_PATH = Path('/app/documents')
+import os
+from backend.services.storage_service import get_storage
+_storage = get_storage()
+DOCUMENTS_PATH = _storage.get_document_root(os.getenv('DEFAULT_TENANT_SLUG', 'default'))
 
 
 def get_prefix_length(total_docs: int) -> int:

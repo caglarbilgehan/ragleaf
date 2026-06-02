@@ -82,7 +82,10 @@ class DocumentPipeline:
         self.text_cleaner = TextCleaner()
         
         # Base documents directory
-        self.base_dir = Path(__file__).parent.parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        import os
+        self.base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
         
         # Task control for pause/cancel
         self.task_controls: Dict[int, Dict[str, Any]] = {}

@@ -40,11 +40,13 @@ async def get_metadata_suggestions():
 
 # Configuration
 MAX_FILE_SIZE_MB = config("MAX_FILE_SIZE_MB", default=100, cast=int)
-# Use absolute path to root documents folder (not relative to backend/)
-DOCUMENTS_DIR = Path(__file__).parent.parent.parent / "documents"
+# Multi-tenant storage service
+from backend.services.storage_service import get_storage as _get_storage
+_storage = _get_storage()
 
-# Ensure only necessary directories exist
-DOCUMENTS_DIR.mkdir(exist_ok=True)
+# Legacy alias for backward compatibility
+DOCUMENTS_DIR = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
+DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Pydantic models
 class DocumentResponse(BaseModel):
@@ -756,13 +758,9 @@ async def reprocess_document(
         options = ReprocessOptions()
     
     # Check if document has been processed before (has extracted text)
-    # Try all possible locations for text files
-    possible_paths = [
-        Path(f"./documents/{document.folder_name}/processed/full_text.txt"),  # Current location
-        Path(f"./documents/{document.folder_name}/processed/ocr_results/full_text.txt"),  # OCR subfolder
-        Path(f"./documents/{document.folder_name}/processed/extracted_text.txt"),  # Alternative
-        Path(f"./documents/{document.folder_name}/text/extracted_text.txt"),  # Old location
-    ]
+    # Use StorageService for multi-tenant path resolution
+    org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+    possible_paths = _storage.get_full_text_paths(org_slug, document.folder_name)
     
     actual_text_path = None
     for path in possible_paths:
@@ -3106,7 +3104,8 @@ async def get_document_statistics(
             
             # Check if metadata file exists
             if document.folder_name:
-                metadata_path = f"./documents/{document.folder_name}/metadata.json"
+                org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+                metadata_path = str(_storage.get_metadata_path(org_slug, document.folder_name))
                 if os.path.exists(metadata_path):
                     with open(metadata_path, 'r', encoding='utf-8') as f:
                         metadata = json.load(f)
@@ -3124,7 +3123,7 @@ async def get_document_statistics(
                             stats["processing_time_seconds"] = metadata['processing_time']
                 
                 # Check index file size
-                index_path = f"./documents/{document.folder_name}/index.faiss"
+                index_path = str(_storage.get_index_path(org_slug, document.folder_name))
                 if os.path.exists(index_path):
                     stats["index_file_size"] = os.path.getsize(index_path)
                     
@@ -3169,7 +3168,8 @@ async def get_document_processing_logs(
         
         # Also try to load logs from file system if available
         try:
-            log_file_path = Path(f"./documents/{document.folder_name}/processing_log.json")
+            org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+            log_file_path = _storage.get_processing_log_path(org_slug, document.folder_name)
             if log_file_path.exists():
                 with open(log_file_path, 'r', encoding='utf-8') as f:
                     file_logs = json.load(f)
@@ -3271,8 +3271,9 @@ async def get_document_file(
                 detail="Document not found"
             )
         
-        # Base path for documents
-        base_path = Path(__file__).parent.parent.parent / "documents" / document.folder_name
+        # Base path for documents (multi-tenant)
+        org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+        base_path = _storage.get_document_path(org_slug, document.folder_name)
         
         # Try to find the original file with multiple strategies
         file_paths = [
@@ -3384,8 +3385,9 @@ async def get_document_preview(
         content = ""
         content_source = "none"
         
-        # Base path for documents (relative to project root, not backend)
-        base_path = Path(__file__).parent.parent.parent / "documents" / document.folder_name
+        # Base path for documents (multi-tenant)
+        org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+        base_path = _storage.get_document_path(org_slug, document.folder_name)
         
         # Try multiple possible locations for extracted text (prioritize new structure)
         text_paths = [

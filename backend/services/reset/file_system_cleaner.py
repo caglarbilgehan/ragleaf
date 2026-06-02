@@ -9,7 +9,10 @@ from decouple import config
 
 logger = logging.getLogger(__name__)
 
-DOCUMENTS_DIR = Path(config("DOCUMENTS_DIR", default="documents"))
+from backend.services.storage_service import get_storage as _get_storage
+import os
+_st = _get_storage()
+DOCUMENTS_DIR = _st.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
 
 
 class FileSystemCleaner:

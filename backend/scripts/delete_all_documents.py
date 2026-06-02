@@ -26,7 +26,10 @@ logger = logging.getLogger(__name__)
 def delete_chromadb():
     """ChromaDB'yi tamamen sil"""
     try:
-        chroma_db_path = Path("./documents/database/chroma_db").resolve()
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        org_slug = os.getenv('DEFAULT_TENANT_SLUG', 'default')
+        chroma_db_path = _storage.get_chroma_dir(org_slug)
         
         if chroma_db_path.exists():
             logger.info(f"🗑️  ChromaDB siliniyor: {chroma_db_path}")
@@ -40,7 +43,10 @@ def delete_chromadb():
 
 def delete_all_document_folders():
     """Tüm doküman klasörlerini fiziksel olarak sil"""
-    documents_dir = Path("./documents")
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    org_slug = os.getenv('DEFAULT_TENANT_SLUG', 'default')
+    documents_dir = _storage.get_document_root(org_slug)
     
     if not documents_dir.exists():
         logger.warning("⚠️  Documents klasörü bulunamadı")

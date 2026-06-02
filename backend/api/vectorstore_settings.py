@@ -64,6 +64,13 @@ class SettingsUpdateResponse(BaseModel):
 # Helper Functions
 # ========================================
 
+def _get_default_chroma_dir() -> str:
+    """Get default ChromaDB directory using StorageService."""
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+    return str(_storage.get_chroma_dir(org_slug))
+
 def get_default_settings() -> VectorStoreSettingsSchema:
     """Get default vector store settings from environment variables"""
     return VectorStoreSettingsSchema(
@@ -71,7 +78,7 @@ def get_default_settings() -> VectorStoreSettingsSchema:
         chunk_size=int(os.getenv("CHUNK_SIZE", "512")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
         collection_name=os.getenv("COLLECTION_NAME", "documents"),
-        chroma_dir=os.getenv("CHROMA_DIR", "./documents/database/chroma_db"),
+        chroma_dir=os.getenv("CHROMA_DIR", str(_get_default_chroma_dir())),
         reranker_model=os.getenv("RERANKER_MODEL", "BAAI/bge-reranker-large"),
         reranker_enabled=os.getenv("RERANKER_ENABLED", "false").lower() == "true"
     )

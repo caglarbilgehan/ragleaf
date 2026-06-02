@@ -1108,9 +1108,12 @@ async def rag_chat_completions(
         related_images = []
         seen_image_ids = set()  # Prevent duplicates
         
-        # Get DOCUMENTS_DIR for file existence check
+        # Get DOCUMENTS_DIR for file existence check (multi-tenant)
         from pathlib import Path
-        DOCUMENTS_DIR = Path(__file__).parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        import os as _os
+        DOCUMENTS_DIR = _storage.get_document_root(_os.getenv("DEFAULT_TENANT_SLUG", "default"))
         logger.info(f"🖼️ DOCUMENTS_DIR: {DOCUMENTS_DIR} (exists: {DOCUMENTS_DIR.exists()})")
         
         for doc, score in results:

@@ -29,7 +29,9 @@ class ProfessionalRAGService:
     
     def __init__(self):
         # Use absolute path to root documents folder
-        self.base_dir = Path(__file__).parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        self.base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
         self.max_chunks = 3  # Reduced from 5 for faster processing
         self.similarity_threshold = 0.4  # Increased from 0.3 for better quality
     

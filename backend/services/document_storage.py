@@ -36,7 +36,10 @@ def clean_turkish_chars(text: str) -> str:
 class DocumentStorage:
     def __init__(self, base_path: str = None):
         if base_path is None:
-            base_path = Path(__file__).parent.parent.parent / "documents"
+            from backend.services.storage_service import get_storage
+            _storage = get_storage()
+            org_slug = os.getenv("DEFAULT_TENANT_SLUG", "default")
+            base_path = _storage.get_document_root(org_slug)
         self.base_path = Path(base_path).resolve()
         self.base_path.mkdir(parents=True, exist_ok=True)
         

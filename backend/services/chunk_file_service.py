@@ -15,7 +15,10 @@ class ChunkFileService:
     
     def __init__(self):
         # Use absolute path to root documents folder
-        self.base_dir = Path(__file__).parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        import os
+        self.base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
     
     async def save_chunks_as_files(
         self, 

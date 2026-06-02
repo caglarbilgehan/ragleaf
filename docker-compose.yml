@@ -15,6 +15,8 @@
 #   1305 - Embedding Service
 #   1306 - API Gateway
 #   1307 - Platform (app.ragleaf.com)
+#   1308 - MinIO S3 API
+#   1309 - MinIO Console
 #
 # GPU otomatik algılanır - ayrı komut gerektirmez!
 # =====================================================================
@@ -180,17 +182,26 @@ services:
       EMBEDDING_SERVICE_URL: http://embedding-service:8002
       PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.ragleaf.com}
       PUBLIC_CHAT_URL: ${PUBLIC_CHAT_URL:-https://chat.ragleaf.com}
+      # Multi-tenant storage
+      STORAGE_ROOT: /app/storage
+      DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-default}
+      # MinIO (S3-compatible object storage)
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-ragleaf}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-ragleaf_minio_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ragleaf}
+      MINIO_USE_SSL: "false"
     ports:
       - "1306:8000"
     volumes:
-      - ./uploads:/app/uploads
-      - ./documents:/app/documents
+      - ./storage:/app/storage
       - ./logs:/app/logs
-      - ./backups:/app/backups
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
@@ -198,6 +209,39 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # MinIO — S3-Compatible Object Storage
+  # Self-hosted, production-grade file storage
+  # Console: http://localhost:1309
+  # ===========================================
+  minio:
+    image: minio/minio:latest
+    container_name: ragleaf_minio
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-ragleaf}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-ragleaf_minio_secret}
+    ports:
+      - "1308:9000"  # S3 API
+      - "1309:9001"  # MinIO Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - ragleaf-network
 
@@ -260,6 +304,7 @@ volumes:
   postgres_data:
   redis_data:
   huggingface_cache:
+  minio_data:
 
     # ===========================================
     # Networks

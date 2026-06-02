@@ -8,6 +8,7 @@ MIGRATED: Now uses new unified services:
 """
 
 import logging
+import os
 import asyncio
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
@@ -27,7 +28,9 @@ class EnhancedRAGService:
     
     def __init__(self):
         # Use absolute path to root documents folder
-        self.base_dir = Path(__file__).parent.parent.parent / "documents"
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        self.base_dir = _storage.get_document_root(os.getenv("DEFAULT_TENANT_SLUG", "default"))
         self.max_chunks = 5
         self.similarity_threshold = 0.3
         self.diversity_threshold = 0.8  # Çeşitlilik için

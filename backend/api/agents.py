@@ -687,10 +687,11 @@ async def upload_agent_document(
     # Update folder_name with ID for uniqueness
     doc.folder_name = f"org_{org.id}_doc_{doc.id}"
     
-    # Save file to disk
+    # Save file to disk (multi-tenant storage)
     import os
-    upload_dir = os.path.join("documents", doc.folder_name, "original")
-    os.makedirs(upload_dir, exist_ok=True)
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    upload_dir = str(_storage.get_upload_dir(org.slug, doc.folder_name))
     
     file_path = os.path.join(upload_dir, file.filename)
     with open(file_path, "wb") as f:
