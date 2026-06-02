@@ -6,25 +6,23 @@
 
 ## 🟡 Orta Öncelik
 
-### GÖREV-2: Sektörel Hazır AI Asistan Şablonları
+### GÖREV-2: Sektörel Hazır AI Asistan Şablonları (DEVAM)
 **Kaynak:** PROMPTS.md #2
 **Tarih:** 2026-06-02
 **Açıklama:**
-- Sektöre yönelik hazır yapay zeka asistanları geliştir
-- Randevulu iş modelleri (kuaför, diş hekimi vb.) için widget tabanlı asistanlar
-- E-ticaret siteleri için sipariş verme/takip asistanları
-- Kullanıcılar hazır şablonları seçerek hızlıca kurulum yapabilmeli
-- Kendi firma adlarını, bilgilerini girerek özelleştirme
-- System prompt otomatik oluşturma
+Kuaför şablonu tamamlandı. Kalan işler:
 
 **Alt görevler:**
-1. Sektör şablon veri modeli oluştur (DB)
-2. Şablon yönetim API'leri
-3. Platform UI'da şablon seçim ekranı
-4. Widget entegrasyonu ile randevu/sipariş sistemi
-5. Hazır system prompt'lar ve örnek veriler
+1. ~~Kuaför şablonu~~ ✅ Tamamlandı
+2. ~~Randevu sistemi (DB + API)~~ ✅ Tamamlandı
+3. ~~AI chat → randevu entegrasyonu~~ ✅ Tamamlandı
+4. ~~Frontend wizard + dashboard~~ ✅ Tamamlandı
+5. [ ] Google Calendar OAuth2 entegrasyonu
+6. [ ] Randevu hatırlatma sistemi (SMS/email)
+7. [ ] Diş hekimi şablonu
+8. [ ] E-ticaret şablonu (sipariş takip)
 
-**Durum:** ⏳ Bekliyor
+**Durum:** ⏳ Kısmen tamamlandı
 
 ---
 
