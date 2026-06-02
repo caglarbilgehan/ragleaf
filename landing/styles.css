@@ -750,3 +750,28 @@ select.form-input {
 }
 .sector-icon { font-size: 32px; }
 .sector-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+/* ===== PHONE INPUT WITH COUNTRY CODE ===== */
+.phone-input-wrap {
+  display: flex; gap: 0; border-radius: var(--radius-sm);
+  overflow: hidden; border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.phone-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.phone-input-wrap .phone-country {
+  width: 110px; flex-shrink: 0;
+  border: none; border-right: 1px solid var(--border);
+  border-radius: 0; font-size: 14px;
+  padding: 10px 8px; background: rgba(255,255,255,0.02);
+}
+.phone-input-wrap .phone-number {
+  flex: 1; border: none; border-radius: 0;
+  font-size: 15px; letter-spacing: 0.5px;
+}
+.phone-input-wrap .phone-country:focus,
+.phone-input-wrap .phone-number:focus {
+  outline: none; box-shadow: none;
+}

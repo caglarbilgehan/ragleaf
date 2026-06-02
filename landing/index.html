@@ -458,10 +458,35 @@
     <div class="wizard-page" id="wizPage1">
       <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Markanızı tanıtın — bu bilgiler AI asistanınızın temelini oluşturacak.</p>
       <div class="form-group"><label>Marka / İşletme Adı *</label><input type="text" class="form-input" id="regBrandName" placeholder="ör: Bella Güzellik Salonu" required /></div>
-      <div class="form-row">
-        <div class="form-group"><label>Telefon *</label><input type="tel" class="form-input" id="regBrandPhone" placeholder="+90 5XX XXX XX XX" required /></div>
-        <div class="form-group"><label>Website *</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" required /></div>
+      <div class="form-group">
+        <label>Telefon *</label>
+        <div class="phone-input-wrap">
+          <select class="form-input phone-country" id="regPhoneCountry">
+            <option value="+90" data-min="10" data-max="10" selected>🇹🇷 +90</option>
+            <option value="+1" data-min="10" data-max="10">🇺🇸 +1</option>
+            <option value="+44" data-min="10" data-max="10">🇬🇧 +44</option>
+            <option value="+49" data-min="10" data-max="11">🇩🇪 +49</option>
+            <option value="+33" data-min="9" data-max="9">🇫🇷 +33</option>
+            <option value="+31" data-min="9" data-max="9">🇳🇱 +31</option>
+            <option value="+39" data-min="9" data-max="10">🇮🇹 +39</option>
+            <option value="+34" data-min="9" data-max="9">🇪🇸 +34</option>
+            <option value="+7" data-min="10" data-max="10">🇷🇺 +7</option>
+            <option value="+81" data-min="10" data-max="10">🇯🇵 +81</option>
+            <option value="+86" data-min="11" data-max="11">🇨🇳 +86</option>
+            <option value="+91" data-min="10" data-max="10">🇮🇳 +91</option>
+            <option value="+55" data-min="10" data-max="11">🇧🇷 +55</option>
+            <option value="+966" data-min="9" data-max="9">🇸🇦 +966</option>
+            <option value="+971" data-min="9" data-max="9">🇦🇪 +971</option>
+            <option value="+380" data-min="9" data-max="9">🇺🇦 +380</option>
+            <option value="+48" data-min="9" data-max="9">🇵🇱 +48</option>
+            <option value="+30" data-min="10" data-max="10">🇬🇷 +30</option>
+            <option value="+994" data-min="9" data-max="9">🇦🇿 +994</option>
+            <option value="+995" data-min="9" data-max="9">🇬🇪 +995</option>
+          </select>
+          <input type="tel" class="form-input phone-number" id="regBrandPhone" placeholder="5XX XXX XX XX" required />
+        </div>
       </div>
+      <div class="form-group"><label>Website *</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" required /></div>
       <p class="form-hint" style="margin-top:8px;">💡 Bu bilgiler AI asistanınızın temelini oluşturacak.</p>
     </div>
 
@@ -892,11 +917,31 @@ function wizardNext() {
   // Step 1: Marka bilgileri
   else if (wizardStep === 1) {
     const brandName = document.getElementById('regBrandName').value.trim();
-    const brandPhone = document.getElementById('regBrandPhone').value.trim();
-    const brandWebsite = document.getElementById('regBrandWebsite').value.trim();
     if (!brandName) { showSignupErr('Marka / işletme adı zorunludur.'); return; }
-    if (!brandPhone) { showSignupErr('Telefon numarası zorunludur.'); return; }
-    if (!brandWebsite) { showSignupErr('Website adresi zorunludur.'); return; }
+    if (brandName.length < 2) { showSignupErr('Marka adı en az 2 karakter olmalıdır.'); return; }
+
+    // Phone validation
+    const phoneRaw = document.getElementById('regBrandPhone').value.trim();
+    const phoneDigits = phoneRaw.replace(/[\s\-\(\)]/g, '');
+    if (!phoneDigits) { showSignupErr('Telefon numarası zorunludur.'); return; }
+    if (!/^\d+$/.test(phoneDigits)) { showSignupErr('Telefon numarası sadece rakam içermelidir.'); return; }
+    const countryEl = document.getElementById('regPhoneCountry');
+    const selOpt = countryEl.options[countryEl.selectedIndex];
+    const minLen = parseInt(selOpt.dataset.min || '9');
+    const maxLen = parseInt(selOpt.dataset.max || '11');
+    if (phoneDigits.length < minLen || phoneDigits.length > maxLen) {
+      showSignupErr(`Seçilen ülke kodu için telefon numarası ${minLen === maxLen ? minLen : minLen + '-' + maxLen} haneli olmalıdır. (Girilen: ${phoneDigits.length} hane)`);
+      return;
+    }
+
+    // Website validation
+    const website = document.getElementById('regBrandWebsite').value.trim();
+    if (!website) { showSignupErr('Website adresi zorunludur.'); return; }
+    const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+    if (!urlPattern.test(website)) {
+      showSignupErr('Geçerli bir website adresi girin. (ör: https://markaniz.com)');
+      return;
+    }
   }
   // Step 2: Hesap
   else if (wizardStep === 2) {
@@ -972,9 +1017,10 @@ async function submitRegistration() {
   errEl.style.display = 'none';
 
   const brandName = document.getElementById('regBrandName').value.trim();
-  const brandPhone = document.getElementById('regBrandPhone').value.trim();
+  const countryCode = document.getElementById('regPhoneCountry').value;
+  const phoneNum = document.getElementById('regBrandPhone').value.trim().replace(/[\s\-\(\)]/g, '');
+  const brandPhone = countryCode + phoneNum;
   const brandWebsite = document.getElementById('regBrandWebsite').value.trim();
-  const dynamicData = collectDynamicFields();
 
   const body = {
     name: document.getElementById('regName').value.trim(),
@@ -986,13 +1032,11 @@ async function submitRegistration() {
     website: brandWebsite || null,
     sector: selectedSector !== 'diger' ? selectedSector : null,
     plan: selectedPlan,
-    // New fields for template-based agent creation
     template_slug: selectedSector !== 'diger' ? selectedSector : null,
     brand_config: {
       firma_adi: brandName,
       telefon: brandPhone,
-      website: brandWebsite,
-      ...dynamicData
+      website: brandWebsite
     }
   };
 
