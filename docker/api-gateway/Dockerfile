@@ -37,6 +37,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code
 COPY backend ./backend
+COPY widget/dist ./widget/dist
 COPY .env* ./
 
 # Create necessary directories
