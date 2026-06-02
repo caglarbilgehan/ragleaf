@@ -754,24 +754,76 @@ select.form-input {
 /* ===== PHONE INPUT WITH COUNTRY CODE ===== */
 .phone-input-wrap {
   display: flex; gap: 0; border-radius: var(--radius-sm);
-  overflow: hidden; border: 1px solid var(--border);
+  overflow: visible; border: 1px solid var(--border);
   transition: border-color 0.2s;
+  position: relative;
 }
 .phone-input-wrap:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
-.phone-input-wrap .phone-country {
-  width: 110px; flex-shrink: 0;
-  border: none; border-right: 1px solid var(--border);
-  border-radius: 0; font-size: 14px;
-  padding: 10px 8px; background: rgba(255,255,255,0.02);
-}
 .phone-input-wrap .phone-number {
-  flex: 1; border: none; border-radius: 0;
+  flex: 1; border: none; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 15px; letter-spacing: 0.5px;
 }
-.phone-input-wrap .phone-country:focus,
 .phone-input-wrap .phone-number:focus {
   outline: none; box-shadow: none;
 }
+
+/* Country Picker */
+.country-picker { position: relative; flex-shrink: 0; }
+.country-picker-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 10px; height: 100%;
+  background: rgba(255,255,255,0.03); border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer; color: var(--text-primary);
+  font-size: 14px; font-family: var(--font);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  transition: background 0.2s;
+}
+.country-picker-btn:hover { background: rgba(255,255,255,0.06); }
+.cp-flag { font-size: 20px; line-height: 1; }
+.cp-code { font-weight: 600; font-size: 14px; }
+.cp-arrow { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
+
+/* Dropdown Panel */
+.country-dropdown {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  width: 300px; max-height: 320px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  z-index: 1000; overflow: hidden;
+  flex-direction: column;
+}
+.country-dropdown.open { display: flex; }
+
+.country-search {
+  padding: 10px 12px; border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent; color: var(--text-primary);
+  font-size: 14px; font-family: var(--font);
+  outline: none;
+}
+.country-search::placeholder { color: var(--text-muted); }
+
+.country-list {
+  overflow-y: auto; flex: 1; max-height: 260px;
+}
+.country-list::-webkit-scrollbar { width: 6px; }
+.country-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1); border-radius: 3px;
+}
+
+.country-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; cursor: pointer;
+  transition: background 0.15s; font-size: 14px;
+  color: var(--text-primary);
+}
+.country-item:hover { background: rgba(255,255,255,0.06); }
+.country-item.active { background: var(--accent-glow); }
+.country-item .ci-flag { font-size: 20px; flex-shrink: 0; }
+.country-item .ci-name { flex: 1; font-weight: 500; }
+.country-item .ci-code { color: var(--text-muted); font-size: 13px; font-weight: 600; }
