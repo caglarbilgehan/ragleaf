@@ -415,7 +415,7 @@
       </div>
       <div class="wizard-step" data-step="1">
         <div class="step-dot">2</div>
-        <span class="step-label">Marka Bilgileri</span>
+        <span class="step-label">Marka</span>
       </div>
       <div class="wizard-step" data-step="2">
         <div class="step-dot">3</div>
@@ -423,7 +423,11 @@
       </div>
       <div class="wizard-step" data-step="3">
         <div class="step-dot">4</div>
-        <span class="step-label">Paket Seçimi</span>
+        <span class="step-label">Paket</span>
+      </div>
+      <div class="wizard-step" data-step="4">
+        <div class="step-dot">5</div>
+        <span class="step-label">Asistan</span>
       </div>
     </div>
 
@@ -531,6 +535,21 @@
           <div class="plan-limits">Sınırsız Agent &amp; Doküman<br/>SLA • SSO • Özel Entegrasyon</div>
         </div>
       </div>
+    </div>
+
+    <!-- Step 5: Agent Ayarları -->
+    <div class="wizard-page" id="wizPage4">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">AI asistanınızı özelleştirin. Bu bilgiler daha sonra da değiştirilebilir.</p>
+      <div class="form-group"><label>Asistan Adı *</label><input type="text" class="form-input" id="regAgentName" placeholder="ör: Bella Asistan" required /></div>
+      <div class="form-group">
+        <label>Karşılama Mesajı *</label>
+        <textarea class="form-input" id="regWelcomeMsg" rows="3" style="resize:vertical;" placeholder="Ziyaretçileriniz sohbeti açtığında görecekleri ilk mesaj..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Asistan Açıklaması</label>
+        <textarea class="form-input" id="regAgentDesc" rows="2" style="resize:vertical;" placeholder="Bu asistan ne iş yapar? (opsiyonel)"></textarea>
+      </div>
+      <p class="form-hint" style="margin-top:8px;">💡 Bu alanlar sektörünüze göre hazır dolduruldu. Dilediğiniz gibi düzenleyebilirsiniz.</p>
     </div>
 
     <div id="signupError" class="form-error" style="display:none;margin-top:12px;"></div>
@@ -1056,7 +1075,7 @@ function updateWizardUI() {
   });
   document.getElementById('wizBack').style.display = wizardStep > 0 ? 'inline-flex' : 'none';
   const nextBtn = document.getElementById('wizNext');
-  if (wizardStep === 3) {
+  if (wizardStep === 4) {
     nextBtn.textContent = 'Markanızı Oluşturun ✓';
   } else {
     nextBtn.textContent = 'Devam →';
@@ -1118,8 +1137,16 @@ function wizardNext() {
     if (pw.length < 8) { showSignupErr('Şifre en az 8 karakter olmalıdır.'); return; }
     if (pw !== pw2) { showSignupErr('Şifreler eşleşmiyor.'); return; }
   }
-  // Step 3: Paket → submit
+  // Step 3: Paket → agent ayarlarını doldur
   else if (wizardStep === 3) {
+    prefillAgentFields();
+  }
+  // Step 4: Agent → submit
+  else if (wizardStep === 4) {
+    const agentName = document.getElementById('regAgentName').value.trim();
+    const welcomeMsg = document.getElementById('regWelcomeMsg').value.trim();
+    if (!agentName) { showSignupErr('Asistan adı zorunludur.'); return; }
+    if (!welcomeMsg) { showSignupErr('Karşılama mesajı zorunludur.'); return; }
     submitRegistration();
     return;
   }
@@ -1137,6 +1164,54 @@ function selectPlan(el, plan) {
   selectedPlan = plan;
   document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+}
+
+const SECTOR_DEFAULTS = {
+  'kuafor': {
+    suffix: 'Güzellik Asistanı',
+    welcome: 'Merhaba! 👋 Ben {{brand}} online asistanıyım. Hizmetlerimiz, fiyatlarımız ve uygun randevu saatleri hakkında size yardımcı olabilirim. Nasıl yardımcı olabilirim?',
+    desc: 'Müşterilere hizmetler, fiyatlar ve randevu bilgileri hakkında yardımcı olan AI asistan.'
+  },
+  'dis-hekimi': {
+    suffix: 'Sağlık Asistanı',
+    welcome: 'Merhaba! 👋 Ben {{brand}} online sağlık asistanıyım. Tedavi seçenekleri, randevu saatleri ve sık sorulan sorular hakkında size bilgi verebilirim. Size nasıl yardımcı olabilirim?',
+    desc: 'Hastalara tedavi bilgileri, randevu ve klinik hizmetleri hakkında yardımcı olan AI asistan.'
+  },
+  'e-ticaret': {
+    suffix: 'Alışveriş Asistanı',
+    welcome: 'Merhaba! 👋 Ben {{brand}} alışveriş asistanıyım. Ürünler, sipariş takibi, kargo ve iade işlemleri hakkında size yardımcı olabilirim. Nasıl yardımcı olabilirim?',
+    desc: 'Müşterilere ürün bilgisi, sipariş takibi ve destek sağlayan AI asistan.'
+  },
+  'restoran': {
+    suffix: 'Restoran Asistanı',
+    welcome: 'Merhaba! 👋 Ben {{brand}} asistanıyım. Menümüz, çalışma saatlerimiz, rezervasyon ve paket servis hakkında size yardımcı olabilirim. Buyurun, size nasıl yardımcı olayım?',
+    desc: 'Müşterilere menü, rezervasyon ve sipariş konusunda yardımcı olan AI asistan.'
+  },
+  'diger': {
+    suffix: 'AI Asistanı',
+    welcome: 'Merhaba! 👋 Ben {{brand}} online asistanıyım. Size nasıl yardımcı olabilirim?',
+    desc: 'Ziyaretçilere bilgi ve destek sağlayan AI asistan.'
+  }
+};
+
+function prefillAgentFields() {
+  const brandName = document.getElementById('regBrandName').value.trim() || 'Marka';
+  const defaults = SECTOR_DEFAULTS[selectedSector] || SECTOR_DEFAULTS['diger'];
+  
+  const agentNameEl = document.getElementById('regAgentName');
+  const welcomeEl = document.getElementById('regWelcomeMsg');
+  const descEl = document.getElementById('regAgentDesc');
+  
+  // Only prefill if empty (don't overwrite user edits on back/forward)
+  if (!agentNameEl.value.trim()) {
+    agentNameEl.value = brandName + ' ' + defaults.suffix;
+  }
+  if (!welcomeEl.value.trim()) {
+    welcomeEl.value = defaults.welcome.replace(/\{\{brand\}\}/g, brandName);
+  }
+  if (!descEl.value.trim()) {
+    descEl.value = defaults.desc;
+  }
 }
 
 function checkPwStrength() {
@@ -1196,6 +1271,9 @@ async function submitRegistration() {
     sector: selectedSector !== 'diger' ? selectedSector : null,
     plan: selectedPlan,
     template_slug: selectedSector !== 'diger' ? selectedSector : null,
+    agent_name: document.getElementById('regAgentName').value.trim(),
+    welcome_message: document.getElementById('regWelcomeMsg').value.trim(),
+    agent_description: document.getElementById('regAgentDesc').value.trim() || null,
     brand_config: {
       firma_adi: brandName,
       telefon: brandPhone,

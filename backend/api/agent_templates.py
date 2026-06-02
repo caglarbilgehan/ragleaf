@@ -187,7 +187,9 @@ def _create_agent_from_template(
     config_data: dict,
     org_id: int,
     user_id: int,
-    agent_name: str = None
+    agent_name: str = None,
+    welcome_message: str = None,
+    agent_description: str = None
 ) -> Agent:
     """
     Create an agent from a template. Reusable by both API endpoint
@@ -203,10 +205,15 @@ def _create_agent_from_template(
     
     # Render system prompt
     system_prompt = render_template(template.default_system_prompt, config_data)
-    welcome_message = render_template(
-        template.default_welcome_message or "Merhaba! Size nasıl yardımcı olabilirim?",
-        config_data
-    )
+    # Use user-provided welcome message or fall back to template
+    if not welcome_message:
+        welcome_message = render_template(
+            template.default_welcome_message or "Merhaba! Size nasıl yardımcı olabilirim?",
+            config_data
+        )
+    
+    # Use user-provided description or fall back to template
+    description = agent_description or template.description
     
     # Determine agent name
     if not agent_name:
@@ -233,7 +240,7 @@ def _create_agent_from_template(
         organization_id=org_id,
         name=agent_name,
         slug=slug,
-        description=template.description,
+        description=description,
         system_prompt=system_prompt,
         welcome_message=welcome_message,
         personality=personality,

@@ -34,6 +34,9 @@ class UserCreate(BaseModel):
     # Template-based onboarding
     template_slug: Optional[str] = None
     brand_config: Optional[dict] = None
+    agent_name: Optional[str] = None
+    welcome_message: Optional[str] = None
+    agent_description: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: int
@@ -187,7 +190,9 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
                 config_data=user_data.brand_config or {},
                 org_id=org.id,
                 user_id=user.id,
-                agent_name=org_name + " AI Asistan"
+                agent_name=user_data.agent_name or (org_name + " AI Asistan"),
+                welcome_message=user_data.welcome_message,
+                agent_description=user_data.agent_description
             )
             logger.info(f"✅ Auto-created agent from template: {user_data.template_slug}")
         except Exception as e:
