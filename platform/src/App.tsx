@@ -43,6 +43,10 @@ import TenantWidget from './pages/tenant/TenantWidget';
 import TenantDocuments from './pages/tenant/TenantDocuments';
 import TenantUsers from './pages/tenant/TenantUsers';
 import TenantAppointments from './pages/tenant/TenantAppointments';
+// Admin Pages
+import TenantsPage from './pages/admin/TenantsPage';
+import TenantDetailPage from './pages/admin/TenantDetailPage';
+import TemplateManagementPage from './pages/admin/TemplateManagementPage';
 import { authApi, adminApi } from '@/services/api';
 import type { User } from '@/types';
 
@@ -110,9 +114,10 @@ function App() {
         {/* Admin Routes */}
         <Route path="/" element={isAdmin ? <Dashboard /> : <Navigate to="/tenant" replace />} />
         <Route path="/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/tenant" replace />} />
-        <Route path="/documents" element={isAdmin ? <DocumentsPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/tenants" element={isAdmin ? <TenantsPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/tenants/:tenantId" element={isAdmin ? <TenantDetailPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/templates" element={isAdmin ? <TemplateManagementPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/models" element={isAdmin ? <ModelsPage /> : <Navigate to="/tenant" replace />} />
-        <Route path="/users" element={isAdmin ? <UsersPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/system-monitor" element={isAdmin ? <SystemMonitorPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/backup" element={isAdmin ? <BackupPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/statistics" element={isAdmin ? <StatisticsPage /> : <Navigate to="/tenant" replace />} />

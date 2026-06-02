@@ -178,6 +178,7 @@ export interface AgentTemplate {
   description: string | null;
   icon: string | null;
   is_featured: boolean;
+  sort_order?: number;
   preview_questions: string[] | null;
   config_schema: TemplateConfigField[];
   default_system_prompt?: string;
@@ -329,6 +330,77 @@ export const calendarApi = {
 
   getFeedUrl: async (): Promise<ICalFeedInfo> => {
     const res = await api.get('/api/calendar/feed-url');
+    return res.data;
+  },
+};
+
+// ============================================================================
+// Admin Tenant Management API
+// ============================================================================
+
+export interface TenantListItem {
+  id: number;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  plan: string;
+  is_active: boolean;
+  allow_admin_doc_access: boolean;
+  max_agents: number;
+  max_documents: number;
+  created_at: string;
+  user_count: number;
+  agent_count: number;
+  document_count: number;
+  appointment_count: number;
+}
+
+export interface TenantStats {
+  total_tenants: number;
+  active_tenants: number;
+  inactive_tenants: number;
+  total_agents: number;
+  total_appointments: number;
+  plan_distribution: Record<string, number>;
+}
+
+export const adminTenantApi = {
+  list: async (params?: { search?: string; plan?: string }): Promise<TenantListItem[]> => {
+    const res = await api.get('/api/admin/tenants', { params });
+    return res.data;
+  },
+
+  stats: async (): Promise<TenantStats> => {
+    const res = await api.get('/api/admin/tenants/stats');
+    return res.data;
+  },
+
+  get: async (id: number): Promise<TenantListItem> => {
+    const res = await api.get(`/api/admin/tenants/${id}`);
+    return res.data;
+  },
+
+  update: async (id: number, data: Record<string, any>): Promise<void> => {
+    await api.patch(`/api/admin/tenants/${id}`, data);
+  },
+
+  getUsers: async (id: number): Promise<any> => {
+    const res = await api.get(`/api/admin/tenants/${id}/users`);
+    return res.data;
+  },
+
+  getAgents: async (id: number): Promise<any> => {
+    const res = await api.get(`/api/admin/tenants/${id}/agents`);
+    return res.data;
+  },
+
+  getDocuments: async (id: number): Promise<any> => {
+    const res = await api.get(`/api/admin/tenants/${id}/documents`);
+    return res.data;
+  },
+
+  getAppointments: async (id: number): Promise<any> => {
+    const res = await api.get(`/api/admin/tenants/${id}/appointments`);
     return res.data;
   },
 };

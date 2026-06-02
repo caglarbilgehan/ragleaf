@@ -49,24 +49,24 @@ interface DashboardLayoutProps {
 const adminNavigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   {
-    name: 'Ragleaf Platform',
+    name: 'Tenant Yönetimi',
     href: '#',
-    icon: Bot,
+    icon: Users,
     isHeader: true
   },
+  { name: 'Tenantlar', href: '/admin/tenants', icon: Users },
+  { name: 'Hazır Şablonlar', href: '/admin/templates', icon: Sparkles },
   { name: 'AI Temsilciler', href: '/agents', icon: Bot },
-  { name: 'Dökümanlar', href: '/documents', icon: FileText },
-  { name: 'Kullanıcılar', href: '/users', icon: Users },
-  { name: 'Sistem İzleme', href: '/system-monitor', icon: Monitor },
-  { name: 'Yedekleme', href: '/backup', icon: HardDrive },
-  { name: 'API Tokenları', href: '/api-tokens', icon: Key },
   {
-    name: 'AI Servisleri',
+    name: 'Sistem',
     href: '#',
-    icon: Zap,
+    icon: Monitor,
     isHeader: true
   },
   { name: 'AI Providers', href: '/ai-providers', icon: Zap },
+  { name: 'Sistem İzleme', href: '/system-monitor', icon: Monitor },
+  { name: 'Yedekleme', href: '/backup', icon: HardDrive },
+  { name: 'API Tokenları', href: '/api-tokens', icon: Key },
   {
     name: 'LLM Yönetimi',
     href: '#',

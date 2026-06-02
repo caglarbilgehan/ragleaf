@@ -489,6 +489,10 @@ def create_app() -> FastAPI:
     from backend.api.calendar_integration import calendar_router
     app.include_router(calendar_router, prefix="/api", tags=["calendar"])
 
+    # Admin Tenant Management API
+    from backend.api.admin_tenants import admin_tenants_router
+    app.include_router(admin_tenants_router, prefix="/api", tags=["admin-tenants"])
+
     # --- Widget CDN ---
     import os
     widget_dist_path = os.path.join(os.path.dirname(__file__), "..", "widget", "dist")
