@@ -476,7 +476,7 @@
           <input type="hidden" id="regPhoneCountry" value="+90" data-min="10" data-max="10" />
         </div>
       </div>
-      <div class="form-group"><label>Website *</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" required /></div>
+      <div class="form-group"><label>Website *</label><input type="text" class="form-input" id="regBrandWebsite" placeholder="markaniz.com" required /></div>
       <p class="form-hint" style="margin-top:8px;">💡 Bu bilgiler AI asistanınızın temelini oluşturacak.</p>
     </div>
 
@@ -1095,11 +1095,14 @@ function wizardNext() {
     }
 
     // Website validation
-    const website = document.getElementById('regBrandWebsite').value.trim();
+    let website = document.getElementById('regBrandWebsite').value.trim();
     if (!website) { showSignupErr('Website adresi zorunludur.'); return; }
-    const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
-    if (!urlPattern.test(website)) {
-      showSignupErr('Geçerli bir website adresi girin. (ör: https://markaniz.com)');
+    // Auto-prepend https:// if no protocol
+    if (!/^https?:\/\//i.test(website)) { website = 'https://' + website; }
+    document.getElementById('regBrandWebsite').value = website;
+    const domainPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+    if (!domainPattern.test(website)) {
+      showSignupErr('Geçerli bir website adresi girin. (ör: markaniz.com)');
       return;
     }
   }
