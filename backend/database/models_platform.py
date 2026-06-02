@@ -103,6 +103,7 @@ class Organization(Base):
     
     # Status
     is_active = Column(Boolean, default=True)
+    is_system = Column(Boolean, default=False)  # System tenant (e.g. Ragleaf) — cannot be deleted
     
     # KVKK — Admin doküman erişim izni (tenant tarafından verilir)
     allow_admin_doc_access = Column(Boolean, default=False)
@@ -237,6 +238,7 @@ class Agent(Base):
     # Status
     is_active = Column(Boolean, default=True)
     is_public = Column(Boolean, default=True)  # Can be accessed via widget/API
+    is_system = Column(Boolean, default=False)  # System agent — cannot be deleted
     
     # Stats (denormalized for quick access)
     total_conversations = Column(Integer, default=0)

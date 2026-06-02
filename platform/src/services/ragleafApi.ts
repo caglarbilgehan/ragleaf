@@ -345,6 +345,7 @@ export interface TenantListItem {
   logo_url: string | null;
   plan: string;
   is_active: boolean;
+  is_system: boolean;
   allow_admin_doc_access: boolean;
   max_agents: number;
   max_documents: number;

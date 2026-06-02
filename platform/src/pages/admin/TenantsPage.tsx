@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   CalendarDaysIcon,
   ChevronRightIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const PLAN_BADGES: Record<string, { label: string; color: string }> = {
@@ -134,6 +135,12 @@ export default function TenantsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-900">{t.name}</span>
+                      {t.is_system && (
+                        <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                          <ShieldCheckIcon className="h-3 w-3" />
+                          Sistem
+                        </span>
+                      )}
                       <span className={`text-xs px-2 py-0.5 rounded-full ${plan.color}`}>
                         {plan.label}
                       </span>

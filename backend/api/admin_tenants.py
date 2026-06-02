@@ -47,6 +47,7 @@ class TenantListItem(BaseModel):
     logo_url: Optional[str] = None
     plan: str
     is_active: bool
+    is_system: bool = False
     allow_admin_doc_access: bool
     max_agents: int
     max_documents: int
@@ -137,6 +138,7 @@ async def list_tenants(
             logo_url=org.logo_url,
             plan=org.plan,
             is_active=org.is_active,
+            is_system=org.is_system or False,
             allow_admin_doc_access=org.allow_admin_doc_access or False,
             max_agents=org.max_agents,
             max_documents=org.max_documents,
@@ -221,6 +223,7 @@ async def get_tenant(
         logo_url=org.logo_url,
         plan=org.plan,
         is_active=org.is_active,
+        is_system=org.is_system or False,
         allow_admin_doc_access=org.allow_admin_doc_access or False,
         max_agents=org.max_agents,
         max_documents=org.max_documents,
@@ -251,7 +254,20 @@ async def update_tenant(
     if not org:
         raise HTTPException(status_code=404, detail="Tenant bulunamadı")
 
-    update_data = request.model_dump(exclude_unset=True)
+    # System tenant protection
+    if org.is_system:
+        # Only allow limited updates on system tenant
+        update_data = request.model_dump(exclude_unset=True)
+        forbidden = {'is_active'}
+        blocked = forbidden & set(update_data.keys())
+        if blocked:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Sistem tenant'ında bu alanlar değiştirilemez: {', '.join(blocked)}"
+            )
+    else:
+        update_data = request.model_dump(exclude_unset=True)
+
     for field, value in update_data.items():
         setattr(org, field, value)
 
@@ -320,6 +336,7 @@ async def get_tenant_agents(
                 "name": a.name,
                 "slug": a.slug,
                 "is_active": a.is_active,
+                "is_system": a.is_system or False,
                 "total_conversations": a.total_conversations or 0,
                 "total_messages": a.total_messages or 0,
                 "created_at": a.created_at.isoformat() if a.created_at else None,

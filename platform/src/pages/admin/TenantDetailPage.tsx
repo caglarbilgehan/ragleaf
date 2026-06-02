@@ -96,7 +96,14 @@ export default function TenantDetailPage() {
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{tenant.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{tenant.name}</h1>
+            {(tenant as any).is_system && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                🔒 Sistem Tenant
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-500">{tenant.slug} • {tenant.plan} plan</p>
         </div>
       </div>
@@ -248,9 +255,12 @@ export default function TenantDetailPage() {
               <div className="space-y-2">
                 {agentsData.agents.map((a: any) => (
                   <div key={a.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="font-medium">{a.name}</span>
-                      <span className="text-xs text-gray-500 ml-2">{a.slug}</span>
+                      <span className="text-xs text-gray-500">{a.slug}</span>
+                      {a.is_system && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">🔒 Sistem</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <span>💬 {a.total_conversations} konuşma</span>

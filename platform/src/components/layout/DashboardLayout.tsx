@@ -56,7 +56,6 @@ const adminNavigation = [
   },
   { name: 'Tenantlar', href: '/admin/tenants', icon: Users },
   { name: 'Hazır Şablonlar', href: '/admin/templates', icon: Sparkles },
-  { name: 'AI Temsilciler', href: '/agents', icon: Bot },
   {
     name: 'Sistem',
     href: '#',
