@@ -485,6 +485,10 @@ def create_app() -> FastAPI:
     from backend.api.appointments import appointments_router
     app.include_router(appointments_router, prefix="/api", tags=["appointments"])
 
+    # Calendar Integration API (Google Calendar, iCal)
+    from backend.api.calendar_integration import calendar_router
+    app.include_router(calendar_router, prefix="/api", tags=["calendar"])
+
     # --- Widget CDN ---
     import os
     widget_dist_path = os.path.join(os.path.dirname(__file__), "..", "widget", "dist")

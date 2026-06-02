@@ -285,3 +285,50 @@ export const appointmentApi = {
     return res.data;
   },
 };
+
+// ============================================================================
+// Calendar Integration API
+// ============================================================================
+
+export interface CalendarIntegrationItem {
+  id: number;
+  provider: string;
+  name: string;
+  calendar_id: string | null;
+  sync_enabled: boolean;
+  sync_direction: string;
+  last_sync_at: string | null;
+  sync_error: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ICalFeedInfo {
+  feed_url: string;
+  instructions: {
+    google_calendar: string;
+    apple_calendar: string;
+    outlook: string;
+  };
+}
+
+export const calendarApi = {
+  listIntegrations: async (): Promise<CalendarIntegrationItem[]> => {
+    const res = await api.get('/api/calendar/integrations');
+    return res.data;
+  },
+
+  removeIntegration: async (id: number): Promise<void> => {
+    await api.delete(`/api/calendar/integrations/${id}`);
+  },
+
+  startGoogleAuth: async (): Promise<{ auth_url: string }> => {
+    const res = await api.get('/api/calendar/google/auth');
+    return res.data;
+  },
+
+  getFeedUrl: async (): Promise<ICalFeedInfo> => {
+    const res = await api.get('/api/calendar/feed-url');
+    return res.data;
+  },
+};
