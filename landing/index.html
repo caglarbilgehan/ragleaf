@@ -459,12 +459,10 @@
       <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Markanızı tanıtın — bu bilgiler AI asistanınızın temelini oluşturacak.</p>
       <div class="form-group"><label>Marka / İşletme Adı *</label><input type="text" class="form-input" id="regBrandName" placeholder="ör: Bella Güzellik Salonu" required /></div>
       <div class="form-row">
-        <div class="form-group"><label>Telefon</label><input type="tel" class="form-input" id="regBrandPhone" placeholder="+90 5XX XXX XX XX" /></div>
-        <div class="form-group"><label>Website</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" /></div>
+        <div class="form-group"><label>Telefon *</label><input type="tel" class="form-input" id="regBrandPhone" placeholder="+90 5XX XXX XX XX" required /></div>
+        <div class="form-group"><label>Website *</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" required /></div>
       </div>
-      <!-- Dynamic fields from template config_schema -->
-      <div id="dynamicBrandFields"></div>
-      <p class="form-hint" style="margin-top:8px;">💡 Tüm alanlar daha sonra da düzenlenebilir. Zorunlu olanlar * ile işaretlenmiştir.</p>
+      <p class="form-hint" style="margin-top:8px;">💡 Bu bilgiler AI asistanınızın temelini oluşturacak.</p>
     </div>
 
     <!-- Step 3: Hesap Oluştur -->
@@ -894,7 +892,11 @@ function wizardNext() {
   // Step 1: Marka bilgileri
   else if (wizardStep === 1) {
     const brandName = document.getElementById('regBrandName').value.trim();
+    const brandPhone = document.getElementById('regBrandPhone').value.trim();
+    const brandWebsite = document.getElementById('regBrandWebsite').value.trim();
     if (!brandName) { showSignupErr('Marka / işletme adı zorunludur.'); return; }
+    if (!brandPhone) { showSignupErr('Telefon numarası zorunludur.'); return; }
+    if (!brandWebsite) { showSignupErr('Website adresi zorunludur.'); return; }
   }
   // Step 2: Hesap
   else if (wizardStep === 2) {
