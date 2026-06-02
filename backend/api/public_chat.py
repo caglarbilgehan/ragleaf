@@ -20,7 +20,8 @@ from sqlalchemy.orm import Session
 
 from backend.database.connection import get_db
 from backend.database.models_platform import (
-    Agent, AgentKnowledgeBase, PublicConversation, PublicMessage, UsageLog
+    Agent, AgentKnowledgeBase, PublicConversation, PublicMessage, UsageLog,
+    Appointment
 )
 from backend.database.models_v2 import Document, DocumentChunk
 from backend.auth.org_dependencies import get_agent_from_api_key, AgentAuth
@@ -220,6 +221,11 @@ async def chat_completion(
         )
         response_text = fallback
         model_used = "fallback"
+    
+    # --- Post-process: Extract Appointment ---
+    response_text = await _process_appointment_from_response(
+        response_text, agent, conversation, db
+    )
     
     # --- Save Assistant Message ---
     response_time_ms = int((time.time() - start_time) * 1000)
@@ -458,6 +464,29 @@ def _build_system_prompt(agent: Agent, context: str) -> str:
 {language_instructions.get(language, language_instructions["tr"])}
 """
     
+    # Add appointment instructions for template-based agents
+    template_slug = personality.get("template_slug")
+    if template_slug:
+        system += """
+## RANDEVU SİSTEMİ TALİMATI
+Müşteri randevu almak istediğinde şu bilgileri topla:
+1. İsim
+2. Telefon numarası
+3. İstenen tarih ve saat
+4. Hizmet türü
+
+TÜM bilgileri aldıktan sonra, randevuyu onaylamak için aşağıdaki JSON formatını yanıtının SONUNA ekle:
+```APPOINTMENT_JSON
+{"customer_name": "...", "customer_phone": "...", "appointment_date": "YYYY-MM-DDTHH:MM:SS", "service_type": "...", "duration_minutes": 60}
+```
+
+ÖNEMLİ KURALLAR:
+- JSON'u SADECE tüm bilgiler toplandığında ekle
+- JSON'dan ÖNCE müşteriye nazik bir onay mesajı yaz
+- Eksik bilgi varsa JSON ekleme, bilgiyi iste
+- Tarih/saat bilgisi belirsizse netleştir
+"""
+    
     # Add RAG context
     if context:
         system += f"""
@@ -542,3 +571,143 @@ async def _call_llm(
     except Exception as e:
         logger.error(f"LLM call failed: {e}")
         raise
+
+
+# ============================================================================
+# Appointment Extraction from LLM Response
+# ============================================================================
+
+import re
+from datetime import timedelta
+
+async def _process_appointment_from_response(
+    response_text: str,
+    agent: Agent,
+    conversation: PublicConversation,
+    db: Session
+) -> str:
+    """
+    Detect APPOINTMENT_JSON block in LLM response.
+    If found, create a real Appointment in DB and remove the JSON block from response.
+    Returns cleaned response text.
+    """
+    # Check if this agent uses templates (has appointment capability)
+    personality = agent.personality or {}
+    if not personality.get("template_slug"):
+        return response_text
+    
+    # Look for APPOINTMENT_JSON block
+    pattern = r'```APPOINTMENT_JSON\s*\n?(.*?)\n?\s*```'
+    match = re.search(pattern, response_text, re.DOTALL)
+    
+    if not match:
+        return response_text
+    
+    json_str = match.group(1).strip()
+    
+    try:
+        apt_data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to parse appointment JSON: {e}")
+        # Remove the malformed JSON block from response
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+    
+    # Validate required fields
+    required = ["customer_name", "customer_phone", "appointment_date", "service_type"]
+    missing = [f for f in required if not apt_data.get(f)]
+    if missing:
+        logger.warning(f"Appointment JSON missing fields: {missing}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+    
+    # Parse appointment date
+    try:
+        apt_date_str = apt_data["appointment_date"]
+        # Handle various formats
+        apt_date = None
+        for fmt in [
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+        ]:
+            try:
+                apt_date = datetime.strptime(apt_date_str, fmt)
+                break
+            except ValueError:
+                continue
+        
+        if not apt_date:
+            raise ValueError(f"Cannot parse date: {apt_date_str}")
+        
+        # Make timezone aware (assume Turkey timezone +03:00)
+        if apt_date.tzinfo is None:
+            from datetime import timezone as tz
+            apt_date = apt_date.replace(tzinfo=tz(timedelta(hours=3)))
+        
+    except (ValueError, KeyError) as e:
+        logger.warning(f"Invalid appointment date: {e}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+    
+    # Check if it's in the future
+    now = datetime.now(timezone.utc)
+    if apt_date <= now:
+        logger.warning(f"Appointment date is in the past: {apt_date}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+    
+    duration = apt_data.get("duration_minutes", 60)
+    apt_end = apt_date + timedelta(minutes=duration)
+    
+    # Check for conflicts
+    conflicts = db.query(Appointment).filter(
+        Appointment.organization_id == agent.organization_id,
+        Appointment.status.in_(["pending", "confirmed"]),
+        Appointment.appointment_date < apt_end,
+        Appointment.appointment_end > apt_date
+    ).count()
+    
+    if conflicts > 0:
+        logger.info(f"Appointment conflict detected for {apt_date}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        cleaned += "\n\n⚠️ *Not: Bu zaman diliminde başka bir randevu mevcut. Lütfen farklı bir saat deneyin.*"
+        return cleaned
+    
+    # Create appointment
+    try:
+        appointment = Appointment(
+            organization_id=agent.organization_id,
+            agent_id=agent.id,
+            conversation_id=conversation.id,
+            customer_name=apt_data["customer_name"],
+            customer_phone=apt_data.get("customer_phone"),
+            customer_email=apt_data.get("customer_email"),
+            customer_notes=apt_data.get("customer_notes"),
+            service_type=apt_data["service_type"],
+            service_details={"services": [apt_data["service_type"]]},
+            appointment_date=apt_date,
+            appointment_end=apt_end,
+            duration_minutes=duration,
+            status="pending"
+        )
+        db.add(appointment)
+        db.flush()
+        
+        logger.info(
+            f"📅 Appointment created from chat: {appointment.public_id} "
+            f"customer={apt_data['customer_name']} date={apt_date} "
+            f"service={apt_data['service_type']} agent={agent.name}"
+        )
+        
+        # Remove JSON block and add confirmation badge
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        cleaned += f"\n\n✅ *Randevu talebiniz başarıyla alındı! (Referans: {appointment.public_id})*"
+        
+        return cleaned
+        
+    except Exception as e:
+        logger.error(f"Failed to create appointment from chat: {e}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
