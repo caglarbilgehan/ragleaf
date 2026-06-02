@@ -31,6 +31,9 @@ class UserCreate(BaseModel):
     website: Optional[str] = None
     sector: Optional[str] = None
     plan: Optional[str] = "free"
+    # Template-based onboarding
+    template_slug: Optional[str] = None
+    brand_config: Optional[dict] = None
 
 class UserResponse(BaseModel):
     id: int
@@ -173,6 +176,22 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     
     db.commit()
     logger.info(f"✅ New user registered: {user_data.email}, org: {org_name}, plan: {plan}")
+    
+    # Auto-create agent from template if template_slug provided
+    if user_data.template_slug:
+        try:
+            from backend.api.agent_templates import _create_agent_from_template
+            _create_agent_from_template(
+                db=db,
+                template_slug=user_data.template_slug,
+                config_data=user_data.brand_config or {},
+                org_id=org.id,
+                user_id=user.id,
+                agent_name=org_name + " AI Asistan"
+            )
+            logger.info(f"✅ Auto-created agent from template: {user_data.template_slug}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to auto-create agent: {e}")
     
     # Auto-login: generate token
     access_token = create_access_token(

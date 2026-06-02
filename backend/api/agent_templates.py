@@ -65,10 +65,12 @@ class CreateFromTemplateResponse(BaseModel):
     public_id: str
     name: str
     slug: str
-    system_prompt: str
+    template_slug: Optional[str] = None
+    message: Optional[str] = None
+    system_prompt: Optional[str] = None
     welcome_message: Optional[str] = None
     api_key: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -175,85 +177,60 @@ async def get_template(
 
 
 # ============================================================================
-# Endpoints — Authenticated (agent creation)
+# ============================================================================
+# Helper — reusable agent creation from template
 # ============================================================================
 
-@templates_router.post(
-    "/agents/from-template",
-    response_model=CreateFromTemplateResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Şablondan agent oluştur"
-)
-async def create_agent_from_template(
-    request: CreateFromTemplateRequest,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user),
-    org: Organization = Depends(get_current_org)
-):
+def _create_agent_from_template(
+    db: Session,
+    template_slug: str,
+    config_data: dict,
+    org_id: int,
+    user_id: int,
+    agent_name: str = None
+) -> Agent:
     """
-    Sektörel şablondan yeni agent oluştur.
-    config_data içindeki bilgiler system_prompt'a yerleştirilir.
+    Create an agent from a template. Reusable by both API endpoint
+    and the registration auto-onboarding flow.
     """
-    
-    # 1. Get template
     template = db.query(AgentTemplate).filter(
-        AgentTemplate.slug == request.template_slug,
+        AgentTemplate.slug == template_slug,
         AgentTemplate.is_active == True
     ).first()
     
     if not template:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Şablon bulunamadı: {request.template_slug}"
-        )
+        raise ValueError(f"Şablon bulunamadı: {template_slug}")
     
-    # 2. Validate required fields from config_schema
-    for field in template.config_schema or []:
-        if field.get("required") and field["key"] not in request.config_data:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Zorunlu alan eksik: {field.get('label', field['key'])}"
-            )
-    
-    # 3. Check agent limit
-    agent_count = db.query(Agent).filter(Agent.organization_id == org.id).count()
-    if agent_count >= org.max_agents:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Agent limiti doldu ({org.max_agents}). Planınızı yükseltin."
-        )
-    
-    # 4. Render system prompt
-    system_prompt = render_template(template.default_system_prompt, request.config_data)
+    # Render system prompt
+    system_prompt = render_template(template.default_system_prompt, config_data)
     welcome_message = render_template(
         template.default_welcome_message or "Merhaba! Size nasıl yardımcı olabilirim?",
-        request.config_data
+        config_data
     )
     
-    # 5. Determine agent name
-    agent_name = request.agent_name
+    # Determine agent name
     if not agent_name:
-        firma_adi = request.config_data.get("firma_adi", template.name)
+        firma_adi = config_data.get("firma_adi", template.name)
         agent_name = f"{firma_adi} Asistanı"
     
-    # 6. Generate unique slug
+    # Generate unique slug
     base_slug = slugify(agent_name)
     slug = base_slug
     counter = 1
     while db.query(Agent).filter(
-        Agent.organization_id == org.id,
+        Agent.organization_id == org_id,
         Agent.slug == slug
     ).first():
         slug = f"{base_slug}-{counter}"
         counter += 1
     
-    # 7. Create agent
+    # Create agent
     personality = dict(template.default_personality or {})
     personality["template_slug"] = template.slug
-    personality["template_config"] = request.config_data
+    personality["template_config"] = config_data
     
     agent = Agent(
-        organization_id=org.id,
+        organization_id=org_id,
         name=agent_name,
         slug=slug,
         description=template.description,
@@ -288,13 +265,13 @@ async def create_agent_from_template(
     )
     
     db.add(agent)
-    db.flush()  # Get agent.id
+    db.flush()
     
-    # 8. Auto-generate public API key
+    # Auto-generate public API key
     raw_key, key_prefix, key_hash = AgentAPIKey.generate_key("public")
     api_key = AgentAPIKey(
         agent_id=agent.id,
-        organization_id=org.id,
+        organization_id=org_id,
         name=f"{agent_name} — Widget Key",
         key_prefix=key_prefix,
         key_hash=key_hash,
@@ -307,15 +284,79 @@ async def create_agent_from_template(
     db.commit()
     db.refresh(agent)
     
-    logger.info(f"✅ Agent created from template '{template.slug}': {agent.name} (org={org.slug})")
+    logger.info(f"✅ Agent created from template '{template.slug}': {agent.name} (org_id={org_id})")
+    
+    return agent
+
+
+# ============================================================================
+# Endpoints — Authenticated (agent creation)
+# ============================================================================
+
+@templates_router.post(
+    "/agents/from-template",
+    response_model=CreateFromTemplateResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Şablondan agent oluştur"
+)
+async def create_agent_from_template(
+    request: CreateFromTemplateRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user),
+    org: Organization = Depends(get_current_org)
+):
+    """
+    Sektörel şablondan yeni agent oluştur.
+    config_data içindeki bilgiler system_prompt'a yerleştirilir.
+    """
+    
+    # Validate required fields
+    template = db.query(AgentTemplate).filter(
+        AgentTemplate.slug == request.template_slug,
+        AgentTemplate.is_active == True
+    ).first()
+    
+    if not template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Şablon bulunamadı: {request.template_slug}"
+        )
+    
+    for field in template.config_schema or []:
+        if field.get("required") and field["key"] not in request.config_data:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Zorunlu alan eksik: {field.get('label', field['key'])}"
+            )
+    
+    # Check agent limit
+    agent_count = db.query(Agent).filter(Agent.organization_id == org.id).count()
+    if agent_count >= org.max_agents:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Agent limiti doldu ({org.max_agents}). Planınızı yükseltin."
+        )
+    
+    agent = _create_agent_from_template(
+        db=db,
+        template_slug=request.template_slug,
+        config_data=request.config_data,
+        org_id=org.id,
+        user_id=current_user.id,
+        agent_name=request.agent_name
+    )
+    
+    # Get the raw API key for response
+    latest_key = db.query(AgentAPIKey).filter(
+        AgentAPIKey.agent_id == agent.id
+    ).order_by(AgentAPIKey.created_at.desc()).first()
     
     return CreateFromTemplateResponse(
         id=agent.id,
         public_id=agent.public_id,
         name=agent.name,
         slug=agent.slug,
-        system_prompt=agent.system_prompt,
-        welcome_message=agent.welcome_message,
-        api_key=raw_key,
-        created_at=agent.created_at
+        template_slug=request.template_slug,
+        message=f"✅ '{agent.name}' başarıyla oluşturuldu!"
     )
+

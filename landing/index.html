@@ -403,7 +403,7 @@
 <div class="modal-overlay" id="signupOverlay"></div>
 <div class="modal-box modal-lg" id="signupModal">
   <div class="modal-header">
-    <h3>🍃 Hesap Oluştur</h3>
+    <h3>🍃 Markanızı Oluşturun</h3>
     <button class="modal-close" onclick="closeSignupWizard()">&times;</button>
   </div>
   <div class="modal-body">
@@ -411,15 +411,15 @@
     <div class="wizard-steps">
       <div class="wizard-step active" data-step="0">
         <div class="step-dot">1</div>
-        <span class="step-label">Kişisel Bilgiler</span>
+        <span class="step-label">Sektör</span>
       </div>
       <div class="wizard-step" data-step="1">
         <div class="step-dot">2</div>
-        <span class="step-label">Şifre</span>
+        <span class="step-label">Marka Bilgileri</span>
       </div>
       <div class="wizard-step" data-step="2">
         <div class="step-dot">3</div>
-        <span class="step-label">Firma Bilgileri</span>
+        <span class="step-label">Hesap</span>
       </div>
       <div class="wizard-step" data-step="3">
         <div class="step-dot">4</div>
@@ -427,21 +427,54 @@
       </div>
     </div>
 
-    <!-- Step 1: Personal Info -->
+    <!-- Step 1: Sektör Seçimi -->
     <div class="wizard-page active" id="wizPage0">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">AI asistanınızın sektörünü seçin. Sizin için hazır bir şablon oluşturacağız.</p>
+      <div class="sector-grid" id="sectorGrid">
+        <div class="sector-card" onclick="selectSector(this,'kuafor')" data-slug="kuafor">
+          <span class="sector-icon">✂️</span>
+          <span class="sector-name">Kuaför / Güzellik</span>
+        </div>
+        <div class="sector-card" onclick="selectSector(this,'dis-hekimi')" data-slug="dis-hekimi">
+          <span class="sector-icon">🦷</span>
+          <span class="sector-name">Diş Hekimi / Klinik</span>
+        </div>
+        <div class="sector-card" onclick="selectSector(this,'e-ticaret')" data-slug="e-ticaret">
+          <span class="sector-icon">🛒</span>
+          <span class="sector-name">E-Ticaret</span>
+        </div>
+        <div class="sector-card" onclick="selectSector(this,'restoran')" data-slug="restoran">
+          <span class="sector-icon">🍽️</span>
+          <span class="sector-name">Restoran / Kafe</span>
+        </div>
+        <div class="sector-card" onclick="selectSector(this,'diger')" data-slug="diger">
+          <span class="sector-icon">⚙️</span>
+          <span class="sector-name">Diğer Sektör</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Marka Bilgileri (dynamic) -->
+    <div class="wizard-page" id="wizPage1">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Markanızı tanıtın — bu bilgiler AI asistanınızın temelini oluşturacak.</p>
+      <div class="form-group"><label>Marka / İşletme Adı *</label><input type="text" class="form-input" id="regBrandName" placeholder="ör: Bella Güzellik Salonu" required /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefon</label><input type="tel" class="form-input" id="regBrandPhone" placeholder="+90 5XX XXX XX XX" /></div>
+        <div class="form-group"><label>Website</label><input type="url" class="form-input" id="regBrandWebsite" placeholder="https://markaniz.com" /></div>
+      </div>
+      <!-- Dynamic fields from template config_schema -->
+      <div id="dynamicBrandFields"></div>
+      <p class="form-hint" style="margin-top:8px;">💡 Tüm alanlar daha sonra da düzenlenebilir. Zorunlu olanlar * ile işaretlenmiştir.</p>
+    </div>
+
+    <!-- Step 3: Hesap Oluştur -->
+    <div class="wizard-page" id="wizPage2">
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">Yönetim panelinize erişmek için bir hesap oluşturun.</p>
       <div class="form-row">
         <div class="form-group"><label>Ad *</label><input type="text" class="form-input" id="regName" placeholder="Adınız" required /></div>
         <div class="form-group"><label>Soyad *</label><input type="text" class="form-input" id="regSurname" placeholder="Soyadınız" required /></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>İl</label><input type="text" class="form-input" id="regCity" placeholder="Şehir" /></div>
-        <div class="form-group"><label>İlçe</label><input type="text" class="form-input" id="regDistrict" placeholder="İlçe" /></div>
-      </div>
-      <div class="form-group"><label>E-posta *</label><input type="email" class="form-input" id="regEmail" placeholder="ornek@firma.com" required /></div>
-      <div class="form-group"><label>Telefon</label><input type="tel" class="form-input" id="regPhone" placeholder="+90 5XX XXX XX XX" /></div>
-    </div>
-
-    <div class="wizard-page" id="wizPage1">
+      <div class="form-group"><label>E-posta *</label><input type="email" class="form-input" id="regEmail" placeholder="ornek@markaniz.com" required /></div>
       <div class="form-group">
         <label>Şifre *</label>
         <div class="pw-input-wrap">
@@ -457,29 +490,6 @@
           <button type="button" class="pw-toggle" onclick="togglePw('regPasswordConfirm',this)" tabindex="-1">👁️</button>
         </div>
       </div>
-    </div>
-
-    <!-- Step 3: Company Info -->
-    <div class="wizard-page" id="wizPage2">
-      <div class="form-group"><label>Firma Adı</label><input type="text" class="form-input" id="regCompany" placeholder="Firma adınız" /></div>
-      <div class="form-group"><label>Website</label><input type="url" class="form-input" id="regWebsite" placeholder="https://www.firmaniz.com" /></div>
-      <div class="form-group">
-        <label>Sektör</label>
-        <select class="form-input" id="regSector">
-          <option value="">Sektör seçin</option>
-          <option value="teknoloji">Teknoloji</option>
-          <option value="e-ticaret">E-Ticaret</option>
-          <option value="egitim">Eğitim</option>
-          <option value="saglik">Sağlık</option>
-          <option value="finans">Finans</option>
-          <option value="hukuk">Hukuk</option>
-          <option value="uretim">Üretim</option>
-          <option value="medya">Medya</option>
-          <option value="turizm">Turizm</option>
-          <option value="diger">Diğer</option>
-        </select>
-      </div>
-      <p class="form-hint" style="margin-top:8px;">💡 Bu bilgiler opsiyoneldir, daha sonra da tamamlayabilirsiniz.</p>
     </div>
 
     <!-- Step 4: Plan Selection -->
@@ -505,7 +515,7 @@
         <div class="plan-card" onclick="selectPlan(this,'enterprise')">
           <h4>Kurumsal</h4>
           <div class="plan-price">Özel</div>
-          <div class="plan-limits">Sınırsız Agent & Doküman<br/>SLA • SSO • Özel Entegrasyon</div>
+          <div class="plan-limits">Sınırsız Agent &amp; Doküman<br/>SLA • SSO • Özel Entegrasyon</div>
         </div>
       </div>
     </div>
@@ -524,6 +534,7 @@
     </p>
   </div>
 </div>
+
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -771,6 +782,8 @@ async function handleLogin(e) {
 // ===== SIGNUP WIZARD =====
 let wizardStep = 0;
 let selectedPlan = 'free';
+let selectedSector = '';
+let templateConfigSchema = [];
 
 function openSignupWizard(step, plan) {
   wizardStep = step || 0;
@@ -791,23 +804,76 @@ function closeSignupWizard() {
 }
 document.getElementById('signupOverlay').addEventListener('click', closeSignupWizard);
 
+function selectSector(el, slug) {
+  selectedSector = slug;
+  document.querySelectorAll('.sector-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  // Load dynamic fields from API if real template
+  if (slug !== 'diger') {
+    loadTemplateDynamicFields(slug);
+  } else {
+    templateConfigSchema = [];
+    document.getElementById('dynamicBrandFields').innerHTML = '';
+  }
+}
+
+async function loadTemplateDynamicFields(slug) {
+  try {
+    const res = await fetch(`${API_BASE}/api/templates/${slug}`);
+    if (!res.ok) return;
+    const tmpl = await res.json();
+    templateConfigSchema = tmpl.config_schema || [];
+    renderDynamicFields();
+  } catch(e) {
+    console.warn('Template yüklenemedi:', e);
+    templateConfigSchema = [];
+    document.getElementById('dynamicBrandFields').innerHTML = '';
+  }
+}
+
+function renderDynamicFields() {
+  const container = document.getElementById('dynamicBrandFields');
+  // Skip fields we already have (firma_adi, telefon, website)
+  const skipKeys = ['firma_adi', 'telefon', 'website', 'hekim_adi', 'email'];
+  const fields = templateConfigSchema.filter(f => !skipKeys.includes(f.key));
+  
+  if (fields.length === 0) { container.innerHTML = ''; return; }
+  
+  let html = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">';
+  html += '<p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">📋 Sektöre özel bilgiler</p>';
+  
+  fields.forEach(f => {
+    const req = f.required ? ' *' : '';
+    const id = 'dyn_' + f.key;
+    
+    if (f.type === 'textarea') {
+      html += `<div class="form-group"><label>${f.label}${req}</label><textarea class="form-input" id="${id}" placeholder="${f.placeholder || ''}" rows="2" style="resize:vertical;"></textarea></div>`;
+    } else if (f.type === 'schedule') {
+      html += `<div class="form-group"><label>${f.label}${req}</label><input type="text" class="form-input" id="${id}" placeholder="${f.placeholder || 'ör: Pazartesi-Cumartesi 09:00-19:00'}" /></div>`;
+    } else if (f.type === 'tag_list') {
+      html += `<div class="form-group"><label>${f.label}${req}</label><input type="text" class="form-input" id="${id}" placeholder="${f.placeholder || 'Virgülle ayırın'}" /></div>`;
+    } else {
+      html += `<div class="form-group"><label>${f.label}${req}</label><input type="${f.type || 'text'}" class="form-input" id="${id}" placeholder="${f.placeholder || ''}" /></div>`;
+    }
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function updateWizardUI() {
-  // Update step indicators
   document.querySelectorAll('.wizard-step').forEach((s, i) => {
     s.classList.remove('active', 'done');
     if (i < wizardStep) s.classList.add('done');
     if (i === wizardStep) s.classList.add('active');
   });
-  // Show/hide pages
   document.querySelectorAll('.wizard-page').forEach((p, i) => {
     p.classList.toggle('active', i === wizardStep);
   });
-  // Back button
   document.getElementById('wizBack').style.display = wizardStep > 0 ? 'inline-flex' : 'none';
-  // Next button text
   const nextBtn = document.getElementById('wizNext');
   if (wizardStep === 3) {
-    nextBtn.textContent = 'Üyeliği Tamamla ✓';
+    nextBtn.textContent = 'Markanızı Oluşturun ✓';
   } else {
     nextBtn.textContent = 'Devam →';
   }
@@ -821,20 +887,29 @@ function wizardNext() {
   const errEl = document.getElementById('signupError');
   errEl.style.display = 'none';
 
-  // Validate current step
+  // Step 0: Sektör seçimi
   if (wizardStep === 0) {
+    if (!selectedSector) { showSignupErr('Lütfen bir sektör seçin.'); return; }
+  }
+  // Step 1: Marka bilgileri
+  else if (wizardStep === 1) {
+    const brandName = document.getElementById('regBrandName').value.trim();
+    if (!brandName) { showSignupErr('Marka / işletme adı zorunludur.'); return; }
+  }
+  // Step 2: Hesap
+  else if (wizardStep === 2) {
     const name = document.getElementById('regName').value.trim();
     const surname = document.getElementById('regSurname').value.trim();
     const email = document.getElementById('regEmail').value.trim();
-    if (!name || !surname) { showSignupErr('Ad ve soyad zorunludur.'); return; }
-    if (!email || !email.includes('@')) { showSignupErr('Geçerli bir e-posta adresi girin.'); return; }
-  } else if (wizardStep === 1) {
     const pw = document.getElementById('regPassword').value;
     const pw2 = document.getElementById('regPasswordConfirm').value;
+    if (!name || !surname) { showSignupErr('Ad ve soyad zorunludur.'); return; }
+    if (!email || !email.includes('@')) { showSignupErr('Geçerli bir e-posta adresi girin.'); return; }
     if (pw.length < 8) { showSignupErr('Şifre en az 8 karakter olmalıdır.'); return; }
     if (pw !== pw2) { showSignupErr('Şifreler eşleşmiyor.'); return; }
-  } else if (wizardStep === 3) {
-    // Final: submit
+  }
+  // Step 3: Paket → submit
+  else if (wizardStep === 3) {
     submitRegistration();
     return;
   }
@@ -871,24 +946,52 @@ function checkPwStrength() {
   else { fill.classList.add('strong'); label.textContent = 'Güçlü'; }
 }
 
+function collectDynamicFields() {
+  const data = {};
+  templateConfigSchema.forEach(f => {
+    const el = document.getElementById('dyn_' + f.key);
+    if (el) {
+      let val = el.value.trim();
+      if (f.type === 'tag_list' && val) {
+        val = val.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      if (val && (typeof val === 'string' ? val.length > 0 : val.length > 0)) {
+        data[f.key] = val;
+      }
+    }
+  });
+  return data;
+}
+
 async function submitRegistration() {
   const btn = document.getElementById('wizNext');
   btn.disabled = true; btn.textContent = 'Kaydediliyor...';
   const errEl = document.getElementById('signupError');
   errEl.style.display = 'none';
 
+  const brandName = document.getElementById('regBrandName').value.trim();
+  const brandPhone = document.getElementById('regBrandPhone').value.trim();
+  const brandWebsite = document.getElementById('regBrandWebsite').value.trim();
+  const dynamicData = collectDynamicFields();
+
   const body = {
     name: document.getElementById('regName').value.trim(),
     surname: document.getElementById('regSurname').value.trim(),
     email: document.getElementById('regEmail').value.trim(),
     password: document.getElementById('regPassword').value,
-    phone: document.getElementById('regPhone').value.trim() || null,
-    city: document.getElementById('regCity').value.trim() || null,
-    district: document.getElementById('regDistrict').value.trim() || null,
-    company_name: document.getElementById('regCompany').value.trim() || null,
-    website: document.getElementById('regWebsite').value.trim() || null,
-    sector: document.getElementById('regSector').value || null,
-    plan: selectedPlan
+    phone: brandPhone || null,
+    company_name: brandName || null,
+    website: brandWebsite || null,
+    sector: selectedSector !== 'diger' ? selectedSector : null,
+    plan: selectedPlan,
+    // New fields for template-based agent creation
+    template_slug: selectedSector !== 'diger' ? selectedSector : null,
+    brand_config: {
+      firma_adi: brandName,
+      telefon: brandPhone,
+      website: brandWebsite,
+      ...dynamicData
+    }
   };
 
   try {
@@ -899,15 +1002,13 @@ async function submitRegistration() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Kayıt başarısız');
-    // Auto-login
     localStorage.setItem('ragleaf_token', data.access_token);
     localStorage.setItem('ragleaf_user', JSON.stringify(data.user));
-    // Pass token to app.ragleaf.com via URL (different domain = different localStorage)
     window.location.href = `${APP_URL}/login?token=${encodeURIComponent(data.access_token)}`;
   } catch(err) {
     showSignupErr(err.message);
   } finally {
-    btn.disabled = false; btn.textContent = 'Üyeliği Tamamla ✓';
+    btn.disabled = false; btn.textContent = 'Markanızı Oluşturun ✓';
   }
 }
 
