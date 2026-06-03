@@ -5,4 +5,4 @@
 
 ---
 
-*(Şu an bekleyen prompt yok)*
+*(Şu an yeni prompt yok)*

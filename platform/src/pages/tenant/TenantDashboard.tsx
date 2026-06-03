@@ -90,7 +90,7 @@ export default function TenantDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Agent'lar"
+          title="Asistanlar"
           value={stats.agent_count}
           subtitle={`${stats.active_agent_count} aktif / ${stats.max_agents} limit`}
           icon="🤖"
@@ -121,20 +121,20 @@ export default function TenantDashboard() {
       {/* Agents Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Agent'larınız</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Asistanlarınız</h2>
         </div>
         {agents.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p className="text-4xl mb-2">🤖</p>
-            <p>Henüz agent oluşturmadınız.</p>
-            <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">İlk agent'ınızı oluşturun →</a>
+            <p>Henüz asistan oluşturmadınız.</p>
+            <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">İlk asistanınızı oluşturun →</a>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
                 <tr>
-                  <th className="px-6 py-3 text-left">Agent</th>
+                  <th className="px-6 py-3 text-left">Asistan</th>
                   <th className="px-6 py-3 text-center">Durum</th>
                   <th className="px-6 py-3 text-center">Doküman</th>
                   <th className="px-6 py-3 text-center">Konuşma</th>

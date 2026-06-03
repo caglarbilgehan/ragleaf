@@ -762,11 +762,20 @@ window.addEventListener('scroll', () => {
 });
 document.getElementById('navToggle')?.addEventListener('click', () => {
   const links = document.getElementById('navLinks');
-  const isOpen = links.style.display === 'flex';
-  Object.assign(links.style, isOpen ? {display:'none'} : {
-    display:'flex', flexDirection:'column', position:'absolute',
-    top:'60px', left:'0', right:'0', background:'rgba(10,10,15,0.98)',
-    padding:'24px', gap:'16px', borderBottom:'1px solid rgba(255,255,255,0.06)'
+  const toggle = document.getElementById('navToggle');
+  const isOpen = links.classList.contains('open');
+  links.classList.toggle('open');
+  toggle.textContent = isOpen ? '☰' : '✕';
+});
+// Close mobile menu when a nav link is clicked
+document.querySelectorAll('#navLinks a:not(.btn)').forEach(link => {
+  link.addEventListener('click', () => {
+    const links = document.getElementById('navLinks');
+    const toggle = document.getElementById('navToggle');
+    if (links.classList.contains('open')) {
+      links.classList.remove('open');
+      toggle.textContent = '☰';
+    }
   });
 });
 
@@ -1330,6 +1339,7 @@ setTimeout(addDemoMsg, 4000);
   data-agent-id="ag_ragleaf_system01"
   data-api-key="ak_fe57931967dca677701e5754fd5412df82b060c052ea2017"
   data-api-url="https://api.ragleaf.com"
+  data-auto-open="true"
 ></script>
 
 </body>

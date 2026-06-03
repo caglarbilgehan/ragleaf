@@ -44,3 +44,21 @@
 - [ ] Widget embed testi (harici HTML sayfasında)
 - [ ] Multi-tenant izolasyon testi (farklı org_slug ile)
 - [ ] Google Calendar entegrasyon testi
+- [ ] Widget markdown render testi (tablo, bold, liste)
+
+### Hibrit RAG/LLM + Widget (2026-06-03)
+| Test | Durum | Notlar |
+|------|-------|--------|
+| LLM Fallback (doküman yoksa) | ✅ Başarılı | Genel bilgi ile yanıt veriyor |
+| Token stats NULL handling | ✅ Başarılı | `total_requests or 0` koruması |
+| Widget parseMarkdown | ✅ Başarılı | Bold, tablo, liste, code blocks |
+| Widget autoOpen | ✅ Başarılı | Varsayılan true, agent bazlı override |
+| Dockerfile 3-stage build | ✅ Başarılı | Python + Node Alpine + Production |
+
+### Admin Panel Temizlik (2026-06-03)
+| Test | Durum | Notlar |
+|------|-------|--------|
+| Console hataları (GÖREV-9) | ✅ Başarılı | 12 sayfa kaldırıldı, 0 console hatası |
+| Sidebar temizlik (GÖREV-10) | ✅ Başarılı | 11 menü itemi kaldırıldı |
+| Kullanılmayan import temizliği | ✅ Başarılı | App.tsx + DashboardLayout |
+

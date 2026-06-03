@@ -79,6 +79,7 @@ class AgentResponse(BaseModel):
     rate_limit_per_day: int = 500
     is_active: bool = True
     is_public: bool = True
+    is_system: bool = False
     total_conversations: int = 0
     total_messages: int = 0
     document_count: Optional[int] = 0
@@ -146,7 +147,7 @@ async def create_agent(
     if existing:
         slug = f"{slug}-{current_count + 1}"
     
-    # Default configs
+    # Default configs from global admin settings
     default_personality = {
         "tone": "professional",
         "language": "tr",
@@ -154,21 +155,10 @@ async def create_agent(
         "fallback_message": "Bu konuda yeterli bilgim yok. Daha fazla bilgi için müşteri hizmetlerimizle iletişime geçebilirsiniz."
     }
     
-    default_model_config = {
-        "provider": "huggingface",
-        "model": "meta-llama/Llama-3.1-70B-Instruct",
-        "temperature": 0.3,
-        "max_tokens": 1024,
-        "top_p": 0.9
-    }
-    
-    default_rag_config = {
-        "top_k": 5,
-        "similarity_threshold": 0.3,
-        "search_method": "hybrid",
-        "include_sources": False,
-        "max_context_chars": 4000
-    }
+    # Get model and RAG config from global admin settings
+    from backend.api.ai_provider_config import get_effective_model_config, get_effective_rag_config
+    default_model_config = get_effective_model_config(db)
+    default_rag_config = get_effective_rag_config(db)
     
     default_appearance = {
         "primary_color": "#4F46E5",
@@ -178,7 +168,8 @@ async def create_agent(
         "height": 600,
         "show_branding": True,
         "bubble_icon": "chat",
-        "border_radius": 16
+        "border_radius": 16,
+        "auto_open": True
     }
     
     agent = Agent(
@@ -283,6 +274,9 @@ async def delete_agent(
 ):
     """Delete an agent and all associated data."""
     agent = _get_agent_or_404(agent_id, org.id, db)
+    
+    if agent.is_system:
+        raise HTTPException(status_code=403, detail="Sistem agent'ı silinemez.")
     
     db.delete(agent)
     db.commit()
@@ -766,12 +760,13 @@ def _agent_to_response(agent: Agent, db: Session) -> AgentResponse:
         rag_config=agent.rag_config,
         appearance=agent.appearance,
         allowed_domains=agent.allowed_domains,
-        rate_limit_per_minute=agent.rate_limit_per_minute,
-        rate_limit_per_day=agent.rate_limit_per_day,
+        rate_limit_per_minute=agent.rate_limit_per_minute or 20,
+        rate_limit_per_day=agent.rate_limit_per_day or 500,
         is_active=agent.is_active,
         is_public=agent.is_public,
-        total_conversations=agent.total_conversations,
-        total_messages=agent.total_messages,
+        is_system=agent.is_system or False,
+        total_conversations=agent.total_conversations or 0,
+        total_messages=agent.total_messages or 0,
         document_count=doc_count,
         created_at=agent.created_at,
         updated_at=agent.updated_at

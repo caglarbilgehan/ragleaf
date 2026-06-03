@@ -491,7 +491,7 @@ TÜM bilgileri aldıktan sonra, randevuyu onaylamak için aşağıdaki JSON form
     if context:
         system += f"""
 Aşağıdaki bilgi tabanı içeriklerini kullanarak kullanıcının sorusunu yanıtla.
-Bilgi tabanında bulunmayan konularda bunu belirt.
+Bilgi tabanında bulunmayan konularda genel bilgin ve sistem promptundaki bilgilere dayanarak yanıt ver.
 
 --- BİLGİ TABANI ---
 {context}
@@ -500,9 +500,16 @@ Bilgi tabanında bulunmayan konularda bunu belirt.
     else:
         fallback = (agent.personality or {}).get(
             "fallback_message",
-            "Bu konuda bilgi tabanımda yeterli bilgi bulunamadı."
+            ""
         )
-        system += f"\nBilgi tabanında ilgili içerik bulunamazsa şu mesajı ver: '{fallback}'"
+        system += f"""
+Bilgi tabanında henüz doküman bulunmuyor. Aşağıdaki kurallara göre yanıt ver:
+1. Sistem promptundaki bilgilere ve genel bilgine dayanarak kullanıcıya yardımcı ol.
+2. Kullanıcının sorusunu anlamaya çalış ve mümkün olduğunca faydalı bir yanıt ver.
+3. Eğer soru hakkında hiçbir bilgin yoksa veya çok spesifik bir konuysa, bunu nazikçe belirt.
+"""
+        if fallback:
+            system += f"4. Gerçekten yanıt veremediğin durumlarda şunu öner: '{fallback}'\n"
     
     return system
 

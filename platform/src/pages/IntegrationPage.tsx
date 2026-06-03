@@ -93,7 +93,7 @@ export default function IntegrationPage() {
           Entegrasyon — {agent.name}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Agent'ınızı web sitenize veya uygulamanıza ekleyin
+          Asistanınızı web sitenize veya uygulamanıza ekleyin
         </p>
       </div>
 
@@ -190,7 +190,7 @@ export default function IntegrationPage() {
             <div className="space-y-3 text-sm">
               {[
                 { method: 'POST', path: '/v1/chat/completions', desc: 'Sohbet mesajı gönder' },
-                { method: 'GET', path: `/v1/agents/${agent.public_id}/info`, desc: 'Agent bilgilerini al' },
+                { method: 'GET', path: `/v1/agents/${agent.public_id}/info`, desc: 'Asistan bilgilerini al' },
                 { method: 'GET', path: '/v1/conversations/{session_id}/history', desc: 'Sohbet geçmişi' },
               ].map((ep) => (
                 <div key={ep.path} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">

@@ -66,7 +66,7 @@ export default function TemplateWizardPage() {
       navigate(`/agents/${data.id}/edit`);
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.detail || 'Agent oluşturma hatası');
+      toast.error(err.response?.data?.detail || 'Asistan oluşturma hatası');
     },
   });
 
@@ -114,7 +114,7 @@ export default function TemplateWizardPage() {
           <ArrowLeftIcon className="h-5 w-5 text-gray-500" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Hazır Şablondan Agent Oluştur</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Hazır Asistan Seç</h1>
           <p className="text-sm text-gray-500">
             Sektörünüze uygun şablonu seçin, bilgilerinizi girin, hemen kullanmaya başlayın
           </p>
@@ -327,8 +327,8 @@ export default function TemplateWizardPage() {
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
-              <strong>Not:</strong> Agent oluşturulduktan sonra tüm ayarları düzenleyebilirsiniz.
-              System prompt, görünüm ve RAG ayarları Agent düzenleme sayfasından değiştirilebilir.
+              <strong>Not:</strong> Asistan oluşturulduktan sonra tüm ayarları düzenleyebilirsiniz.
+              System prompt, görünüm ve RAG ayarları Asistan düzenleme sayfasından değiştirilebilir.
             </div>
           </div>
         )}
@@ -358,7 +358,7 @@ export default function TemplateWizardPage() {
             ) : (
               <>
                 <SparklesIcon className="h-5 w-5" />
-                Agent Oluştur
+                Asistan Oluştur
               </>
             )
           ) : (

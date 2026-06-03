@@ -1,6 +1,7 @@
 # API Gateway - FastAPI
 # Uses existing backend code with modifications for microservices
 
+# Stage 1: Python dependencies builder
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
@@ -16,7 +17,16 @@ RUN apt-get update && apt-get install -y \
 COPY backend/requirements-docker.txt ./requirements.txt
 RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Production stage
+# Stage 2: Widget builder (lightweight Node)
+FROM node:20-alpine AS widget-builder
+WORKDIR /widget
+COPY widget/src ./src
+COPY widget/package.json ./
+RUN npm install -g esbuild && \
+    mkdir -p dist && \
+    esbuild src/index.ts --bundle --minify --format=iife --outfile=dist/widget.js --target=es2018
+
+# Stage 3: Production
 FROM python:3.11-slim AS production
 
 WORKDIR /app
@@ -37,7 +47,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code
 COPY backend ./backend
-COPY widget/dist ./widget/dist
+COPY --from=widget-builder /widget/dist ./widget/dist
 COPY .env* ./
 
 # Create necessary directories

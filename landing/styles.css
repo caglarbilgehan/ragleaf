@@ -697,6 +697,40 @@ select.form-input {
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* Mobile nav (hamburger menu) */
+.nav-links.open {
+  display: flex !important;
+  flex-direction: column;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: rgba(10,10,15,0.98);
+  backdrop-filter: blur(20px);
+  padding: 20px 24px 28px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeIn 0.25s ease;
+  z-index: 99;
+}
+.nav-links.open a {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: background 0.2s;
+}
+.nav-links.open a:hover {
+  background: rgba(255,255,255,0.05);
+}
+.nav-links.open a.btn-primary,
+.nav-links.open a.btn-ghost {
+  width: 100%;
+  justify-content: center;
+  padding: 14px 20px !important;
+  margin-top: 4px;
+}
+
 @media (max-width: 900px) {
   .features-grid, .steps-container, .pricing-grid {
     grid-template-columns: 1fr;
@@ -710,13 +744,61 @@ select.form-input {
   .wizard-step .step-label { display: none; }
   .wizard-step + .wizard-step::before { width: 20px; margin: 0 4px; }
   .form-row { grid-template-columns: 1fr; }
+
+  .section { padding: 80px 0; }
+  .section-header { margin-bottom: 48px; }
+  .cta-section { padding: 80px 24px; }
+
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
+
 @media (max-width: 600px) {
-  .hero { padding: 120px 0 80px; }
-  .hero h1 { font-size: 36px; }
-  .demo-chat-widget { width: 220px; }
+  .hero { padding: 100px 0 64px; }
+  .hero h1 { font-size: 32px; }
+  .hero p { font-size: 16px; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .hero-buttons .btn { width: 100%; max-width: 280px; justify-content: center; }
+
+  .section { padding: 56px 0; }
+  .section-header { margin-bottom: 36px; }
+  .section-header h2 { font-size: 26px; }
+  .section-header p { font-size: 15px; }
+
+  .code-window { margin-top: 48px; }
+  .code-content { padding: 16px; font-size: 12px; line-height: 1.7; }
+
+  .demo-chat-widget { width: 200px; }
+  .demo-chat-messages { padding: 8px; }
+  .demo-msg { font-size: 11px; padding: 6px 10px; }
+
+  .feature-card { padding: 24px; }
+  .feature-card h3 { font-size: 16px; }
+
+  .step-num { width: 64px; height: 64px; font-size: 24px; }
+
+  .pricing-card { padding: 28px; }
+  .pricing-card .price { font-size: 36px; }
+
+  .cta-section { padding: 56px 16px; }
+  .cta-section h2 { font-size: 26px; }
+  .cta-section p { font-size: 15px; }
+
   .modal-body { padding: 20px; }
   .modal-header { padding: 20px; }
+  .modal-box.modal-lg { max-width: 100%; margin: 0 8px; }
+
+  .logos-row { gap: 24px; }
+  .logos-row span { font-size: 16px; }
+
+  .container { padding: 0 16px; }
 }
 
 /* ===== SECTOR SELECTION GRID ===== */

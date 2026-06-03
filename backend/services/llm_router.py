@@ -757,11 +757,12 @@ class LLMRouter:
         try:
             token = db.query(AIToken).filter(AIToken.id == token_id).first()
             if token:
-                token.total_requests += 1
+                token.total_requests = (token.total_requests or 0) + 1
                 token.last_used_at = datetime.utcnow()
                 token.is_available = True
                 token.last_error = None
-                db.commit()
+                # Don't commit here - let the parent transaction handle it
+                db.flush()
                 
                 # Advance round-robin for primary provider tokens
                 if token_config and token_config.get("is_primary_provider") and token_config.get("token_count"):
@@ -772,7 +773,7 @@ class LLMRouter:
                     )
         except Exception as e:
             logger.warning(f"Failed to update token success stats: {e}")
-            db.rollback()
+            # Do NOT rollback - it would destroy the parent transaction (conversation, messages, etc.)
     
     async def _update_token_failure(self, db: Session, token_id: int, error: str):
         """Update token stats on failed request"""
@@ -781,21 +782,23 @@ class LLMRouter:
         try:
             token = db.query(AIToken).filter(AIToken.id == token_id).first()
             if token:
-                token.total_requests += 1
-                token.failed_requests += 1
+                token.total_requests = (token.total_requests or 0) + 1
+                token.failed_requests = (token.failed_requests or 0) + 1
                 token.last_error = error[:500]
                 token.last_error_at = datetime.utcnow()
                 
                 # Mark as unavailable if too many failures
-                failure_rate = token.failed_requests / max(token.total_requests, 1)
-                if failure_rate > 0.8 and token.total_requests > 5:
+                total = token.total_requests or 1
+                failed = token.failed_requests or 0
+                failure_rate = failed / max(total, 1)
+                if failure_rate > 0.8 and total > 5:
                     token.is_available = False
                     logger.warning(f"Token {token.display_name} marked unavailable due to high failure rate")
                 
-                db.commit()
+                db.flush()
         except Exception as e:
             logger.warning(f"Failed to update token failure stats: {e}")
-            db.rollback()
+            # Do NOT rollback - it would destroy the parent transaction
     
     def record_statistics(
         self, 

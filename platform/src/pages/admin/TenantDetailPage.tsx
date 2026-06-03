@@ -21,7 +21,7 @@ import {
 const TABS = [
   { key: 'general', label: 'Genel Bilgi', icon: BuildingOffice2Icon },
   { key: 'users', label: 'Kullanıcılar', icon: UserGroupIcon },
-  { key: 'agents', label: "Agent'lar", icon: CpuChipIcon },
+  { key: 'agents', label: "Asistanlar", icon: CpuChipIcon },
   { key: 'documents', label: 'Dokümanlar', icon: DocumentTextIcon },
   { key: 'appointments', label: 'Randevular', icon: CalendarDaysIcon },
 ] as const;
@@ -147,7 +147,7 @@ export default function TenantDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-gray-500">Maks Agent</label>
+                <label className="text-xs text-gray-500">Maks Asistan</label>
                 <input
                   type="number"
                   defaultValue={tenant.max_agents}
@@ -191,7 +191,7 @@ export default function TenantDetailPage() {
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-gray-900">{tenant.agent_count}</p>
-                <p className="text-xs text-gray-500">Agent</p>
+                <p className="text-xs text-gray-500">Asistan</p>
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-gray-900">{tenant.document_count}</p>
@@ -250,7 +250,7 @@ export default function TenantDetailPage() {
 
         {activeTab === 'agents' && (
           <div>
-            <h3 className="font-medium mb-4">Agent'lar ({agentsData?.total || 0})</h3>
+            <h3 className="font-medium mb-4">Asistanlar ({agentsData?.total || 0})</h3>
             {agentsData?.agents?.length > 0 ? (
               <div className="space-y-2">
                 {agentsData.agents.map((a: any) => (
@@ -273,7 +273,7 @@ export default function TenantDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Henüz agent yok</p>
+              <p className="text-gray-500 text-sm">Henüz asistan yok</p>
             )}
           </div>
         )}

@@ -35,7 +35,7 @@ export default function TemplateManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">✨ Şablon Yönetimi</h1>
+          <h1 className="text-2xl font-bold text-gray-900">✨ Hazır Asistan Yönetimi</h1>
           <p className="text-sm text-gray-500 mt-1">
             Hazır sektörel AI asistan şablonlarını yönetin
           </p>

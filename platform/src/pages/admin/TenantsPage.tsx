@@ -159,7 +159,7 @@ export default function TenantsPage() {
                     <UserGroupIcon className="h-4 w-4" />
                     {t.user_count}
                   </span>
-                  <span className="flex items-center gap-1" title="Agent'lar">
+                  <span className="flex items-center gap-1" title="Asistanlar">
                     <CpuChipIcon className="h-4 w-4" />
                     {t.agent_count}
                   </span>

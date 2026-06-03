@@ -547,3 +547,174 @@ async def reset_provider_config(
     except Exception as e:
         logger.error(f"Error resetting provider config: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ===== Global AI Configuration (Model + RAG Defaults) =====
+
+GLOBAL_AI_CONFIG_KEY = "global_ai_config"
+
+DEFAULT_GLOBAL_AI_CONFIG = {
+    "model_config": {
+        "provider": "huggingface",
+        "model": "meta-llama/Llama-3.1-70B-Instruct",
+        "temperature": 0.3,
+        "max_tokens": 1024,
+        "top_p": 0.9
+    },
+    "rag_config": {
+        "top_k": 5,
+        "similarity_threshold": 0.3,
+        "search_method": "hybrid",
+        "include_sources": False,
+        "max_context_chars": 4000
+    },
+    "created_at": None,
+    "updated_at": None
+}
+
+
+class GlobalModelConfig(BaseModel):
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    temperature: Optional[float] = Field(None, ge=0, le=1)
+    max_tokens: Optional[int] = Field(None, ge=128, le=8192)
+    top_p: Optional[float] = Field(None, ge=0, le=1)
+
+
+class GlobalRAGConfig(BaseModel):
+    top_k: Optional[int] = Field(None, ge=1, le=20)
+    similarity_threshold: Optional[float] = Field(None, ge=0, le=1)
+    search_method: Optional[str] = None  # hybrid, semantic, fulltext
+    include_sources: Optional[bool] = None
+    max_context_chars: Optional[int] = Field(None, ge=500, le=16000)
+
+
+class GlobalAIConfigUpdate(BaseModel):
+    model_config_data: Optional[GlobalModelConfig] = None
+    rag_config: Optional[GlobalRAGConfig] = None
+
+
+def get_global_ai_config(db: Session) -> Dict[str, Any]:
+    """Get global AI config from settings, create default if not exists"""
+    setting = db.query(Settings).filter(Settings.key == GLOBAL_AI_CONFIG_KEY).first()
+    
+    if not setting:
+        config = DEFAULT_GLOBAL_AI_CONFIG.copy()
+        config["created_at"] = datetime.utcnow().isoformat()
+        
+        setting = Settings(
+            key=GLOBAL_AI_CONFIG_KEY,
+            value=config,
+            description="Global AI configuration - model defaults and RAG settings for all tenants"
+        )
+        db.add(setting)
+        db.commit()
+        db.refresh(setting)
+        return setting.value
+    
+    return setting.value
+
+
+def save_global_ai_config(db: Session, config: Dict[str, Any]) -> Dict[str, Any]:
+    """Save global AI config to settings"""
+    setting = db.query(Settings).filter(Settings.key == GLOBAL_AI_CONFIG_KEY).first()
+    
+    config["updated_at"] = datetime.utcnow().isoformat()
+    
+    if setting:
+        setting.value = config
+        flag_modified(setting, 'value')
+    else:
+        setting = Settings(
+            key=GLOBAL_AI_CONFIG_KEY,
+            value=config,
+            description="Global AI configuration - model defaults and RAG settings for all tenants"
+        )
+        db.add(setting)
+    
+    db.commit()
+    return config
+
+
+def get_effective_model_config(db: Session) -> Dict[str, Any]:
+    """Get the effective model config (global). Used by agents at runtime."""
+    global_config = get_global_ai_config(db)
+    return global_config.get("model_config", DEFAULT_GLOBAL_AI_CONFIG["model_config"])
+
+
+def get_effective_rag_config(db: Session) -> Dict[str, Any]:
+    """Get the effective RAG config (global). Used by agents at runtime."""
+    global_config = get_global_ai_config(db)
+    return global_config.get("rag_config", DEFAULT_GLOBAL_AI_CONFIG["rag_config"])
+
+
+@ai_provider_config_router.get("/global-config")
+async def get_global_config(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Get global AI configuration (model + RAG defaults)"""
+    try:
+        config = get_global_ai_config(db)
+        return {
+            "success": True,
+            "config": config
+        }
+    except Exception as e:
+        logger.error(f"Error getting global AI config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@ai_provider_config_router.put("/global-config")
+async def update_global_config(
+    request: GlobalAIConfigUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Update global AI configuration (model + RAG defaults)"""
+    try:
+        config = get_global_ai_config(db)
+        
+        if request.model_config_data:
+            model_updates = request.model_config_data.dict(exclude_unset=True)
+            if "model_config" not in config:
+                config["model_config"] = DEFAULT_GLOBAL_AI_CONFIG["model_config"].copy()
+            config["model_config"].update(model_updates)
+        
+        if request.rag_config:
+            rag_updates = request.rag_config.dict(exclude_unset=True)
+            if "rag_config" not in config:
+                config["rag_config"] = DEFAULT_GLOBAL_AI_CONFIG["rag_config"].copy()
+            config["rag_config"].update(rag_updates)
+        
+        saved = save_global_ai_config(db, config)
+        
+        logger.info(f"Global AI config updated by admin")
+        
+        return {
+            "success": True,
+            "config": saved
+        }
+    except Exception as e:
+        logger.error(f"Error updating global AI config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@ai_provider_config_router.get("/global-config/effective")
+async def get_effective_config(
+    db: Session = Depends(get_db)
+):
+    """Get effective AI configuration (public endpoint for agents/chat).
+    Returns the merged global config that all agents should use."""
+    try:
+        model_config = get_effective_model_config(db)
+        rag_config = get_effective_rag_config(db)
+        
+        return {
+            "success": True,
+            "model_config": model_config,
+            "rag_config": rag_config
+        }
+    except Exception as e:
+        logger.error(f"Error getting effective config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

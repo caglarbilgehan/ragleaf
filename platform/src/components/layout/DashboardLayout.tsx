@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
-  FileText,
   Bot,
   Users,
   Menu,
@@ -10,20 +9,11 @@ import {
   LogOut,
   Search,
   BarChart3,
-  Layers,
   Database,
   Package,
-  CheckCircle,
-  Activity,
-  SearchCheck,
   Zap,
   Monitor,
-  Settings2,
-  Globe,
   Sparkles,
-  Eye,
-  TrendingUp,
-  FlaskConical,
   HardDrive,
   Key,
   MessageSquare,
@@ -55,13 +45,14 @@ const adminNavigation = [
     isHeader: true
   },
   { name: 'Tenantlar', href: '/admin/tenants', icon: Users },
-  { name: 'Hazır Şablonlar', href: '/admin/templates', icon: Sparkles },
+  { name: 'Hazır Asistanlar', href: '/admin/templates', icon: Sparkles },
   {
     name: 'Sistem',
     href: '#',
     icon: Monitor,
     isHeader: true
   },
+  { name: 'AI Yapılandırma', href: '/admin/ai-config', icon: Settings },
   { name: 'AI Providers', href: '/ai-providers', icon: Zap },
   { name: 'Sistem İzleme', href: '/system-monitor', icon: Monitor },
   { name: 'Yedekleme', href: '/backup', icon: HardDrive },
@@ -74,8 +65,6 @@ const adminNavigation = [
   },
   { name: 'LLM Modelleri', href: '/models', icon: Bot },
   { name: 'LLM İstatistikleri', href: '/statistics', icon: BarChart3 },
-  { name: 'RAG Analytics', href: '/rag-analytics', icon: TrendingUp },
-  { name: 'RAG Kalite Testi', href: '/rag-evaluation', icon: FlaskConical },
   {
     name: 'Embedding Yönetimi',
     href: '#',
@@ -83,15 +72,6 @@ const adminNavigation = [
     isHeader: true
   },
   { name: 'Embedding Modelleri', href: '/embedding/models', icon: Package },
-  { name: 'Chunking Ayarları', href: '/embedding/chunking', icon: Settings2 },
-  { name: 'RAG Ayarları', href: '/embedding/rag-settings', icon: Search },
-  { name: 'Multi-Modal RAG', href: '/embedding/multimodal', icon: Eye },
-  { name: 'Çoklu Dil Ayarları', href: '/embedding/multilingual', icon: Globe },
-  { name: 'Chunk Zenginleştirme', href: '/embedding/chunk-enrichment', icon: Sparkles },
-  { name: 'Chunk Önizleme', href: '/embedding/chunk-preview', icon: Layers },
-  { name: 'Search Test', href: '/embedding/search-test', icon: SearchCheck },
-  { name: 'Kalite Validasyonu', href: '/embedding/quality-validator', icon: CheckCircle },
-  { name: 'Vector Analytics', href: '/embedding/analytics', icon: Activity },
 ];
 
 const tenantNavigation = [
@@ -102,7 +82,7 @@ const tenantNavigation = [
     icon: Bot,
     isHeader: true
   },
-  { name: 'Agent\'larım', href: '/agents', icon: Bot },
+  { name: 'Asistanlarım', href: '/agents', icon: Bot },
   { name: 'Randevular', href: '/tenant/appointments', icon: CalendarDays },
   { name: 'Dokümanlar', href: '/tenant/documents', icon: Upload },
   { name: 'Konuşmalar', href: '/tenant/conversations', icon: MessageSquare },
@@ -125,19 +105,27 @@ function getNavigation(user: User) {
 
 export default function DashboardLayout({ children, user, onLogout }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'admin' | 'tenant'>(
-    (user.is_superadmin || user.is_admin) ? 'admin' : 'tenant'
-  );
+  const [viewMode, setViewMode] = useState<'admin' | 'tenant'>('tenant');
   const location = useLocation();
   const navigate = useNavigate();
   
   const isAdmin = user.is_superadmin || user.is_admin;
+
+  // Auto-detect admin routes from URL and sync viewMode
+  useEffect(() => {
+    const adminPaths = ['/dashboard', '/admin/', '/models', '/system-monitor', '/backup', '/api-tokens', '/ai-providers', '/statistics', '/rag-', '/embedding/'];
+    const isAdminRoute = adminPaths.some(p => location.pathname.startsWith(p));
+    if (isAdmin && isAdminRoute && viewMode !== 'admin') {
+      setViewMode('admin');
+    }
+  }, [location.pathname, isAdmin]);
+
   const navigation = viewMode === 'admin' ? adminNavigation : tenantNavigation;
 
   const handleViewSwitch = () => {
     const newMode = viewMode === 'admin' ? 'tenant' : 'admin';
     setViewMode(newMode);
-    navigate(newMode === 'admin' ? '/' : '/tenant');
+    navigate(newMode === 'admin' ? '/dashboard' : '/tenant');
   };
 
   const handleLogout = async () => {

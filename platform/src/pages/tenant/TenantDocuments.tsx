@@ -80,19 +80,19 @@ export default function TenantDocuments() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Doküman Yükleme</h1>
-        <p className="text-gray-500 mt-1">Agent'larınıza bilgi tabanı dokümanları yükleyin</p>
+        <p className="text-gray-500 mt-1">Asistanlarınıza bilgi tabanı dokümanları yükleyin</p>
       </div>
 
       {agents.length === 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-700">Henüz agent oluşturmadınız.</p>
-          <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">Agent Oluştur →</a>
+          <p className="text-yellow-700">Henüz asistan oluşturmadınız.</p>
+          <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">Asistan Oluştur →</a>
         </div>
       ) : (
         <>
           {/* Agent Selector */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Hedef Agent</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hedef Asistan</label>
             <select
               value={selectedAgentId || ''}
               onChange={(e) => setSelectedAgentId(Number(e.target.value))}
@@ -151,7 +151,7 @@ export default function TenantDocuments() {
           {/* Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <p className="text-blue-800 text-sm">
-              💡 Yüklenen dokümanlar seçili agent'ın bilgi tabanına eklenir. Agent, bu dokümanları kullanarak soruları yanıtlar.
+              💡 Yüklenen dokümanlar seçili asistanın bilgi tabanına eklenir. Asistan, bu dokümanları kullanarak soruları yanıtlar.
             </p>
           </div>
         </>

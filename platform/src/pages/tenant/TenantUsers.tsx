@@ -277,7 +277,7 @@ export default function TenantUsers() {
                   className="input w-full"
                 >
                   <option value="member">Üye — Görüntüleme ve kullanım</option>
-                  <option value="admin">Yönetici — Kullanıcı ve agent yönetimi</option>
+                  <option value="admin">Yönetici — Kullanıcı ve asistan yönetimi</option>
                   <option value="owner">Sahip — Tam yetki</option>
                 </select>
               </div>

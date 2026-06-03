@@ -128,19 +128,19 @@ export default function TenantWidget() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Widget Entegrasyonu</h1>
-        <p className="text-gray-500 mt-1">Agent'ınızı web sitenize eklemek için embed kodunu kopyalayın</p>
+        <p className="text-gray-500 mt-1">Asistanınızı web sitenize eklemek için embed kodunu kopyalayın</p>
       </div>
 
       {agents.length === 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-700">Henüz agent oluşturmadınız. Önce bir agent oluşturun.</p>
-          <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">Agent Oluştur →</a>
+          <p className="text-yellow-700">Henüz asistan oluşturmadınız. Önce bir asistan oluşturun.</p>
+          <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">Asistan Oluştur →</a>
         </div>
       ) : (
         <>
           {/* Agent Selector */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Agent Seçin</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Asistan Seçin</label>
             <select
               value={selectedAgentId || ''}
               onChange={(e) => setSelectedAgentId(Number(e.target.value))}

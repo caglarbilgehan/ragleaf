@@ -36,7 +36,7 @@ export default function AgentsPage() {
     mutationFn: (data: Partial<Agent>) => agentApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
-      toast.success('Agent oluşturuldu');
+      toast.success('Asistan oluşturuldu');
       setShowCreate(false);
       setNewName('');
       setNewDesc('');
@@ -49,7 +49,7 @@ export default function AgentsPage() {
     mutationFn: (id: number) => agentApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] });
-      toast.success('Agent silindi');
+      toast.success('Asistan silindi');
     },
   });
 
@@ -60,7 +60,7 @@ export default function AgentsPage() {
   });
 
   const handleCreate = () => {
-    if (!newName.trim()) return toast.error('Agent adı gerekli');
+    if (!newName.trim()) return toast.error('Asistan adı gerekli');
     createMutation.mutate({
       name: newName,
       description: newDesc || undefined,
@@ -82,9 +82,9 @@ export default function AgentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Temsilciler</h1>
+          <h1 className="text-2xl font-bold text-gray-900">AI Asistanlar</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Firmanız için AI temsilciler oluşturun ve yönetin
+            Firmanız için AI asistanlar oluşturun ve yönetin
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export default function AgentsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
           >
             <SparklesIcon className="h-5 w-5" />
-            Hazır Şablon
+            Hazır Asistan
           </button>
           <button
             onClick={() => setShowCreate(true)}
@@ -108,10 +108,10 @@ export default function AgentsPage() {
       {/* Create Form */}
       {showCreate && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">
-          <h3 className="text-lg font-semibold">Yeni Agent Oluştur</h3>
+          <h3 className="text-lg font-semibold">Yeni Asistan Oluştur</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Agent Adı *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Asistan Adı *</label>
               <input
                 type="text"
                 value={newName}
@@ -126,7 +126,7 @@ export default function AgentsPage() {
                 type="text"
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Agent'ın amacı"
+                placeholder="Asistanın amacı"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -146,7 +146,7 @@ export default function AgentsPage() {
               value={newPrompt}
               onChange={(e) => setNewPrompt(e.target.value)}
               rows={3}
-              placeholder="Agent'ın davranışını tanımlayan prompt (boş bırakılırsa otomatik oluşturulur)"
+              placeholder="Asistanın davranışını tanımlayan prompt (boş bırakılırsa otomatik oluşturulur)"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
@@ -172,8 +172,8 @@ export default function AgentsPage() {
       {agents.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">Henüz agent yok</h3>
-          <p className="text-gray-500 mt-1">İlk AI temsilcinizi oluşturarak başlayın</p>
+          <h3 className="text-lg font-medium text-gray-900">Henüz asistan yok</h3>
+          <p className="text-gray-500 mt-1">İlk AI asistanınızı oluşturarak başlayın</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -242,7 +242,7 @@ export default function AgentsPage() {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`"${agent.name}" agent'ı silinecek. Emin misiniz?`))
+                    if (confirm(`"${agent.name}" asistanı silinecek. Emin misiniz?`))
                       deleteMutation.mutate(agent.id);
                   }}
                   className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"

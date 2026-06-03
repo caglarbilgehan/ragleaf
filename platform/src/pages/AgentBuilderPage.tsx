@@ -18,12 +18,11 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-type Tab = 'general' | 'prompt' | 'model' | 'knowledge' | 'appearance' | 'security';
+type Tab = 'general' | 'prompt' | 'knowledge' | 'appearance' | 'security';
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: 'general', label: 'Genel', icon: ChatBubbleLeftRightIcon },
   { id: 'prompt', label: 'Prompt & Kişilik', icon: ChatBubbleLeftRightIcon },
-  { id: 'model', label: 'Model & RAG', icon: CpuChipIcon },
   { id: 'knowledge', label: 'Bilgi Tabanı', icon: DocumentTextIcon },
   { id: 'appearance', label: 'Görünüm', icon: PaintBrushIcon },
   { id: 'security', label: 'Güvenlik', icon: ShieldCheckIcon },
@@ -48,17 +47,6 @@ export default function AgentBuilderPage() {
     language: 'tr',
     response_style: 'balanced',
     fallback_message: '',
-    // Model
-    provider: 'huggingface',
-    model: '',
-    temperature: 0.3,
-    max_tokens: 1024,
-    // RAG
-    top_k: 5,
-    similarity_threshold: 0.3,
-    search_method: 'hybrid',
-    include_sources: false,
-    max_context_chars: 4000,
     // Appearance
     primary_color: '#4F46E5',
     text_color: '#FFFFFF',
@@ -68,6 +56,7 @@ export default function AgentBuilderPage() {
     show_branding: true,
     bubble_icon: 'chat',
     border_radius: 16,
+    auto_open: true,
     // Security
     is_active: true,
     is_public: true,
@@ -97,8 +86,6 @@ export default function AgentBuilderPage() {
   useEffect(() => {
     if (agent) {
       const p = agent.personality || {};
-      const m = agent.model_config_data || {};
-      const r = agent.rag_config || {};
       const a = agent.appearance || {};
       setForm({
         name: agent.name || '',
@@ -109,15 +96,6 @@ export default function AgentBuilderPage() {
         language: p.language || 'tr',
         response_style: p.response_style || 'balanced',
         fallback_message: p.fallback_message || '',
-        provider: m.provider || 'huggingface',
-        model: m.model || '',
-        temperature: m.temperature ?? 0.3,
-        max_tokens: m.max_tokens ?? 1024,
-        top_k: r.top_k ?? 5,
-        similarity_threshold: r.similarity_threshold ?? 0.3,
-        search_method: r.search_method || 'hybrid',
-        include_sources: r.include_sources ?? false,
-        max_context_chars: r.max_context_chars ?? 4000,
         primary_color: a.primary_color || '#4F46E5',
         text_color: a.text_color || '#FFFFFF',
         position: a.position || 'bottom-right',
@@ -126,6 +104,7 @@ export default function AgentBuilderPage() {
         show_branding: a.show_branding ?? true,
         bubble_icon: a.bubble_icon || 'chat',
         border_radius: a.border_radius ?? 16,
+        auto_open: a.auto_open ?? true,
         is_active: agent.is_active,
         is_public: agent.is_public,
         rate_limit_per_minute: agent.rate_limit_per_minute,
@@ -139,7 +118,7 @@ export default function AgentBuilderPage() {
     mutationFn: (data: Partial<Agent>) => agentApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent', id] });
-      toast.success('Agent güncellendi');
+      toast.success('Asistan güncellendi');
       setHasChanges(false);
     },
     onError: (err: any) => toast.error(err.response?.data?.detail || 'Güncelleme hatası'),
@@ -183,19 +162,6 @@ export default function AgentBuilderPage() {
         response_style: form.response_style,
         fallback_message: form.fallback_message,
       },
-      model_config_data: {
-        provider: form.provider,
-        model: form.model,
-        temperature: form.temperature,
-        max_tokens: form.max_tokens,
-      },
-      rag_config: {
-        top_k: form.top_k,
-        similarity_threshold: form.similarity_threshold,
-        search_method: form.search_method,
-        include_sources: form.include_sources,
-        max_context_chars: form.max_context_chars,
-      },
       appearance: {
         primary_color: form.primary_color,
         text_color: form.text_color,
@@ -205,6 +171,7 @@ export default function AgentBuilderPage() {
         show_branding: form.show_branding,
         bubble_icon: form.bubble_icon,
         border_radius: form.border_radius,
+        auto_open: form.auto_open,
       },
       is_active: form.is_active,
       is_public: form.is_public,
@@ -223,7 +190,7 @@ export default function AgentBuilderPage() {
   }
 
   if (!agent) {
-    return <div className="text-center py-12 text-gray-500">Agent bulunamadı</div>;
+    return <div className="text-center py-12 text-gray-500">Asistan bulunamadı</div>;
   }
 
   const kbDocIds = new Set((kbData?.documents || []).map((d) => d.id));
@@ -241,7 +208,7 @@ export default function AgentBuilderPage() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{agent.name}</h1>
-            <p className="text-sm text-gray-500">Agent ayarlarını düzenle</p>
+            <p className="text-sm text-gray-500">Asistan ayarlarını düzenle</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -284,7 +251,7 @@ export default function AgentBuilderPage() {
         {activeTab === 'general' && (
           <div className="space-y-5 max-w-2xl">
             <h3 className="text-lg font-semibold border-b pb-2">Genel Bilgiler</h3>
-            <Field label="Agent Adı *" hint="Kullanıcılara gösterilecek isim">
+            <Field label="Asistan Adı *" hint="Kullanıcılara gösterilecek isim">
               <input type="text" value={form.name} onChange={(e) => updateField('name', e.target.value)} className="input" />
             </Field>
             <Field label="Açıklama" hint="İç kullanım için kısa açıklama">
@@ -299,7 +266,7 @@ export default function AgentBuilderPage() {
         {activeTab === 'prompt' && (
           <div className="space-y-5 max-w-2xl">
             <h3 className="text-lg font-semibold border-b pb-2">Prompt & Kişilik</h3>
-            <Field label="System Prompt" hint="Agent'ın davranışını tanımlayan ana talimat">
+            <Field label="System Prompt" hint="Asistanın davranışını tanımlayan ana talimat">
               <textarea value={form.system_prompt} onChange={(e) => updateField('system_prompt', e.target.value)} rows={6} className="input font-mono text-sm" />
             </Field>
             <div className="grid grid-cols-3 gap-4">
@@ -331,52 +298,7 @@ export default function AgentBuilderPage() {
           </div>
         )}
 
-        {activeTab === 'model' && (
-          <div className="space-y-5 max-w-2xl">
-            <h3 className="text-lg font-semibold border-b pb-2">Model Ayarları</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Provider">
-                <select value={form.provider} onChange={(e) => updateField('provider', e.target.value)} className="input">
-                  <option value="huggingface">HuggingFace</option>
-                  <option value="openai">OpenAI</option>
-                  <option value="anthropic">Anthropic</option>
-                  <option value="google">Google</option>
-                </select>
-              </Field>
-              <Field label="Model">
-                <input type="text" value={form.model} onChange={(e) => updateField('model', e.target.value)} placeholder="meta-llama/Llama-3.1-70B-Instruct" className="input" />
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label={`Temperature: ${form.temperature}`} hint="Düşük = tutarlı, Yüksek = yaratıcı">
-                <input type="range" min="0" max="1" step="0.1" value={form.temperature} onChange={(e) => updateField('temperature', parseFloat(e.target.value))} className="w-full accent-indigo-600" />
-              </Field>
-              <Field label="Max Tokens">
-                <input type="number" value={form.max_tokens} onChange={(e) => updateField('max_tokens', parseInt(e.target.value))} min={128} max={8192} className="input" />
-              </Field>
-            </div>
-            <hr />
-            <h3 className="text-lg font-semibold">RAG Ayarları</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <Field label="Top-K Sonuç">
-                <input type="number" value={form.top_k} onChange={(e) => updateField('top_k', parseInt(e.target.value))} min={1} max={20} className="input" />
-              </Field>
-              <Field label="Benzerlik Eşiği">
-                <input type="number" value={form.similarity_threshold} onChange={(e) => updateField('similarity_threshold', parseFloat(e.target.value))} min={0} max={1} step={0.05} className="input" />
-              </Field>
-              <Field label="Arama Yöntemi">
-                <select value={form.search_method} onChange={(e) => updateField('search_method', e.target.value)} className="input">
-                  <option value="hybrid">Hibrit</option>
-                  <option value="semantic">Semantik</option>
-                  <option value="fulltext">Tam Metin</option>
-                </select>
-              </Field>
-            </div>
-            <Field label="Max Context Karakter">
-              <input type="number" value={form.max_context_chars} onChange={(e) => updateField('max_context_chars', parseInt(e.target.value))} min={500} max={16000} className="input" />
-            </Field>
-          </div>
-        )}
+
 
         {activeTab === 'knowledge' && (
           <div className="space-y-5">
@@ -481,6 +403,15 @@ export default function AgentBuilderPage() {
                 <span className="text-sm text-gray-700">"Powered by Ragleaf" yazısını göster</span>
               </label>
             </Field>
+            <Field label="">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.auto_open} onChange={(e) => updateField('auto_open', e.target.checked)} className="rounded" />
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Widget Otomatik Açılsın</span>
+                  <p className="text-xs text-gray-500">Ziyaretçi siteye girdiğinde chat widget’ı otomatik açılır</p>
+                </div>
+              </label>
+            </Field>
 
             {/* Preview */}
             <div className="border rounded-xl p-4 bg-gray-50">
@@ -503,7 +434,7 @@ export default function AgentBuilderPage() {
                   <input type="checkbox" checked={form.is_active} onChange={(e) => updateField('is_active', e.target.checked)} className="rounded" />
                   <div>
                     <span className="text-sm font-medium text-gray-900">Aktif</span>
-                    <p className="text-xs text-gray-500">Devre dışı bırakılırsa agent yanıt vermez</p>
+                    <p className="text-xs text-gray-500">Devre dışı bırakılırsa asistan yanıt vermez</p>
                   </div>
                 </label>
               </Field>
