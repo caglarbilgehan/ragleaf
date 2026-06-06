@@ -105,15 +105,15 @@ const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
   const getMenuItemClasses = (type: string, active: boolean) => {
     const base = 'flex items-center gap-2 w-full px-4 py-2 text-sm';
     if (type === 'destructive') {
-      return `${base} ${active ? 'bg-red-50' : ''} text-red-600`;
+      return `${base} ${active ? 'bg-red-500/10' : ''} text-red-600`;
     }
     if (type === 'primary') {
-      return `${base} ${active ? 'bg-blue-50' : ''} text-blue-600 font-medium`;
+      return `${base} ${active ? 'bg-blue-500/10' : ''} text-blue-400 font-medium`;
     }
     if (type === 'warning') {
-      return `${base} ${active ? 'bg-yellow-50' : ''} text-yellow-600 font-medium`;
+      return `${base} ${active ? 'bg-yellow-500/10' : ''} text-yellow-500 font-medium`;
     }
-    return `${base} ${active ? 'bg-gray-100' : ''} text-gray-700`;
+    return `${base} ${active ? 'bg-dark-600' : ''} text-gray-300`;
   };
 
   // No actions available
@@ -150,7 +150,7 @@ const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
             <>
               <Menu.Button
                 ref={buttonRef}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50 disabled:bg-dark-600 disabled:cursor-not-allowed transition-colors"
                 disabled={disabled}
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -171,7 +171,7 @@ const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
                 >
                   <Menu.Items
                     static
-                    className="fixed w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    className="fixed w-48 rounded-md bg-dark-800/60 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                     style={{
                       top: menuPosition.top,
                       left: menuPosition.left,
@@ -184,7 +184,7 @@ const ActionButtonGroup: React.FC<ActionButtonGroupProps> = ({
                         <React.Fragment key={action.id}>
                           {/* Add separator before destructive actions */}
                           {action.type === 'destructive' && index > 0 && actions[index - 1]?.type !== 'destructive' && (
-                            <div className="border-t border-gray-100 my-1" />
+                            <div className="border-t border-white/[0.06] my-1" />
                           )}
                           <Menu.Item>
                             {({ active }) => (

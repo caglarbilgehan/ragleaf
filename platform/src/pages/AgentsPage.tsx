@@ -72,7 +72,7 @@ export default function AgentsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export default function AgentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Asistanlar</h1>
+          <h1 className="text-2xl font-bold text-gray-100">AI Asistanlar</h1>
           <p className="text-sm text-gray-500 mt-1">
             Firmanız için AI asistanlar oluşturun ve yönetin
           </p>
@@ -90,14 +90,14 @@ export default function AgentsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/agents/new/template')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all "
           >
             <SparklesIcon className="h-5 w-5" />
             Hazır Asistan
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-dark-600 text-gray-300 rounded-lg hover:bg-dark-500 transition-colors"
           >
             <PlusIcon className="h-5 w-5" />
             Sıfırdan Oluştur
@@ -107,60 +107,60 @@ export default function AgentsPage() {
 
       {/* Create Form */}
       {showCreate && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">
+        <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6 space-y-4 ">
           <h3 className="text-lg font-semibold">Yeni Asistan Oluştur</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Asistan Adı *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Asistan Adı *</label>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="ör: Müşteri Destek Botu"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Açıklama</label>
               <input
                 type="text"
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
                 placeholder="Asistanın amacı"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Karşılama Mesajı</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Karşılama Mesajı</label>
             <input
               type="text"
               value={newWelcome}
               onChange={(e) => setNewWelcome(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">System Prompt</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">System Prompt</label>
             <textarea
               value={newPrompt}
               onChange={(e) => setNewPrompt(e.target.value)}
               rows={3}
               placeholder="Asistanın davranışını tanımlayan prompt (boş bırakılırsa otomatik oluşturulur)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
           <div className="flex gap-3 justify-end">
             <button
               onClick={() => setShowCreate(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-gray-300 bg-dark-600 rounded-lg hover:bg-dark-500"
             >
               İptal
             </button>
             <button
               onClick={handleCreate}
               disabled={createMutation.isPending}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
             >
               {createMutation.isPending ? 'Oluşturuluyor...' : 'Oluştur'}
             </button>
@@ -170,9 +170,9 @@ export default function AgentsPage() {
 
       {/* Agent Cards */}
       {agents.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-12 text-center">
           <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">Henüz asistan yok</h3>
+          <h3 className="text-lg font-medium text-gray-100">Henüz asistan yok</h3>
           <p className="text-gray-500 mt-1">İlk AI asistanınızı oluşturarak başlayın</p>
         </div>
       ) : (
@@ -180,8 +180,8 @@ export default function AgentsPage() {
           {agents.map((agent) => (
             <div
               key={agent.id}
-              className={`bg-white rounded-xl border p-5 space-y-4 transition-all hover:shadow-md ${
-                agent.is_active ? 'border-gray-200' : 'border-red-200 bg-red-50/30'
+              className={`bg-dark-800/60 rounded-xl border p-5 space-y-4 transition-all hover:shadow-md ${
+                agent.is_active ? 'border-white/[0.06]' : 'border-red-500/20 bg-red-500/5'
               }`}
             >
               {/* Agent Header */}
@@ -189,18 +189,18 @@ export default function AgentsPage() {
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                    style={{ backgroundColor: agent.appearance?.primary_color || '#4F46E5' }}
+                    style={{ backgroundColor: agent.appearance?.primary_color || '#22c55e' }}
                   >
                     {agent.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{agent.name}</h3>
+                    <h3 className="font-semibold text-gray-100">{agent.name}</h3>
                     <p className="text-xs text-gray-500">{agent.slug}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => toggleMutation.mutate({ id: agent.id, active: !agent.is_active })}
-                  className={`p-1.5 rounded ${agent.is_active ? 'text-green-600 hover:bg-green-50' : 'text-red-500 hover:bg-red-50'}`}
+                  className={`p-1.5 rounded ${agent.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-red-500 hover:bg-red-500/10'}`}
                   title={agent.is_active ? 'Aktif — devre dışı bırak' : 'Devre dışı — aktifleştir'}
                 >
                   {agent.is_active ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" />}
@@ -225,17 +225,17 @@ export default function AgentsPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2 border-t border-gray-100">
+              <div className="flex gap-2 pt-2 border-t border-white/[0.06]">
                 <button
                   onClick={() => navigate(`/agents/${agent.id}/edit`)}
-                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
+                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm text-primary-400 bg-primary-500/10 rounded-lg hover:bg-primary-500/20"
                 >
                   <PencilSquareIcon className="h-4 w-4" />
                   Düzenle
                 </button>
                 <button
                   onClick={() => navigate(`/agents/${agent.id}/integrate`)}
-                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100"
+                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm text-emerald-400 bg-emerald-500/10 rounded-lg hover:bg-emerald-500/20"
                 >
                   <KeyIcon className="h-4 w-4" />
                   Entegre Et
@@ -245,7 +245,7 @@ export default function AgentsPage() {
                     if (confirm(`"${agent.name}" asistanı silinecek. Emin misiniz?`))
                       deleteMutation.mutate(agent.id);
                   }}
-                  className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                  className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>

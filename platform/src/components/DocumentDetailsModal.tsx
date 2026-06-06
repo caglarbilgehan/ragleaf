@@ -116,7 +116,7 @@ export default function DocumentDetailsModal({
 
     if (fileType === 'pdf') {
       return (
-        <div className="w-full h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+        <div className="w-full h-[600px] bg-dark-600 rounded-lg overflow-hidden">
           <iframe
             src={fileUrl}
             className="w-full h-full border-0"
@@ -126,7 +126,7 @@ export default function DocumentDetailsModal({
       );
     } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(fileType || '')) {
       return (
-        <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
+        <div className="flex items-center justify-center bg-dark-600 rounded-lg p-4">
           <img
             src={fileUrl}
             alt={document.name}
@@ -136,10 +136,10 @@ export default function DocumentDetailsModal({
       );
     } else if (['txt', 'md', 'json', 'xml', 'csv', 'html', 'css', 'js', 'py'].includes(fileType || '')) {
       return (
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-dark-700/50 rounded-lg p-4">
           <iframe
             src={fileUrl}
-            className="w-full h-[500px] border border-gray-200 rounded bg-white font-mono text-sm"
+            className="w-full h-[500px] border border-white/[0.06] rounded bg-dark-800/60 font-mono text-sm"
             title="Text Viewer"
           />
         </div>
@@ -147,7 +147,7 @@ export default function DocumentDetailsModal({
     } else {
       // For unsupported file types, show download option
       return (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-dark-700/50 rounded-lg">
           <File className="h-16 w-16 mx-auto mb-4 text-gray-400" />
           <p className="text-gray-600 mb-2">
             Bu dosya türü ({fileType?.toUpperCase()}) tarayıcıda önizlenemez.
@@ -168,7 +168,7 @@ export default function DocumentDetailsModal({
               href={fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-dark-400 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               <ExternalLink className="h-4 w-4 mr-2" />
               Yeni Sekmede Aç
@@ -327,15 +327,15 @@ export default function DocumentDetailsModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 !mt-0 !mb-0" style={{ marginTop: '0 !important', marginBottom: '0 !important', top: '0', left: '0', right: '0', bottom: '0' }}>
-      <div className="h-screen w-full bg-white flex flex-col relative">
+      <div className="h-screen w-full bg-dark-800/60 flex flex-col relative">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div className="flex items-center">
             <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
               <FileText className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-100">
                 Döküman Detayları
               </h3>
               <p className="text-sm text-gray-500">{document.name}</p>
@@ -343,13 +343,13 @@ export default function DocumentDetailsModal({
           </div>
           <div className="flex items-center gap-4">
             {/* Tab Buttons */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-dark-600 rounded-lg p-1">
               <button
                 onClick={() => setActiveTab('details')}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   activeTab === 'details'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-dark-800/60 text-blue-600 '
+                    : 'text-gray-600 hover:text-gray-100'
                 }`}
               >
                 <BarChart3 className="h-4 w-4 inline mr-1" />
@@ -359,8 +359,8 @@ export default function DocumentDetailsModal({
                 onClick={() => setActiveTab('logs')}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   activeTab === 'logs'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-dark-800/60 text-blue-600 '
+                    : 'text-gray-600 hover:text-gray-100'
                 }`}
               >
                 <ScrollText className="h-4 w-4 inline mr-1" />
@@ -375,8 +375,8 @@ export default function DocumentDetailsModal({
                 onClick={() => setActiveTab('preview')}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   activeTab === 'preview'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-dark-800/60 text-blue-600 '
+                    : 'text-gray-600 hover:text-gray-100'
                 }`}
               >
                 <Eye className="h-4 w-4 inline mr-1" />
@@ -386,8 +386,8 @@ export default function DocumentDetailsModal({
                 onClick={() => setActiveTab('history')}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   activeTab === 'history'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-dark-800/60 text-blue-600 '
+                    : 'text-gray-600 hover:text-gray-100'
                 }`}
               >
                 <History className="h-4 w-4 inline mr-1" />
@@ -396,7 +396,7 @@ export default function DocumentDetailsModal({
             </div>
             <button 
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-300 transition-colors"
             >
               <X className="h-6 w-6" />
             </button>
@@ -415,13 +415,13 @@ export default function DocumentDetailsModal({
             <div className="space-y-4">
               {/* View Mode Toggle */}
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex bg-gray-100 rounded-lg p-1">
+                <div className="flex bg-dark-600 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('original')}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       viewMode === 'original'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-dark-800/60 text-blue-600 '
+                        : 'text-gray-600 hover:text-gray-100'
                     }`}
                   >
                     <File className="h-4 w-4 inline mr-1" />
@@ -431,8 +431,8 @@ export default function DocumentDetailsModal({
                     onClick={() => setViewMode('text')}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       viewMode === 'text'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-dark-800/60 text-blue-600 '
+                        : 'text-gray-600 hover:text-gray-100'
                     }`}
                   >
                     <FileText className="h-4 w-4 inline mr-1" />
@@ -442,8 +442,8 @@ export default function DocumentDetailsModal({
                     onClick={() => setViewMode('chunks')}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       viewMode === 'chunks'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-dark-800/60 text-blue-600 '
+                        : 'text-gray-600 hover:text-gray-100'
                     }`}
                   >
                     <Layers className="h-4 w-4 inline mr-1" />
@@ -487,14 +487,14 @@ export default function DocumentDetailsModal({
                 <div className="space-y-4">
                   {preview?.has_content ? (
                     <>
-                      <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-500 flex items-center gap-2">
+                      <div className="bg-dark-700/50 rounded-lg p-4 text-sm text-gray-500 flex items-center gap-2">
                         <Database className="h-4 w-4" />
                         Kaynak: {preview.content_source === 'extracted_text' ? 'Çıkarılmış Metin' : 
                                  preview.content_source === 'chunks' ? 'Chunk Birleşimi' : 
                                  preview.content_source === 'original_file' ? 'Orijinal Dosya' : 'Bilinmiyor'}
                       </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-6 max-h-[500px] overflow-y-auto">
-                        <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">
+                      <div className="bg-dark-800/60 border border-white/[0.06] rounded-lg p-6 max-h-[500px] overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-sm text-gray-300 font-mono leading-relaxed">
                           {preview.content}
                         </pre>
                       </div>
@@ -538,7 +538,7 @@ export default function DocumentDetailsModal({
                     <>
                       <div className="space-y-3">
                         {chunks.map((chunk, idx) => (
-                          <div key={chunk.index} className="bg-white border border-gray-200 rounded-lg p-4">
+                          <div key={chunk.index} className="bg-dark-800/60 border border-white/[0.06] rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
                                 Chunk #{chunk.index + 1}
@@ -547,7 +547,7 @@ export default function DocumentDetailsModal({
                                 {chunk.char_count} karakter
                               </span>
                             </div>
-                            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed max-h-40 overflow-y-auto">
+                            <pre className="whitespace-pre-wrap text-sm text-gray-300 font-mono leading-relaxed max-h-40 overflow-y-auto">
                               {chunk.content}
                             </pre>
                           </div>
@@ -608,12 +608,12 @@ export default function DocumentDetailsModal({
 
               {/* Processing Progress */}
               {logs && (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-dark-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">İşleme Durumu</span>
+                    <span className="text-sm font-medium text-gray-300">İşleme Durumu</span>
                     <span className="text-sm text-gray-500">{logs.processing_stage || 'Bilinmiyor'}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-dark-500 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
                         isErrorStatus ? 'bg-red-500' :
@@ -729,40 +729,40 @@ export default function DocumentDetailsModal({
               {/* Basic Info Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Document Info */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                <div className="bg-dark-700/50 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-100 mb-3 flex items-center">
                     <FileText className="h-4 w-4 mr-2" />
                     Döküman Bilgileri
                   </h4>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Dosya Adı:</span>
+                      <span className="text-gray-400">Dosya Adı:</span>
                       <span className="font-medium text-right">{document.original_filename}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Dosya Boyutu:</span>
+                      <span className="text-gray-400">Dosya Boyutu:</span>
                       <span className="font-medium">{formatFileSize(document.file_size)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Dosya Türü:</span>
+                      <span className="text-gray-400">Dosya Türü:</span>
                       <span className="font-medium uppercase">{document.file_type}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Toplam Sayfa:</span>
+                      <span className="text-gray-400">Toplam Sayfa:</span>
                       <span className="font-medium">{stats?.total_pages || 'Hesaplanıyor...'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Yüklenme Tarihi:</span>
+                      <span className="text-gray-400">Yüklenme Tarihi:</span>
                       <span className="font-medium">
                         {new Date(document.created_at).toLocaleString('tr-TR')}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">İşlenme Tarihi:</span>
+                      <span className="text-gray-400">İşlenme Tarihi:</span>
                       <span className="font-medium">
                         {document.processed_at 
-                          ? new Date(document.processed_at).toLocaleString('tr-TR')
-                          : 'Henüz işlenmedi'
+                           ? new Date(document.processed_at).toLocaleString('tr-TR')
+                           : 'Henüz işlenmedi'
                         }
                       </span>
                     </div>
@@ -770,34 +770,34 @@ export default function DocumentDetailsModal({
                 </div>
 
                 {/* Processing Info */}
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                <div className="bg-dark-700/50 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-100 mb-3 flex items-center">
                     <Database className="h-4 w-4 mr-2" />
                     İşleme Detayları
                   </h4>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Toplam Chunk:</span>
+                      <span className="text-gray-400">Toplam Chunk:</span>
                       <span className="font-medium">{stats?.total_chunks || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Ortalama Chunk Boyutu:</span>
+                      <span className="text-gray-400">Ortalama Chunk Boyutu:</span>
                       <span className="font-medium">{formatFileSize(stats?.avg_chunk_size || 0)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Toplam Karakter:</span>
+                      <span className="text-gray-400">Toplam Karakter:</span>
                       <span className="font-medium">{formatNumber(stats?.total_characters || 0)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Toplam Kelime:</span>
+                      <span className="text-gray-400">Toplam Kelime:</span>
                       <span className="font-medium">{formatNumber(stats?.total_words || 0)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">OCR İşlenen Görsel:</span>
+                      <span className="text-gray-400">OCR İşlenen Görsel:</span>
                       <span className="font-medium">{stats?.ocr_images_count || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">İşleme Süresi:</span>
+                      <span className="text-gray-400">İşleme Süresi:</span>
                       <span className="font-medium">{formatDuration(stats?.processing_time_seconds || 0)}</span>
                     </div>
                   </div>
@@ -806,54 +806,54 @@ export default function DocumentDetailsModal({
 
               {/* Status Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white border rounded-lg p-4">
+                <div className="bg-dark-800/60 border border-white/[0.06] rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">OCR Durumu</p>
-                      <p className={`text-lg font-semibold ${document.ocr_completed ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className="text-sm font-medium text-gray-400">OCR Durumu</p>
+                      <p className={`text-lg font-semibold ${document.ocr_completed ? 'text-green-400' : 'text-red-400'}`}>
                         {document.ocr_completed ? 'Tamamlandı' : 'Bekliyor'}
                       </p>
                     </div>
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                      document.ocr_completed ? 'bg-green-100' : 'bg-red-100'
+                      document.ocr_completed ? 'bg-green-500/10' : 'bg-red-500/10'
                     }`}>
                       {document.ocr_completed ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-green-400" />
                       ) : (
-                        <Clock className="h-5 w-5 text-red-600" />
+                        <Clock className="h-5 w-5 text-red-400" />
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border rounded-lg p-4">
+                <div className="bg-dark-800/60 border border-white/[0.06] rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Vector İndeks</p>
-                      <p className={`text-lg font-semibold ${document.vector_indexed ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className="text-sm font-medium text-gray-400">Vector İndeks</p>
+                      <p className={`text-lg font-semibold ${document.vector_indexed ? 'text-green-400' : 'text-red-400'}`}>
                         {document.vector_indexed ? 'İndekslendi' : 'Bekliyor'}
                       </p>
                     </div>
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                      document.vector_indexed ? 'bg-green-100' : 'bg-red-100'
+                      document.vector_indexed ? 'bg-green-500/10' : 'bg-red-500/10'
                     }`}>
                       {document.vector_indexed ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-green-400" />
                       ) : (
-                        <Clock className="h-5 w-5 text-red-600" />
+                        <Clock className="h-5 w-5 text-red-400" />
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border rounded-lg p-4">
+                <div className="bg-dark-800/60 border border-white/[0.06] rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Genel Durum</p>
+                      <p className="text-sm font-medium text-gray-400">Genel Durum</p>
                       <p className={`text-lg font-semibold ${
-                        document.status === 'processed' ? 'text-green-600' :
-                        document.status === 'processing' ? 'text-yellow-600' :
-                        isErrorStatus ? 'text-red-600' : 'text-gray-600'
+                        document.status === 'processed' ? 'text-green-400' :
+                        document.status === 'processing' ? 'text-yellow-400' :
+                        isErrorStatus ? 'text-red-400' : 'text-gray-400'
                       }`}>
                         {document.status === 'processed' ? 'İşlendi' :
                          document.status === 'processing' ? 'İşleniyor' :
@@ -861,57 +861,57 @@ export default function DocumentDetailsModal({
                       </p>
                     </div>
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                      document.status === 'processed' ? 'bg-green-100' :
-                      document.status === 'processing' ? 'bg-yellow-100' :
-                      isErrorStatus ? 'bg-red-100' : 'bg-gray-100'
+                      document.status === 'processed' ? 'bg-green-500/10' :
+                      document.status === 'processing' ? 'bg-yellow-500/10' :
+                      isErrorStatus ? 'bg-red-500/10' : 'bg-dark-600'
                     }`}>
-                      {document.status === 'processed' && <CheckCircle className="h-5 w-5 text-green-600" />}
-                      {document.status === 'processing' && <Clock className="h-5 w-5 text-yellow-600" />}
-                      {isErrorStatus && <AlertCircle className="h-5 w-5 text-red-600" />}
-                      {!['processed', 'processing', 'error'].includes(document.status) && <Eye className="h-5 w-5 text-gray-600" />}
+                      {document.status === 'processed' && <CheckCircle className="h-5 w-5 text-green-400" />}
+                      {document.status === 'processing' && <Clock className="h-5 w-5 text-yellow-400" />}
+                      {isErrorStatus && <AlertCircle className="h-5 w-5 text-red-400" />}
+                      {!['processed', 'processing', 'error'].includes(document.status) && <Eye className="h-5 w-5 text-gray-400" />}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Statistics */}
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+              <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-white/[0.06] rounded-lg p-6">
+                <h4 className="font-medium text-gray-100 mb-4 flex items-center">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Embedding İstatistikleri
                 </h4>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">{stats?.total_chunks || 0}</div>
-                    <div className="text-sm text-gray-600 mt-1">Toplam Chunk</div>
+                    <div className="text-3xl font-bold text-green-400">{stats?.total_chunks || 0}</div>
+                    <div className="text-sm text-gray-400 mt-1">Toplam Chunk</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">
+                    <div className="text-3xl font-bold text-blue-400">
                       {stats?.avg_chunk_size ? formatFileSize(stats.avg_chunk_size).split(' ')[0] : '0'}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Ort. Chunk Boyutu</div>
+                    <div className="text-sm text-gray-400 mt-1">Ort. Chunk Boyutu</div>
                     <div className="text-xs text-gray-500">{stats?.avg_chunk_size ? formatFileSize(stats.avg_chunk_size).split(' ')[1] : 'B'}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600">
+                    <div className="text-3xl font-bold text-purple-400">
                       {document.vector_indexed ? '100%' : '0%'}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">İndeksleme Oranı</div>
+                    <div className="text-sm text-gray-400 mt-1">İndeksleme Oranı</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">
+                    <div className="text-3xl font-bold text-orange-400">
                       {stats?.total_pages || 0}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Sayfa Sayısı</div>
+                    <div className="text-sm text-gray-400 mt-1">Sayfa Sayısı</div>
                   </div>
                 </div>
               </div>
 
               {/* Additional Info */}
               {document.processing_details && (
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-2">İşleme Detayları</h4>
-                  <p className="text-sm text-gray-700">{document.processing_details}</p>
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <h4 className="font-medium text-yellow-400 mb-2">İşleme Detayları</h4>
+                  <p className="text-sm text-gray-300">{document.processing_details}</p>
                 </div>
               )}
 
@@ -928,10 +928,10 @@ export default function DocumentDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50 mt-auto">
+        <div className="flex justify-end space-x-3 p-6 border-t border-white/[0.06] bg-dark-700/50 mt-auto">
           <button
             onClick={onClose}
-            className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="px-6 py-3 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           >
             Kapat
           </button>

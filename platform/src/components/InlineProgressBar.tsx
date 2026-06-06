@@ -135,7 +135,7 @@ const InlineProgressBar: React.FC<InlineProgressBarProps> = ({
         <span className="text-xs text-gray-600 truncate max-w-[150px]">{progressData.stage}</span>
         <span className="text-xs text-gray-500">{Math.round(progressData.progress)}%</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+      <div className="w-full bg-dark-500 rounded-full h-1.5 overflow-hidden">
         <div
           className="bg-blue-600 h-1.5 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${progressData.progress}%` }}

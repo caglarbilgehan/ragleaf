@@ -115,7 +115,7 @@ export default function ChunkEnrichmentPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                <h1 className="text-2xl font-bold text-gray-100 flex items-center">
                     <Sparkles className="h-7 w-7 mr-2 text-primary-600" />
                     Chunk Zenginleştirme
                 </h1>
@@ -125,8 +125,8 @@ export default function ChunkEnrichmentPage() {
             </div>
 
             {/* Document Selection */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Döküman Seçin</label>
+            <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Döküman Seçin</label>
                 <select
                     value={selectedDocId || ''}
                     onChange={(e) => setSelectedDocId(e.target.value ? Number(e.target.value) : null)}
@@ -150,12 +150,12 @@ export default function ChunkEnrichmentPage() {
                         </div>
                     ) : (
                         chunks?.map((chunk: DocumentChunk) => (
-                            <div key={chunk.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div key={chunk.id} className="bg-dark-800/60 rounded-lg  border border-white/[0.06]">
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
                                             <FileText className="h-5 w-5 text-gray-400" />
-                                            <span className="text-sm font-semibold text-gray-700">
+                                            <span className="text-sm font-semibold text-gray-300">
                                                 Chunk #{chunk.chunk_index} ({chunk.language?.toUpperCase()})
                                             </span>
                                         </div>
@@ -177,15 +177,15 @@ export default function ChunkEnrichmentPage() {
                                         </button>
                                     </div>
 
-                                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 mb-3">
+                                    <div className="bg-dark-700/50 p-3 rounded text-sm text-gray-300 mb-3">
                                         {chunk.content.substring(0, 200)}...
                                     </div>
 
                                     {editingChunkId === chunk.id ? (
-                                        <div className="space-y-4 border-t border-gray-200 pt-4">
+                                        <div className="space-y-4 border-t border-white/[0.06] pt-4">
                                             {/* Suggested Questions */}
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                                                <label className="block text-xs font-semibold text-gray-300 mb-2 flex items-center">
                                                     <MessageCircle className="h-4 w-4 mr-1" />
                                                     Önerilen Sorular
                                                 </label>
@@ -220,7 +220,7 @@ export default function ChunkEnrichmentPage() {
 
                                             {/* Special Instructions */}
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Özel Talimatlar</label>
+                                                <label className="block text-xs font-semibold text-gray-300 mb-2">Özel Talimatlar</label>
                                                 <textarea
                                                     value={enrichmentForm.special_instructions}
                                                     onChange={(e) => setEnrichmentForm({ ...enrichmentForm, special_instructions: e.target.value })}
@@ -232,7 +232,7 @@ export default function ChunkEnrichmentPage() {
 
                                             {/* Tags */}
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-700 mb-2">Etiketler</label>
+                                                <label className="block text-xs font-semibold text-gray-300 mb-2">Etiketler</label>
                                                 <div className="flex gap-2 mb-2">
                                                     <input
                                                         type="text"
@@ -275,20 +275,20 @@ export default function ChunkEnrichmentPage() {
                                                 <div className="space-y-2">
                                                     {(chunk.enrichment_data?.suggested_questions?.length ?? 0) > 0 && (
                                                         <div>
-                                                            <span className="font-semibold text-gray-700">Sorular: </span>
+                                                            <span className="font-semibold text-gray-300">Sorular: </span>
                                                             <span className="text-gray-600">{chunk.enrichment_data?.suggested_questions?.length} soru</span>
                                                         </div>
                                                     )}
                                                     {chunk.enrichment_data?.special_instructions && (
                                                         <div>
-                                                            <span className="font-semibold text-gray-700">Talimat: </span>
+                                                            <span className="font-semibold text-gray-300">Talimat: </span>
                                                             <span className="text-gray-600">{chunk.enrichment_data.special_instructions.substring(0, 50)}...</span>
                                                         </div>
                                                     )}
                                                     {(chunk.enrichment_data?.tags?.length ?? 0) > 0 && (
                                                         <div className="flex gap-1 flex-wrap">
                                                             {chunk.enrichment_data?.tags?.map((tag, idx) => (
-                                                                <span key={idx} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">{tag}</span>
+                                                                <span key={idx} className="px-2 py-0.5 bg-dark-600 text-gray-300 rounded text-xs">{tag}</span>
                                                             ))}
                                                         </div>
                                                     )}

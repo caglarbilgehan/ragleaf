@@ -125,16 +125,16 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-dark-800/60 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
                     <div>
-                        <h3 className="text-xl font-bold text-gray-900">Döküman Yükle</h3>
+                        <h3 className="text-xl font-bold text-gray-100">Döküman Yükle</h3>
                         <p className="text-sm text-gray-500">Dökümanları seçin ve metadata bilgilerini girin.</p>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-300"
                         disabled={isUploading}
                     >
                         <X className="h-6 w-6" />
@@ -146,11 +146,11 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                     {/* Success View */}
                     {uploadResult && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center space-y-4">
-                            <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 text-center space-y-4">
+                            <CheckCircle className="h-12 w-12 text-emerald-400 mx-auto" />
                             <div>
-                                <h4 className="text-lg font-bold text-green-800">Yükleme Tamamlandı!</h4>
-                                <p className="text-green-700">
+                                <h4 className="text-lg font-bold text-emerald-400">Yükleme Tamamlandı!</h4>
+                                <p className="text-emerald-400/80">
                                     {uploadResult.successful} döküman başarıyla yüklendi.
                                     {uploadResult.failed > 0 && ` (${uploadResult.failed} başarısız)`}
                                 </p>
@@ -170,7 +170,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                             {/* File Selection */}
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center hover:border-primary-500 hover:bg-primary-50 transition-colors cursor-pointer bg-gray-50"
+                                className="border-2 border-dashed border-primary-500/30 rounded-lg p-8 text-center hover:border-primary-500 hover:bg-primary-500/5 transition-colors cursor-pointer bg-dark-700/50"
                             >
                                 <input
                                     type="file"
@@ -182,22 +182,22 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                                     disabled={isUploading}
                                 />
                                 <Upload className="h-10 w-10 text-primary-400 mx-auto mb-3" />
-                                <p className="text-lg font-medium text-gray-700">Dosyaları buraya bırakın veya tıklayın</p>
+                                <p className="text-lg font-medium text-gray-300">Dosyaları buraya bırakın veya tıklayın</p>
                                 <p className="text-sm text-gray-500 mt-1">PDF, TXT, MD, DOCX</p>
                             </div>
 
                             {/* Selected Files List */}
                             {selectedFiles.length > 0 && (
-                                <div className="bg-white rounded-lg border border-gray-200 p-3 max-h-40 overflow-y-auto">
+                                <div className="bg-dark-800/60 rounded-lg border border-white/[0.06] p-3 max-h-40 overflow-y-auto">
                                     <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-sm font-semibold text-gray-700">Seçilenler ({selectedFiles.length})</h4>
+                                        <h4 className="text-sm font-semibold text-gray-300">Seçilenler ({selectedFiles.length})</h4>
                                         <button onClick={() => setSelectedFiles([])} className="text-xs text-red-600 hover:text-red-800">Tümünü Sil</button>
                                     </div>
                                     {selectedFiles.map((file, index) => (
-                                        <div key={index} className="flex items-center justify-between py-2 text-sm border-b border-gray-100 last:border-0">
+                                        <div key={index} className="flex items-center justify-between py-2 text-sm border-b border-white/[0.04] last:border-0">
                                             <div className="flex items-center gap-2 truncate flex-1">
                                                 <FileText className="h-4 w-4 text-gray-400" />
-                                                <span className="text-gray-700 truncate">{file.name}</span>
+                                                <span className="text-gray-300 truncate">{file.name}</span>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <span className="text-gray-500 text-xs">{formatFileSize(file.size)}</span>
@@ -211,8 +211,8 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                             )}
 
                             {/* Metadata Inputs */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex items-center text-sm font-medium text-gray-800 mb-2">
+                            <div className="bg-dark-700/50 p-4 rounded-lg border border-white/[0.06] space-y-4">
+                                <div className="flex items-center text-sm font-medium text-gray-200 mb-2">
                                     <Info className="h-4 w-4 mr-2 text-primary-600" />
                                     Döküman Metadata Bilgileri (Tüm dosyalar için uygulanır)
                                 </div>
@@ -220,7 +220,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Language Selection */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center">
+                                        <label className="block text-xs font-semibold text-gray-400 mb-1 flex items-center">
                                             <Globe className="h-3 w-3 mr-1" />
                                             Döküman Dili (Kaynak)
                                         </label>
@@ -242,7 +242,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                                     {/* Category with Autocomplete */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Kategori</label>
+                                        <label className="block text-xs font-semibold text-gray-400 mb-1">Kategori</label>
                                         <AutocompleteInput
                                             value={metadata.category}
                                             onChange={(value: string) => setMetadata({ ...metadata, category: value })}
@@ -254,7 +254,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                                     {/* Brand with Autocomplete */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Marka</label>
+                                        <label className="block text-xs font-semibold text-gray-400 mb-1">Marka</label>
                                         <AutocompleteInput
                                             value={metadata.brand}
                                             onChange={(value: string) => setMetadata({ ...metadata, brand: value })}
@@ -266,7 +266,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                                     {/* Product Info */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Ürün Bilgisi</label>
+                                        <label className="block text-xs font-semibold text-gray-400 mb-1">Ürün Bilgisi</label>
                                         <input
                                             type="text"
                                             className="input w-full text-sm"
@@ -278,7 +278,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                                     {/* Department Checkboxes */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-gray-600 mb-2">Birim / Departman</label>
+                                        <label className="block text-xs font-semibold text-gray-400 mb-2">Birim / Departman</label>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                             {DEPARTMENTS.map(dept => {
                                                 const departments = metadata.department ? metadata.department.split(',').map((d: string) => d.trim()) : [];
@@ -287,8 +287,8 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                                                     <label
                                                         key={dept}
                                                         className={`flex items-center gap-2 p-2 rounded-lg border-2 cursor-pointer transition-all text-sm ${isSelected
-                                                            ? 'border-primary-500 bg-primary-50'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                            ? 'border-primary-500 bg-primary-500/10'
+                                                            : 'border-white/[0.06] hover:border-white/[0.1]'
                                                             }`}
                                                     >
                                                         <input
@@ -296,16 +296,16 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                                                             checked={isSelected}
                                                             onChange={(e) => {
                                                                 let newDepts = [...departments];
-                                                                if (e.target.checked) {
-                                                                    newDepts.push(dept);
-                                                                } else {
-                                                                    newDepts = newDepts.filter(d => d !== dept);
-                                                                }
-                                                                setMetadata({ ...metadata, department: newDepts.join(', ') });
+                                                                 if (e.target.checked) {
+                                                                     newDepts.push(dept);
+                                                                 } else {
+                                                                     newDepts = newDepts.filter(d => d !== dept);
+                                                                 }
+                                                                 setMetadata({ ...metadata, department: newDepts.join(', ') });
                                                             }}
                                                             className="h-4 w-4 text-primary-600 focus:ring-primary-500 rounded"
                                                         />
-                                                        <span className="text-gray-700">{dept}</span>
+                                                        <span className="text-gray-300">{dept}</span>
                                                     </label>
                                                 );
                                             })}
@@ -314,7 +314,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                                     {/* Tags with Autocomplete */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Etiketler</label>
+                                        <label className="block text-xs font-semibold text-gray-400 mb-1">Etiketler</label>
                                         <TagAutocomplete
                                             tags={metadata.tags}
                                             onTagsChange={(tags: string[]) => setMetadata({ ...metadata, tags })}
@@ -331,7 +331,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
                 {/* Footer */}
                 {!uploadResult && (
-                    <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+                    <div className="p-6 border-t border-white/[0.06] bg-dark-700/50 flex justify-end gap-3">
                         <button
                             onClick={handleClose}
                             className="btn btn-secondary"

@@ -303,7 +303,7 @@ export default function OCREditingModal({
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-8">
+        <div className="bg-dark-800/60 rounded-lg p-8">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
           <p className="mt-4 text-gray-600">OCR sayfaları yükleniyor...</p>
         </div>
@@ -321,18 +321,18 @@ export default function OCREditingModal({
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-lg w-full max-w-7xl h-[90vh] flex flex-col"
+        className="bg-dark-800/60 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div>
-            <h3 id="ocr-modal-title" className="text-lg font-semibold text-gray-900">OCR Metni Düzenle</h3>
+            <h3 id="ocr-modal-title" className="text-lg font-semibold text-gray-100">OCR Metni Düzenle</h3>
             <p id="ocr-modal-description" className="text-sm text-gray-500">{documentName}</p>
           </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowKeyboardHelp(prev => !prev)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-300 transition-colors"
               aria-label="Klavye kısayollarını göster"
               title="Klavye Kısayolları (?)"
             >
@@ -343,7 +343,7 @@ export default function OCREditingModal({
             </span>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-300 transition-colors"
               aria-label="Modalı kapat"
             >
               <X className="h-6 w-6" />
@@ -369,27 +369,27 @@ export default function OCREditingModal({
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">←</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">←</kbd>
                 <span className="text-blue-800">Önceki sayfa</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">→</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">→</kbd>
                 <span className="text-blue-800">Sonraki sayfa</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">Ctrl+S</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">Ctrl+S</kbd>
                 <span className="text-blue-800">Kaydet</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">Ctrl+Enter</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">Ctrl+Enter</kbd>
                 <span className="text-blue-800">Tamamla</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">Esc</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">Esc</kbd>
                 <span className="text-blue-800">Kapat</span>
               </div>
               <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">?</kbd>
+                <kbd className="px-2 py-1 bg-dark-800/60 border border-blue-300 rounded text-xs font-mono">?</kbd>
                 <span className="text-blue-800">Bu panel</span>
               </div>
             </div>
@@ -426,14 +426,14 @@ export default function OCREditingModal({
               </div>
 
               {/* Image Preview Panel */}
-              <div className="lg:col-span-4 bg-gray-50 rounded-lg p-4 flex flex-col">
+              <div className="lg:col-span-4 bg-dark-700/50 rounded-lg p-4 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-medium text-gray-900">Görsel Önizleme</h4>
+                  <h4 className="font-medium text-gray-100">Görsel Önizleme</h4>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getConfidenceColor(currentPage.confidence_score)}`}>
                     {getConfidenceLabel(currentPage.confidence_score)} ({currentPage.confidence_score.toFixed(0)}%)
                   </span>
                 </div>
-                <div className="flex-1 bg-white rounded border border-gray-200 overflow-auto flex items-center justify-center">
+                <div className="flex-1 bg-dark-800/60 rounded border border-white/[0.06] overflow-auto flex items-center justify-center">
                   <img
                     src={`${getApiBaseUrl()}${currentPage.image_url}`}
                     alt={`Page ${currentPage.page_number}`}
@@ -443,9 +443,9 @@ export default function OCREditingModal({
               </div>
 
               {/* Text Editor Panel */}
-              <div className="lg:col-span-5 bg-gray-50 rounded-lg p-4 flex flex-col">
+              <div className="lg:col-span-5 bg-dark-700/50 rounded-lg p-4 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-medium text-gray-900">Metin Düzenle</h4>
+                  <h4 className="font-medium text-gray-100">Metin Düzenle</h4>
                   {saveStatus === 'saved' && (
                     <span className="flex items-center text-sm text-green-600">
                       <CheckCircle className="h-4 w-4 mr-1" />
@@ -463,7 +463,7 @@ export default function OCREditingModal({
                   ref={textareaRef}
                   value={editedTexts[currentPage.page_number] ?? currentPage.original_text}
                   onChange={(e) => handleTextChange(e.target.value)}
-                  className="flex-1 w-full p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                  className="flex-1 w-full p-4 border border-white/[0.1] rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
                   placeholder="OCR metni buraya yazın..."
                   aria-label={`Sayfa ${currentPage.page_number} OCR metni`}
                   aria-describedby="text-stats"
@@ -486,7 +486,7 @@ export default function OCREditingModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-white/[0.06] bg-dark-700/50">
           <div className="flex items-center gap-4">
             {/* Navigation */}
             <button
@@ -518,7 +518,7 @@ export default function OCREditingModal({
                 type="checkbox"
                 checked={autoContinue}
                 onChange={(e) => setAutoContinue(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-white/[0.1] text-blue-600 focus:ring-blue-500"
               />
               Kalan sayfaları otomatik devam ettir
             </label>

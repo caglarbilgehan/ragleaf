@@ -122,11 +122,11 @@ const SearchTestPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-dark-700/50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">🔍 Embedding Search Test</h1>
+          <h1 className="text-3xl font-bold text-gray-100">🔍 Embedding Search Test</h1>
           <p className="mt-2 text-gray-600">
             Embedding tabanlı semantik aramayı test edin - LLM kullanmadan vektör benzerliği ile arama
           </p>
@@ -136,19 +136,19 @@ const SearchTestPage: React.FC = () => {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
           <h2 className="text-lg font-semibold text-blue-900 mb-3">⚙️ Nasıl Çalışır?</h2>
           <div className="grid md:grid-cols-4 gap-4 text-sm text-blue-800">
-            <div className="bg-white/50 p-3 rounded">
+            <div className="bg-dark-800/60/50 p-3 rounded">
               <div className="font-semibold mb-1">1. Sorgu Embedding</div>
               <p className="text-xs">Arama sorgunuz 768 boyutlu vektöre dönüştürülür</p>
             </div>
-            <div className="bg-white/50 p-3 rounded">
+            <div className="bg-dark-800/60/50 p-3 rounded">
               <div className="font-semibold mb-1">2. Benzerlik Hesaplama</div>
               <p className="text-xs">Tüm chunk'larla kosinüs benzerliği hesaplanır</p>
             </div>
-            <div className="bg-white/50 p-3 rounded">
+            <div className="bg-dark-800/60/50 p-3 rounded">
               <div className="font-semibold mb-1">3. Sıralama</div>
               <p className="text-xs">En yüksek skorlu chunk'lar sıralanır</p>
             </div>
-            <div className="bg-white/50 p-3 rounded">
+            <div className="bg-dark-800/60/50 p-3 rounded">
               <div className="font-semibold mb-1">4. Sonuçlar</div>
               <p className="text-xs">Top-K sonuç skorlarıyla döndürülür</p>
             </div>
@@ -158,16 +158,16 @@ const SearchTestPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6 sticky top-6">
               <h2 className="text-xl font-semibold mb-4">Arama Ayarları</h2>
 
               {/* Search Mode */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Arama Modu
                 </label>
                 <div className="space-y-2">
-                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-dark-700/50 transition-colors">
                     <input
                       type="radio"
                       name="searchMode"
@@ -182,7 +182,7 @@ const SearchTestPage: React.FC = () => {
                     </div>
                   </label>
                   
-                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-dark-700/50 transition-colors">
                     <input
                       type="radio"
                       name="searchMode"
@@ -197,7 +197,7 @@ const SearchTestPage: React.FC = () => {
                     </div>
                   </label>
                   
-                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-dark-700/50 transition-colors">
                     <input
                       type="radio"
                       name="searchMode"
@@ -217,7 +217,7 @@ const SearchTestPage: React.FC = () => {
               {/* Document Selection (if document mode) */}
               {searchMode === 'document' && (
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Doküman Seçin
                   </label>
                   {loadingDocs ? (
@@ -230,7 +230,7 @@ const SearchTestPage: React.FC = () => {
                     <select
                       value={selectedDocumentId || ''}
                       onChange={(e) => setSelectedDocumentId(Number(e.target.value) || null)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seçin...</option>
                       {documents.map((doc) => (
@@ -247,7 +247,7 @@ const SearchTestPage: React.FC = () => {
               {searchMode === 'sample' && (
                 <div className="mb-6 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Chunk Boyutu: {chunkSize}
                     </label>
                     <input
@@ -261,7 +261,7 @@ const SearchTestPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Overlap: {chunkOverlap}
                     </label>
                     <input
@@ -279,7 +279,7 @@ const SearchTestPage: React.FC = () => {
 
               {/* Top K */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Sonuç Sayısı: {topK}
                 </label>
                 <input
@@ -294,14 +294,14 @@ const SearchTestPage: React.FC = () => {
 
               {/* Query Input */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Arama Sorgusu
                 </label>
                 <textarea
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Örn: Yangın dedektörü nasıl çalışır?"
-                  className="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full h-24 px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
 
@@ -338,7 +338,7 @@ const SearchTestPage: React.FC = () => {
                     <button
                       key={q}
                       onClick={() => setQuery(q)}
-                      className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded"
+                      className="text-xs bg-dark-600 hover:bg-dark-500 px-2 py-1 rounded"
                     >
                       {q}
                     </button>
@@ -353,7 +353,7 @@ const SearchTestPage: React.FC = () => {
             {searchResult ? (
               <div className="space-y-4">
                 {/* Summary */}
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-dark-800/60 rounded-lg shadow p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Arama Sonuçları</h2>
                     <div className="flex gap-4 text-sm text-gray-500">
@@ -367,7 +367,7 @@ const SearchTestPage: React.FC = () => {
                   </div>
 
                   {/* Query Info */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <div className="bg-dark-700/50 rounded-lg p-4 mb-4">
                     <div className="text-sm">
                       <span className="text-gray-500">Sorgu:</span>
                       <span className="ml-2 font-medium">"{searchResult.query}"</span>
@@ -400,16 +400,16 @@ const SearchTestPage: React.FC = () => {
 
                 {/* Results List */}
                 {searchResult.results.length === 0 ? (
-                  <div className="bg-white rounded-lg shadow p-12 text-center">
+                  <div className="bg-dark-800/60 rounded-lg shadow p-12 text-center">
                     <div className="text-gray-400 text-4xl mb-4">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Sonuç bulunamadı</h3>
+                    <h3 className="text-lg font-medium text-gray-100 mb-2">Sonuç bulunamadı</h3>
                     <p className="text-gray-500">Farklı bir sorgu deneyin</p>
                   </div>
                 ) : (
                   searchResult.results.map((result) => (
                     <div
                       key={result.rank}
-                      className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                      className="bg-dark-800/60 rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -417,7 +417,7 @@ const SearchTestPage: React.FC = () => {
                             {result.rank}
                           </span>
                           <div>
-                            <div className="font-medium text-gray-900">
+                            <div className="font-medium text-gray-100">
                               {result.source || 'Bilinmeyen Kaynak'}
                             </div>
                             {result.chunk_index !== null && (
@@ -436,7 +436,7 @@ const SearchTestPage: React.FC = () => {
                       </div>
 
                       {/* Score Bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                      <div className="w-full bg-dark-500 rounded-full h-2 mb-4">
                         <div
                           className={`h-2 rounded-full ${getScoreBarColor(result.score)}`}
                           style={{ width: getScoreBarWidth(result.score) }}
@@ -444,7 +444,7 @@ const SearchTestPage: React.FC = () => {
                       </div>
 
                       {/* Content */}
-                      <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                      <div className="text-sm text-gray-300 bg-dark-700/50 p-4 rounded-lg border-l-4 border-blue-500">
                         {result.content}
                       </div>
                     </div>
@@ -452,13 +452,13 @@ const SearchTestPage: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
+              <div className="bg-dark-800/60 rounded-lg shadow p-12 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-gray-100 mb-2">
                   Arama yapmaya hazır
                 </h3>
                 <p className="text-gray-500 mb-4">

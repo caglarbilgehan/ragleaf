@@ -137,7 +137,7 @@ export default function NotificationBell() {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+        className="relative p-2 text-gray-600 hover:text-gray-100 hover:bg-dark-600 rounded-full transition-colors"
       >
         <Bell className="h-6 w-6" />
         {unreadCount > 0 && (
@@ -149,10 +149,10 @@ export default function NotificationBell() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+        <div className="absolute right-0 mt-2 w-96 bg-dark-800/60 rounded-lg shadow-2xl border border-white/[0.06] z-50">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-900">Bildirimler</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+            <h3 className="font-semibold text-gray-100">Bildirimler</h3>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button
@@ -165,7 +165,7 @@ export default function NotificationBell() {
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-300"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -188,7 +188,7 @@ export default function NotificationBell() {
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    className={`px-4 py-3 hover:bg-dark-700/50 cursor-pointer transition-colors ${
                       !notification.is_read ? 'bg-blue-50' : ''
                     }`}
                     onClick={() => {
@@ -203,7 +203,7 @@ export default function NotificationBell() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-100">
                             {notification.title}
                           </p>
                           {!notification.is_read && (
@@ -232,7 +232,7 @@ export default function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+            <div className="px-4 py-2 border-t border-white/[0.06] bg-dark-700/50">
               <a
                 href="/statistics"
                 className="flex items-center justify-center gap-1 text-sm text-blue-600 hover:text-blue-800"

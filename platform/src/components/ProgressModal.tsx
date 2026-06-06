@@ -142,15 +142,15 @@ export default function ProgressModal({
       case 'error': return 'text-red-600 bg-red-100';
       case 'running': return 'text-blue-600 bg-blue-100';
       case 'pending': return 'text-yellow-600 bg-yellow-100';
-      default: return 'text-gray-600 bg-gray-100';
+      default: return 'text-gray-600 bg-dark-600';
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+      <div className="bg-dark-800/60 rounded-xl shadow-2xl max-w-md w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
             <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
               progress?.stage === 'completed' 
@@ -168,13 +168,13 @@ export default function ProgressModal({
               )}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">İşlem İlerlemesi</h3>
+              <h3 className="text-lg font-semibold text-gray-100">İşlem İlerlemesi</h3>
               <p className="text-sm text-gray-500 truncate max-w-[250px]">{documentName}</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-300"
             disabled={autoCloseCountdown !== null && autoCloseCountdown > 0}
           >
             <X className="h-5 w-5" />
@@ -195,14 +195,14 @@ export default function ProgressModal({
                 <span className={`text-xs font-medium px-3 py-1 rounded-full ${getStageColor(progress.stage)}`}>
                   {getStageLabel(progress.stage)}
                 </span>
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-300">
                   {progress.progress}%
                 </span>
               </div>
 
               {/* Progress Bar */}
               <div className="relative">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-dark-500 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-300 ${
                       progress.stage === 'completed' 
@@ -269,7 +269,7 @@ export default function ProgressModal({
 
         {/* Footer */}
         {(progress?.stage === 'completed' || progress?.stage === 'error' || error) && (
-          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+          <div className="flex items-center justify-end gap-3 p-4 border-t border-white/[0.06] bg-dark-700/50 rounded-b-xl">
             <button
               onClick={onClose}
               className="btn btn-primary"

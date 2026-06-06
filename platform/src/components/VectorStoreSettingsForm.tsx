@@ -160,7 +160,7 @@ export default function VectorStoreSettingsForm() {
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
               <Database className="h-6 w-6 text-blue-600" />
               PgVector Ayarları
             </h2>
@@ -216,15 +216,15 @@ export default function VectorStoreSettingsForm() {
                 key={model.model_id}
                 className={`p-4 border rounded-lg cursor-pointer transition-all ${
                   settings.embedding_model === model.model_id
-                    ? 'border-blue-500 bg-blue-50 shadow-sm'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 '
+                    : 'border-white/[0.06] hover:border-white/[0.1]'
                 }`}
                 onClick={() => setSettings({ ...settings, embedding_model: model.model_id })}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-gray-900">{model.display_name}</h4>
+                      <h4 className="font-semibold text-gray-100">{model.display_name}</h4>
                       {model.recommended && (
                         <Badge className="bg-green-100 text-green-800">Önerilen</Badge>
                       )}
@@ -234,7 +234,7 @@ export default function VectorStoreSettingsForm() {
                     </div>
                     <p className="text-sm text-gray-600 mt-1">{model.description}</p>
                     <p className="text-xs text-gray-500 mt-2">
-                      Model ID: <code className="bg-gray-100 px-1 rounded">{model.model_id}</code>
+                      Model ID: <code className="bg-dark-600 px-1 rounded">{model.model_id}</code>
                       {' · '}
                       Boyut: {model.dimensions}
                     </p>
@@ -334,9 +334,9 @@ export default function VectorStoreSettingsForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
             <div>
-              <h4 className="font-medium text-gray-900">Reranker Kullan</h4>
+              <h4 className="font-medium text-gray-100">Reranker Kullan</h4>
               <p className="text-sm text-gray-600">
                 Arama sonuçlarının kalitesini artırmak için reranking aktif et
               </p>
@@ -355,15 +355,15 @@ export default function VectorStoreSettingsForm() {
                   key={model.model_id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${
                     settings.reranker_model === model.model_id
-                      ? 'border-green-500 bg-green-50 shadow-sm'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-green-500 bg-green-50 '
+                      : 'border-white/[0.06] hover:border-white/[0.1]'
                   }`}
                   onClick={() => setSettings({ ...settings, reranker_model: model.model_id })}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-gray-900">{model.display_name}</h4>
+                        <h4 className="font-semibold text-gray-100">{model.display_name}</h4>
                         {model.recommended && (
                           <Badge className="bg-green-100 text-green-800">Önerilen</Badge>
                         )}
@@ -373,7 +373,7 @@ export default function VectorStoreSettingsForm() {
                       </div>
                       <p className="text-sm text-gray-600 mt-1">{model.description}</p>
                       <p className="text-xs text-gray-500 mt-2">
-                        Model ID: <code className="bg-gray-100 px-1 rounded">{model.model_id}</code>
+                        Model ID: <code className="bg-dark-600 px-1 rounded">{model.model_id}</code>
                         {' · '}
                         Max Length: {model.max_length}
                       </p>

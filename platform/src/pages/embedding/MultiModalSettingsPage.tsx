@@ -121,7 +121,7 @@ const MultiModalSettingsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Multi-Modal RAG Ayarları</h1>
+          <h1 className="text-2xl font-bold text-gray-100">Multi-Modal RAG Ayarları</h1>
           <p className="text-gray-600">Görsel analiz ve muhakeme özelliklerini yapılandırın</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
@@ -143,7 +143,7 @@ const MultiModalSettingsPage: React.FC = () => {
                 <DollarSign className="h-8 w-8 text-green-500" />
               </div>
               <div className="mt-2">
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-dark-500 rounded-full h-2">
                   <div 
                     className={`h-2 rounded-full ${usage.budget.daily_percentage > 80 ? 'bg-red-500' : 'bg-green-500'}`}
                     style={{ width: `${Math.min(usage.budget.daily_percentage, 100)}%` }}
@@ -166,7 +166,7 @@ const MultiModalSettingsPage: React.FC = () => {
                 <BarChart3 className="h-8 w-8 text-blue-500" />
               </div>
               <div className="mt-2">
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-dark-500 rounded-full h-2">
                   <div 
                     className={`h-2 rounded-full ${usage.budget.monthly_percentage > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
                     style={{ width: `${Math.min(usage.budget.monthly_percentage, 100)}%` }}
@@ -212,7 +212,7 @@ const MultiModalSettingsPage: React.FC = () => {
       )}
 
       {/* Enable/Disable */}
-      <Card className={settings.enabled ? 'border-2 border-green-300' : 'border-2 border-gray-200'}>
+      <Card className={settings.enabled ? 'border-2 border-green-300' : 'border-2 border-white/[0.06]'}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5" />
@@ -223,7 +223,7 @@ const MultiModalSettingsPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
             <div className="space-y-1">
               <Label className="text-base font-medium flex items-center gap-2">
                 {settings.enabled ? (
@@ -267,7 +267,7 @@ const MultiModalSettingsPage: React.FC = () => {
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       settings.provider === provider.value
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-white/[0.06] hover:border-white/[0.1]'
                     }`}
                   >
                     <p className="font-medium">{provider.label}</p>
@@ -379,7 +379,7 @@ const MultiModalSettingsPage: React.FC = () => {
               <CardDescription>Görsel analiz sonuçlarını önbelleğe alarak maliyeti düşürün</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
                 <div className="space-y-1">
                   <Label className="text-base font-medium">Önbellek Aktif</Label>
                   <p className="text-sm text-gray-500">
@@ -429,8 +429,8 @@ const MultiModalSettingsPage: React.FC = () => {
               daha doğru yanıtlar verir.
             </p>
             
-            <div className="bg-white p-3 rounded border space-y-2">
-              <p className="text-gray-700 font-semibold">Kullanım Senaryoları:</p>
+            <div className="bg-dark-800/60 p-3 rounded border space-y-2">
+              <p className="text-gray-300 font-semibold">Kullanım Senaryoları:</p>
               <div className="space-y-1 text-xs">
                 <p>• <strong>Teknik Çizimler:</strong> Bağlantı şemaları, montaj talimatları</p>
                 <p>• <strong>Tablolar:</strong> Teknik özellik tabloları, karşılaştırma tabloları</p>

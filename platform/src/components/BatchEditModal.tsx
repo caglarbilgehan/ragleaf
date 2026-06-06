@@ -145,18 +145,18 @@ export default function BatchEditModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-dark-800/60 rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Toplu Düzenle</h3>
+            <h3 className="text-lg font-semibold text-gray-100">Toplu Düzenle</h3>
             <p className="text-sm text-gray-500">
               {selectedPages.length} sayfa seçildi
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-300 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -167,7 +167,7 @@ export default function BatchEditModal({
           {/* Find and Replace Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 <Search className="h-4 w-4 inline mr-1" />
                 Bul
               </label>
@@ -176,11 +176,11 @@ export default function BatchEditModal({
                 value={findText}
                 onChange={(e) => setFindText(e.target.value)}
                 placeholder="Aranacak metin..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 <Replace className="h-4 w-4 inline mr-1" />
                 Değiştir
               </label>
@@ -189,7 +189,7 @@ export default function BatchEditModal({
                 value={replaceText}
                 onChange={(e) => setReplaceText(e.target.value)}
                 placeholder="Yeni metin..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -201,7 +201,7 @@ export default function BatchEditModal({
                 type="checkbox"
                 checked={caseSensitive}
                 onChange={(e) => setCaseSensitive(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-white/[0.1] text-blue-600 focus:ring-blue-500"
               />
               Büyük/küçük harf duyarlı
             </label>
@@ -210,7 +210,7 @@ export default function BatchEditModal({
                 type="checkbox"
                 checked={useRegex}
                 onChange={(e) => setUseRegex(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-white/[0.1] text-blue-600 focus:ring-blue-500"
               />
               Regex kullan
             </label>
@@ -218,9 +218,9 @@ export default function BatchEditModal({
 
           {/* Match Summary */}
           {findText && (
-            <div className={`p-4 rounded-lg ${totalMatches > 0 ? 'bg-blue-50' : 'bg-gray-50'}`}>
+            <div className={`p-4 rounded-lg ${totalMatches > 0 ? 'bg-blue-50' : 'bg-dark-700/50'}`}>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-gray-300">
                   {totalMatches > 0 ? (
                     <>
                       <strong>{totalMatches}</strong> eşleşme bulundu ({affectedPages} sayfada)
@@ -245,12 +245,12 @@ export default function BatchEditModal({
           {/* Preview Changes */}
           {showPreview && previewChanges.length > 0 && (
             <div className="space-y-4">
-              <h4 className="font-medium text-gray-900">Değişiklik Önizlemesi</h4>
+              <h4 className="font-medium text-gray-100">Değişiklik Önizlemesi</h4>
               <div className="max-h-64 overflow-y-auto space-y-3">
                 {previewChanges.map((change) => (
-                  <div key={change.pageNumber} className="border border-gray-200 rounded-lg p-4">
+                  <div key={change.pageNumber} className="border border-white/[0.06] rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-gray-300">
                         Sayfa {change.pageNumber}
                       </span>
                       <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
@@ -261,13 +261,13 @@ export default function BatchEditModal({
                       <div>
                         <span className="text-xs text-gray-500 block mb-1">Önceki:</span>
                         <div 
-                          className="bg-red-50 p-2 rounded text-gray-700 max-h-24 overflow-y-auto font-mono text-xs"
+                          className="bg-red-50 p-2 rounded text-gray-300 max-h-24 overflow-y-auto font-mono text-xs"
                           dangerouslySetInnerHTML={{ __html: highlightMatches(change.originalText.substring(0, 500)) }}
                         />
                       </div>
                       <div>
                         <span className="text-xs text-gray-500 block mb-1">Sonraki:</span>
-                        <div className="bg-green-50 p-2 rounded text-gray-700 max-h-24 overflow-y-auto font-mono text-xs">
+                        <div className="bg-green-50 p-2 rounded text-gray-300 max-h-24 overflow-y-auto font-mono text-xs">
                           {change.newText.substring(0, 500)}
                           {change.newText.length > 500 && '...'}
                         </div>
@@ -289,10 +289,10 @@ export default function BatchEditModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end gap-4 p-6 border-t border-white/[0.06] bg-dark-700/50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-lg hover:bg-dark-700/50"
           >
             İptal
           </button>

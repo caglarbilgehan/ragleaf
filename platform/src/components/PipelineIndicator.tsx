@@ -69,7 +69,7 @@ const PipelineIndicator: React.FC<PipelineIndicatorProps> = ({ status, compact =
     return (
       <div className="flex items-center gap-2">
         {getStageIcon(currentStage)}
-        <span className="text-sm text-gray-700">{currentStage.label}</span>
+        <span className="text-sm text-gray-300">{currentStage.label}</span>
       </div>
     );
   }

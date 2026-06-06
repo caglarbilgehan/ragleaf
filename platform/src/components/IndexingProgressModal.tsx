@@ -184,21 +184,21 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
       {/* Full Screen Modal */}
       <div className="fixed inset-0 z-50 flex items-stretch pointer-events-none">
         <div
-          className="bg-white w-full h-full pointer-events-auto flex flex-col overflow-hidden"
+          className="bg-dark-800/60 w-full h-full pointer-events-auto flex flex-col overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white flex-shrink-0">
+          <div className="flex items-center justify-between px-8 py-6 border-b border-white/[0.06] bg-dark-800/60 flex-shrink-0">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <h2 className="text-3xl font-bold text-gray-900">
+                <h2 className="text-3xl font-bold text-gray-100">
                   Döküman İndeksleniyor
                 </h2>
                 {/* Status Badge */}
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full ${progressData.status === 'running' ? 'bg-blue-100 text-blue-700' :
-                  progressData.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
-                    progressData.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full ${progressData.status === 'running' ? 'bg-blue-500/10 text-blue-400' :
+                  progressData.status === 'paused' ? 'bg-yellow-500/10 text-yellow-400' :
+                    progressData.status === 'completed' ? 'bg-green-500/10 text-green-400' :
+                      'bg-red-500/10 text-red-400'
                   }`}>
                   <span className={`w-2 h-2 rounded-full ${progressData.status === 'running' ? 'bg-blue-500 animate-pulse' :
                     progressData.status === 'paused' ? 'bg-yellow-500' :
@@ -211,11 +211,11 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
                         'Hata'}
                 </span>
               </div>
-              <p className="text-base text-gray-600 mt-1 truncate">{documentName}</p>
+              <p className="text-base text-gray-400 mt-1 truncate">{documentName}</p>
             </div>
             <button
               onClick={onClose}
-              className="ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="ml-4 p-2 text-gray-400 hover:text-gray-300 hover:bg-dark-600 rounded-lg transition-colors"
             >
               <X className="w-7 h-7" />
             </button>
@@ -223,7 +223,7 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
 
           {/* Main Content - Two Panel Layout */}
           <div className="flex-1 overflow-hidden">
-            <div className="h-full grid grid-cols-1 lg:grid-cols-5 divide-x divide-gray-200">
+            <div className="h-full grid grid-cols-1 lg:grid-cols-5 divide-x divide-white/[0.04]">
 
               {/* Left Panel - Progress & Stats */}
               <div className="lg:col-span-2 p-8 overflow-y-auto">
@@ -238,7 +238,7 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
                         stroke="currentColor"
                         strokeWidth="12"
                         fill="none"
-                        className="text-gray-200"
+                        className="text-white/[0.06]"
                       />
                       <circle
                         cx="96"
@@ -249,16 +249,16 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
                         fill="none"
                         strokeDasharray={`${2 * Math.PI * 88}`}
                         strokeDashoffset={`${2 * Math.PI * 88 * (1 - progressData.progress / 100)}`}
-                        className={`transition-all duration-500 ${progressData.status === 'completed' ? 'text-green-600' :
-                          progressData.status === 'error' ? 'text-red-600' :
-                            progressData.status === 'paused' ? 'text-yellow-600' :
-                              'text-blue-600'
+                        className={`transition-all duration-500 ${progressData.status === 'completed' ? 'text-green-500' :
+                          progressData.status === 'error' ? 'text-red-500' :
+                            progressData.status === 'paused' ? 'text-yellow-500' :
+                              'text-blue-500'
                           }`}
                         strokeLinecap="round"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-5xl font-bold text-gray-900">{Math.round(progressData.progress)}</span>
+                      <span className="text-5xl font-bold text-gray-100">{Math.round(progressData.progress)}</span>
                       <span className="text-2xl text-gray-500">%</span>
                     </div>
                   </div>
@@ -266,58 +266,57 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
                   {/* Current Stage */}
                   <div className="mt-4 text-center">
                     <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Mevcut Aşama</p>
-                    <p className="mt-1 text-base font-semibold text-gray-900">{progressData.stage}</p>
+                    <p className="mt-1 text-base font-semibold text-gray-100">{progressData.stage}</p>
                   </div>
-                </div>
-
-                {/* Time Stats Grid */}
+                    {/* Time Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                  <div className="bg-dark-700/50 rounded-xl p-4">
+                    <div className="flex items-center gap-2 text-gray-400 mb-1">
                       <Clock className="w-4 h-4" />
                       <span className="text-xs font-medium uppercase">Geçen Süre</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">{formatTime(elapsedTime)}</p>
+                    <p className="text-2xl font-bold text-gray-100">{formatTime(elapsedTime)}</p>
                   </div>
 
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                  <div className="bg-dark-700/50 rounded-xl p-4">
+                    <div className="flex items-center gap-2 text-gray-400 mb-1">
                       <Clock className="w-4 h-4" />
                       <span className="text-xs font-medium uppercase">Kalan Süre</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-gray-100">
                       {progressData.progress > 5 ? formatTime(Math.max(0, estimatedRemaining)) : '--:--'}
                     </p>
                   </div>
                 </div>
+              </div>
 
                 {/* Status Messages */}
                 {progressData.status === 'completed' && (
-                  <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                    <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-green-900">Tamamlandı!</p>
-                      <p className="text-sm text-green-700 mt-0.5">İndeksleme başarıyla tamamlandı</p>
+                      <p className="font-semibold text-green-400">Tamamlandı!</p>
+                      <p className="text-sm text-green-400/80 mt-0.5">İndeksleme başarıyla tamamlandı</p>
                     </div>
                   </div>
                 )}
 
                 {progressData.status === 'error' && (
-                  <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-red-900">Hata Oluştu</p>
-                      <p className="text-sm text-red-700 mt-0.5">{progressData.error || 'Bilinmeyen hata'}</p>
+                      <p className="font-semibold text-red-400">Hata Oluştu</p>
+                      <p className="text-sm text-red-400/80 mt-0.5">{progressData.error || 'Bilinmeyen hata'}</p>
                     </div>
                   </div>
                 )}
 
                 {progressData.status === 'paused' && (
-                  <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <Pause className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                    <Pause className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-yellow-900">Duraklatıldı</p>
-                      <p className="text-sm text-yellow-700 mt-0.5">İşlem duraklatıldı, devam ettirmek için butona tıklayın</p>
+                      <p className="font-semibold text-yellow-400">Duraklatıldı</p>
+                      <p className="text-sm text-yellow-400/80 mt-0.5">İşlem duraklatıldı, devam ettirmek için butona tıklayın</p>
                     </div>
                   </div>
                 )}
@@ -345,7 +344,7 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
 
                       <button
                         onClick={() => setShowCancelConfirm(true)}
-                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white text-red-600 font-medium rounded-xl border-2 border-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-dark-800/60 text-red-400 font-medium rounded-xl border border-red-500/20 hover:bg-red-500/10 transition-colors"
                       >
                         <StopCircle className="w-5 h-5" />
                         İptal Et
@@ -358,8 +357,8 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
               {/* Right Panel - Steps & Logs */}
               <div className="lg:col-span-3 flex flex-col overflow-hidden">
                 {/* Indexing Steps */}
-                <div className="px-8 py-6 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">İndeksleme Aşamaları</h3>
+                <div className="px-8 py-6 border-b border-white/[0.06]">
+                  <h3 className="text-lg font-semibold text-gray-100 mb-4">İndeksleme Aşamaları</h3>
                   <div className="space-y-3">
                     {INDEXING_STEPS.map((step, index) => {
                       const isCompleted = index < currentStepIndex;
@@ -369,32 +368,32 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
                       return (
                         <div
                           key={step.id}
-                          className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${isCurrent ? 'bg-blue-50 border-blue-500' :
-                            isCompleted ? 'bg-green-50 border-green-200' :
-                              'bg-gray-50 border-gray-200'
+                          className={`flex items-center gap-4 p-4 rounded-xl border border-white/[0.06] transition-all ${isCurrent ? 'bg-blue-500/10 border-blue-500/30' :
+                            isCompleted ? 'bg-green-500/10 border-green-500/20' :
+                              'bg-dark-700/50'
                             }`}
                         >
                           <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isCurrent ? 'bg-blue-600 text-white' :
                             isCompleted ? 'bg-green-600 text-white' :
-                              'bg-gray-300 text-gray-600'
+                              'bg-dark-600 text-gray-400'
                             }`}>
                             {isCompleted ? (
                               <CheckCircle className="w-6 h-6" />
                             ) : isCurrent ? (
-                              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                              <div className="w-3 h-3 bg-dark-800/60 rounded-full animate-pulse" />
                             ) : (
                               step.icon
                             )}
                           </div>
                           <div className="flex-1">
-                            <p className={`font-medium ${isCurrent ? 'text-blue-900' :
-                              isCompleted ? 'text-green-900' :
-                                'text-gray-600'
+                            <p className={`font-medium ${isCurrent ? 'text-blue-400' :
+                              isCompleted ? 'text-green-400' :
+                                'text-gray-400'
                               }`}>
                               {step.label}
                             </p>
                             {isCurrent && (
-                              <p className="text-sm text-blue-700 mt-0.5">
+                              <p className="text-sm text-blue-400/80 mt-0.5">
                                 {Math.round(progressData.progress)}% tamamlandı
                               </p>
                             )}
@@ -407,15 +406,15 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
 
                 {/* Logs */}
                 <div className="flex-1 overflow-y-auto px-8 py-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Son İşlemler</h3>
+                  <h3 className="text-lg font-semibold text-gray-100 mb-4">Son İşlemler</h3>
                   {progressData.processing_logs && progressData.processing_logs.length > 0 ? (
                     <div className="space-y-2">
                       {[...progressData.processing_logs].reverse().map((log, index) => (
                         <div
                           key={index}
-                          className={`p-3 rounded-lg text-sm border ${log.level === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                            log.level === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
-                              'bg-gray-50 border-gray-200 text-gray-700'
+                          className={`p-3 rounded-lg text-sm border ${log.level === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                            log.level === 'warning' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                              'bg-dark-700/50 border-white/[0.06] text-gray-300'
                             }`}
                         >
                           <div className="flex items-start gap-2">
@@ -440,14 +439,14 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
       {/* Cancel Confirmation Dialog */}
       {showCancelConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-red-100">
+          <div className="bg-dark-800/60 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-red-500/20">
             <div className="flex items-start gap-4 mb-4">
-              <div className="bg-red-100 p-3 rounded-xl flex-shrink-0">
-                <AlertCircle className="w-6 h-6 text-red-600" />
+              <div className="bg-red-500/10 p-3 rounded-xl flex-shrink-0">
+                <AlertCircle className="w-6 h-6 text-red-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">İşlemi Durdurmak İstediğinize Emin Misiniz?</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <h3 className="text-lg font-semibold text-gray-100 mb-1">İşlemi Durdurmak İstediğinize Emin Misiniz?</h3>
+                <p className="text-sm text-gray-300 leading-relaxed">
                   İndeksleme işlemi iptal edilecek ve mevcut ilerleme kaybedilecek.
                 </p>
               </div>
@@ -455,7 +454,7 @@ const IndexingProgressModal: React.FC<IndexingProgressModalProps> = ({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all"
+                className="px-4 py-2.5 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-xl hover:bg-dark-700/50 hover:border-gray-400 transition-all"
               >
                 Vazgeç
               </button>

@@ -9,7 +9,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Depends, Query, status
+from fastapi import APIRouter, HTTPException, Depends, Query, status, UploadFile, File, BackgroundTasks
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -53,6 +53,7 @@ class TenantListItem(BaseModel):
     max_documents: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    ragleaf_leaves: int = 0
     # Computed
     user_count: int = 0
     agent_count: int = 0
@@ -78,6 +79,33 @@ class TenantUpdateRequest(BaseModel):
 
 class KVKKToggleRequest(BaseModel):
     allow_admin_doc_access: bool
+
+
+class PlanResponse(BaseModel):
+    id: int
+    key: str
+    name: str
+    price: float
+    billing_cycle: str
+    max_agents: int
+    max_documents: int
+    max_queries_per_month: int
+    max_storage_mb: int
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class PlanUpdate(BaseModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    billing_cycle: Optional[str] = None
+    max_agents: Optional[int] = None
+    max_documents: Optional[int] = None
+    max_queries_per_month: Optional[int] = None
+    max_storage_mb: Optional[int] = None
+    is_active: Optional[bool] = None
 
 
 # ============================================================================
@@ -144,6 +172,7 @@ async def list_tenants(
             max_documents=org.max_documents,
             created_at=org.created_at,
             updated_at=org.updated_at,
+            ragleaf_leaves=org.ragleaf_leaves,
             user_count=user_count,
             agent_count=agent_count,
             document_count=document_count,
@@ -232,6 +261,7 @@ async def get_tenant(
         settings=org.settings,
         created_at=org.created_at,
         updated_at=org.updated_at,
+        ragleaf_leaves=org.ragleaf_leaves,
         user_count=user_count,
         agent_count=agent_count,
         document_count=document_count,
@@ -268,6 +298,21 @@ async def update_tenant(
     else:
         update_data = request.model_dump(exclude_unset=True)
 
+    # Auto-apply plan limits on plan change if limits are not explicitly passed
+    if "plan" in update_data:
+        new_plan = update_data["plan"]
+        from sqlalchemy import text
+        plan_db = db.execute(text("SELECT max_agents, max_documents, max_queries_per_month, max_storage_mb FROM plans WHERE key = :key AND is_active = true"), {"key": new_plan}).fetchone()
+        if plan_db:
+            if "max_agents" not in update_data:
+                org.max_agents = plan_db.max_agents
+            if "max_documents" not in update_data:
+                org.max_documents = plan_db.max_documents
+            if "max_queries_per_month" not in update_data:
+                org.max_queries_per_month = plan_db.max_queries_per_month
+            if "max_storage_mb" not in update_data:
+                org.max_storage_mb = plan_db.max_storage_mb
+
     for field, value in update_data.items():
         setattr(org, field, value)
 
@@ -292,7 +337,7 @@ async def get_tenant_users(
     if not org:
         raise HTTPException(status_code=404, detail="Tenant bulunamadı")
 
-    from backend.database.models_platform import User
+    from backend.database.models_v2 import User
 
     members = db.query(OrganizationMember).filter(
         OrganizationMember.organization_id == org.id
@@ -305,8 +350,8 @@ async def get_tenant_users(
             users.append({
                 "id": user.id,
                 "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
+                "first_name": user.name,
+                "last_name": user.surname,
                 "role": member.role,
                 "is_active": user.is_active,
                 "created_at": user.created_at.isoformat() if user.created_at else None,
@@ -424,3 +469,223 @@ async def get_tenant_appointments(
         ],
         "total": len(appointments),
     }
+
+
+@admin_tenants_router.post(
+    "/admin/tenants/{tenant_id}/agents/{agent_id}/documents/upload",
+    summary="Admin: Tenant agent'ına döküman yükle"
+)
+async def admin_upload_tenant_document(
+    tenant_id: int,
+    agent_id: int,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    admin=Depends(require_superadmin)
+):
+    """
+    Admin uploads a document to a tenant's agent.
+    Requires KVKK doc access permission from the tenant.
+    Auto-processes the document after upload.
+    """
+    from pathlib import Path as FilePath
+    from backend.database.models_platform import AgentKnowledgeBase, UsageLog
+
+    # Verify tenant exists
+    org = db.query(Organization).filter(Organization.id == tenant_id).first()
+    if not org:
+        raise HTTPException(status_code=404, detail="Tenant bulunamadı")
+
+    # KVKK check
+    if not org.allow_admin_doc_access:
+        raise HTTPException(
+            status_code=403,
+            detail="Bu tenant KVKK kapsamında doküman erişim izni vermemiş. "
+                   "Tenant ayarlarından 'Teknik Destek Erişimi' etkinleştirilmelidir."
+        )
+
+    # Verify agent belongs to tenant
+    agent = db.query(Agent).filter(
+        Agent.id == agent_id,
+        Agent.organization_id == tenant_id
+    ).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent bulunamadı veya bu tenant'a ait değil")
+
+    # Validate file type
+    allowed_types = ['.pdf', '.docx', '.txt', '.md']
+    file_ext = FilePath(file.filename).suffix.lower()
+    if file_ext not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Desteklenmeyen dosya tipi: {file_ext}. İzin verilenler: {allowed_types}"
+        )
+
+    # Read content
+    content = await file.read()
+    max_size_mb = 50
+    if len(content) > max_size_mb * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"Dosya boyutu {max_size_mb}MB limitini aşıyor")
+
+    # Create document record
+    doc = Document(
+        name=FilePath(file.filename).stem,
+        original_filename=file.filename,
+        folder_name=f"admin_upload_{tenant_id}_{file.filename}",
+        file_size=len(content),
+        file_type=file_ext[1:],
+        status="uploaded",
+        organization_id=tenant_id
+    )
+    db.add(doc)
+    db.flush()
+
+    # Update folder_name with ID for uniqueness
+    doc.folder_name = f"org_{tenant_id}_doc_{doc.id}"
+
+    # Save file to disk
+    import os
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    upload_dir = str(_storage.get_upload_dir(org.slug, doc.folder_name))
+
+    file_path = os.path.join(upload_dir, file.filename)
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    # Link to agent's knowledge base
+    kb_link = AgentKnowledgeBase(agent_id=agent.id, document_id=doc.id)
+    db.add(kb_link)
+
+    # Log usage
+    usage = UsageLog(
+        organization_id=tenant_id,
+        agent_id=agent.id,
+        event_type="doc_upload",
+        details={
+            "filename": file.filename,
+            "size": len(content),
+            "document_id": doc.id,
+            "uploaded_by": "admin"
+        }
+    )
+    db.add(usage)
+
+    db.commit()
+    db.refresh(doc)
+
+    # Auto-process in background
+    from backend.api.agents import _auto_process_document
+    background_tasks.add_task(_auto_process_document, doc.id)
+
+    logger.info(f"✅ Admin uploaded document: {file.filename} → agent {agent.name} (tenant={org.slug})")
+
+    return {
+        "success": True,
+        "document_id": doc.id,
+        "filename": file.filename,
+        "agent_id": agent.id,
+        "tenant_id": tenant_id,
+        "auto_processing": True,
+        "note": "Doküman yüklendi ve otomatik işleme başlatıldı."
+    }
+
+
+@admin_tenants_router.delete(
+    "/admin/tenants/{tenant_id}",
+    summary="Tenant'ı kalıcı olarak sil"
+)
+async def delete_tenant(
+    tenant_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(require_superadmin)
+):
+    """
+    Permanently delete a tenant (Organization).
+    Cascades database records and deletes physical storage files.
+    """
+    org = db.query(Organization).filter(Organization.id == tenant_id).first()
+    if not org:
+        raise HTTPException(status_code=404, detail="Tenant bulunamadı")
+        
+    if org.is_system:
+        raise HTTPException(status_code=403, detail="Sistem tenant'ı silinemez")
+        
+    org_slug = org.slug
+    
+    # 1. Clean up users belonging solely to this tenant
+    members = db.query(OrganizationMember).filter(
+        OrganizationMember.organization_id == tenant_id
+    ).all()
+    
+    from backend.database.models_v2 import User
+    for member in members:
+        # Check if they belong to any other orgs
+        other_org_count = db.query(OrganizationMember).filter(
+            OrganizationMember.user_id == member.user_id,
+            OrganizationMember.organization_id != tenant_id
+        ).count()
+        
+        if other_org_count == 0:
+            user = db.query(User).filter(User.id == member.user_id).first()
+            if user:
+                db.delete(user)
+                
+    # 2. Delete organization record from DB (triggers CASCADE delete on agents, links, members, docs)
+    db.delete(org)
+    db.commit()
+    
+    # 3. Clean up physical storage files
+    try:
+        from backend.services.storage_service import get_storage
+        get_storage().delete_tenant_storage(org_slug)
+    except Exception as e:
+        logger.error(f"Failed to delete storage for tenant {org_slug}: {e}")
+        
+    logger.info(f"🗑️ Admin permanently deleted tenant {org_slug} (id={tenant_id})")
+    
+    return {"success": True, "detail": f"Tenant '{org_slug}' ve ilişkili tüm verileri silindi."}
+
+
+@admin_tenants_router.get(
+    "/admin/plans",
+    response_model=List[PlanResponse],
+    summary="Tüm planları listele"
+)
+async def list_plans(
+    db: Session = Depends(get_db),
+    current_user = Depends(require_superadmin)
+):
+    """Sistemdeki tüm planları (aktif/pasif) listeler."""
+    from backend.database.models_platform import Plan
+    plans = db.query(Plan).order_by(Plan.price.asc()).all()
+    return plans
+
+
+@admin_tenants_router.put(
+    "/admin/plans/{plan_id}",
+    response_model=PlanResponse,
+    summary="Plan güncelle"
+)
+async def update_plan(
+    plan_id: int,
+    request: PlanUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_superadmin)
+):
+    """Belirli bir planın fiyat ve limitlerini günceller."""
+    from backend.database.models_platform import Plan
+    plan_obj = db.query(Plan).filter(Plan.id == plan_id).first()
+    if not plan_obj:
+        raise HTTPException(status_code=404, detail="Plan bulunamadı")
+
+    update_data = request.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(plan_obj, field, value)
+
+    db.commit()
+    db.refresh(plan_obj)
+    
+    logger.info(f"Admin updated plan {plan_obj.key}: {update_data}")
+    return plan_obj
+

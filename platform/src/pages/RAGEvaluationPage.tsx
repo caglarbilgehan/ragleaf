@@ -197,7 +197,7 @@ const RAGEvaluationPage: React.FC = () => {
   };
 
   const getScoreBg = (score: number | null) => {
-    if (score === null) return 'bg-gray-100';
+    if (score === null) return 'bg-dark-600';
     if (score >= 0.8) return 'bg-green-100';
     if (score >= 0.6) return 'bg-yellow-100';
     return 'bg-red-100';
@@ -217,7 +217,7 @@ const RAGEvaluationPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">RAG Kalite Değerlendirmesi</h1>
+          <h1 className="text-2xl font-bold text-gray-100">RAG Kalite Değerlendirmesi</h1>
           <p className="text-gray-600">Test setleri oluşturun ve RAG kalitesini ölçün</p>
         </div>
         <Button onClick={fetchData} variant="outline" className="flex items-center gap-2">
@@ -239,7 +239,7 @@ const RAGEvaluationPage: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
               activeTab === tab.id
                 ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -350,7 +350,7 @@ const RAGEvaluationPage: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Add Question Form */}
-                <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+                <div className="p-4 bg-dark-700/50 rounded-lg space-y-3">
                   <Label>Yeni Soru Ekle</Label>
                   <Input
                     value={newQuestion.question}
@@ -517,7 +517,7 @@ const RAGEvaluationPage: React.FC = () => {
                         <strong>Beklenen:</strong> {result.expected_answer}
                       </p>
                     )}
-                    <p className="text-sm bg-gray-50 p-2 rounded">
+                    <p className="text-sm bg-dark-700/50 p-2 rounded">
                       <strong>RAG Yanıtı:</strong> {result.rag_answer}
                     </p>
                     <p className="text-xs text-gray-400 mt-2">

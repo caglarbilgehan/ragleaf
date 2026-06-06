@@ -206,21 +206,21 @@ export const EmbeddingConfigTab: React.FC = () => {
       {/* Model Change Confirmation Dialog */}
       {showConfirmDialog && compatibilityCheck && pendingModelChange && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
+          <div className="bg-dark-800/60 rounded-lg shadow-2xl max-w-lg w-full mx-4 p-6 border border-white/[0.06]">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-yellow-100 rounded-full">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+              <div className="p-2 bg-amber-500/10 rounded-full border border-amber-500/20">
+                <AlertTriangle className="h-6 w-6 text-amber-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-100">
                 Embedding Modeli Değişikliği
               </h3>
             </div>
             
             <div className="space-y-4">
-              <p className="text-gray-700">{compatibilityCheck.reason}</p>
+              <p className="text-gray-300">{compatibilityCheck.reason}</p>
               
               {compatibilityCheck.old_model && compatibilityCheck.new_model && (
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="bg-dark-700/50 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Mevcut Model:</span>
                     <span className="font-medium">{compatibilityCheck.old_model.display_name}</span>
@@ -229,20 +229,20 @@ export const EmbeddingConfigTab: React.FC = () => {
                     <span className="text-gray-500">Mevcut Boyut:</span>
                     <span className="font-medium">{compatibilityCheck.old_model.dimension} vektör</span>
                   </div>
-                  <div className="border-t my-2"></div>
+                  <div className="border-t border-white/[0.06] my-2"></div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Yeni Model:</span>
-                    <span className="font-medium text-blue-600">{compatibilityCheck.new_model.display_name}</span>
+                    <span className="font-medium text-blue-400">{compatibilityCheck.new_model.display_name}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Yeni Boyut:</span>
-                    <span className="font-medium text-blue-600">{compatibilityCheck.new_model.dimension} vektör</span>
+                    <span className="font-medium text-blue-400">{compatibilityCheck.new_model.dimension} vektör</span>
                   </div>
                 </div>
               )}
               
-              <Alert className="border-yellow-500 bg-yellow-50">
-                <AlertDescription className="text-yellow-800">
+              <Alert className="border-amber-500/20 bg-amber-500/10 text-amber-300">
+                <AlertDescription className="text-amber-300">
                   <strong>⚠️ Dikkat:</strong> Bu işlem şunları yapacak:
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>PgVector vektör veritabanı sıfırlanacak</li>
@@ -264,7 +264,7 @@ export const EmbeddingConfigTab: React.FC = () => {
               </Button>
               <Button
                 variant="default"
-                className="bg-yellow-600 hover:bg-yellow-700"
+                className="bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
                 onClick={() => proceedWithModelChange(pendingModelChange, true)}
                 disabled={changingDefault !== null}
               >
@@ -284,13 +284,13 @@ export const EmbeddingConfigTab: React.FC = () => {
 
       {/* Alerts */}
       {error && (
-        <Alert className="border-red-500 bg-red-50">
-          <AlertDescription className="text-red-800">{error}</AlertDescription>
+        <Alert className="border-red-500/20 bg-red-500/10 text-red-400">
+          <AlertDescription className="text-red-400">{error}</AlertDescription>
         </Alert>
       )}
       {success && (
-        <Alert className="border-green-500 bg-green-50">
-          <AlertDescription className="text-green-800 whitespace-pre-line">{success}</AlertDescription>
+        <Alert className="border-green-500/20 bg-green-500/10 text-green-400">
+          <AlertDescription className="text-green-400 whitespace-pre-line">{success}</AlertDescription>
         </Alert>
       )}
 
@@ -379,7 +379,7 @@ export const EmbeddingConfigTab: React.FC = () => {
                       <Button
                         size="sm"
                         variant="default"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500"
                         onClick={() => handleTestEncode(model.model_id)}
                         disabled={testingModel !== null}
                       >
@@ -417,16 +417,16 @@ export const EmbeddingConfigTab: React.FC = () => {
             • <strong>Uzak Modeller:</strong> API üzerinden çalışır (gelecekte eklenecek)
           </p>
           
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="font-semibold text-blue-800 mb-2">🔢 Vektör Boyutu Nedir?</p>
-            <p className="text-blue-700 text-xs">
+          <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+            <p className="font-semibold text-blue-400 mb-2">🔢 Vektör Boyutu Nedir?</p>
+            <p className="text-blue-300 text-xs">
               Embedding modeli, metni sayısal bir vektöre (dizi) dönüştürür. 
               <strong> 768 vektör</strong> = metin 768 adet sayı ile temsil edilir.
             </p>
-            <p className="text-blue-700 text-xs mt-1">
+            <p className="text-blue-300 text-xs mt-1">
               Bu sayılar metnin anlamsal özelliklerini içerir ve benzer metinlerin vektörleri birbirine yakın olur.
             </p>
-            <p className="text-blue-600 text-xs mt-2">
+            <p className="text-blue-400 text-xs mt-2">
               <strong>Örnek:</strong> "Merhaba" → [0.12, -0.45, 0.78, ... 768 sayı]
             </p>
           </div>

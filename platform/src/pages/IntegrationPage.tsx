@@ -89,7 +89,7 @@ export default function IntegrationPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-100">
           Entegrasyon — {agent.name}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -98,15 +98,15 @@ export default function IntegrationPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 bg-dark-600 p-1 rounded-lg w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-dark-800/60 text-primary-400 '
+                : 'text-gray-600 hover:text-gray-100'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -118,14 +118,14 @@ export default function IntegrationPage() {
       {/* Widget Tab */}
       {activeTab === 'widget' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-2">Widget Embed Kodu</h3>
             <p className="text-sm text-gray-500 mb-4">
-              Bu kodu web sitenizin <code className="bg-gray-100 px-1 rounded">&lt;body&gt;</code> tag'ının sonuna ekleyin
+              Bu kodu web sitenizin <code className="bg-dark-600 px-1 rounded">&lt;body&gt;</code> tag'ının sonuna ekleyin
             </p>
 
             {!firstPublicKey && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 mb-4 text-sm">
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg p-3 mb-4 text-sm">
                 ⚠️ Henüz API key oluşturmadınız. Önce "API Keys" sekmesinden bir public key oluşturun.
               </div>
             )}
@@ -144,7 +144,7 @@ export default function IntegrationPage() {
           </div>
 
           {/* Customization */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-4">Özelleştirme Seçenekleri</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {[
@@ -152,8 +152,8 @@ export default function IntegrationPage() {
                 { attr: 'data-position', desc: 'Widget pozisyonu', example: 'bottom-right | bottom-left' },
                 { attr: 'data-title', desc: 'Widget başlığı', example: 'Destek Asistanı' },
               ].map((opt) => (
-                <div key={opt.attr} className="bg-gray-50 rounded-lg p-3">
-                  <code className="text-indigo-600 font-mono text-xs">{opt.attr}</code>
+                <div key={opt.attr} className="bg-dark-700/50 rounded-lg p-3">
+                  <code className="text-primary-400 font-mono text-xs">{opt.attr}</code>
                   <p className="text-gray-600 mt-1">{opt.desc}</p>
                   <p className="text-gray-400 text-xs mt-0.5">Örnek: {opt.example}</p>
                 </div>
@@ -166,7 +166,7 @@ export default function IntegrationPage() {
       {/* API Tab */}
       {activeTab === 'api' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-2">REST API Kullanımı</h3>
             <p className="text-sm text-gray-500 mb-4">
               OpenAI-compatible API ile kendi uygulamanızdan sohbet başlatın
@@ -185,7 +185,7 @@ export default function IntegrationPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-3">API Endpointleri</h3>
             <div className="space-y-3 text-sm">
               {[
@@ -193,13 +193,13 @@ export default function IntegrationPage() {
                 { method: 'GET', path: `/v1/agents/${agent.public_id}/info`, desc: 'Asistan bilgilerini al' },
                 { method: 'GET', path: '/v1/conversations/{session_id}/history', desc: 'Sohbet geçmişi' },
               ].map((ep) => (
-                <div key={ep.path} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                    ep.method === 'POST' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                <div key={ep.path} className="flex items-center gap-3 bg-dark-700/50 rounded-lg p-3">
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold border ${
+                    ep.method === 'POST' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-green-500/10 text-green-400 border-green-500/20'
                   }`}>
                     {ep.method}
                   </span>
-                  <code className="font-mono text-gray-700 flex-1">{ep.path}</code>
+                  <code className="font-mono text-gray-300 flex-1">{ep.path}</code>
                   <span className="text-gray-500">{ep.desc}</span>
                 </div>
               ))}
@@ -213,45 +213,45 @@ export default function IntegrationPage() {
         <div className="space-y-6">
           {/* Created Key Alert */}
           {createdKey && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-              <h4 className="font-semibold text-green-800 mb-2">🔑 Yeni API Key Oluşturuldu</h4>
-              <p className="text-sm text-green-700 mb-2">
+            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+              <h4 className="font-semibold text-green-400 mb-2">🔑 Yeni API Key Oluşturuldu</h4>
+              <p className="text-sm text-green-400/80 mb-2">
                 Bu key sadece bir kez gösterilecek. Güvenli bir yere kaydedin.
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-green-100 px-3 py-2 rounded-lg font-mono text-sm break-all">
+                <code className="flex-1 bg-dark-700/50 border border-white/[0.1] px-3 py-2 rounded-lg font-mono text-sm break-all text-gray-100">
                   {createdKey}
                 </code>
-                <button onClick={() => copy(createdKey)} className="p-2 bg-green-200 rounded-lg hover:bg-green-300">
-                  <ClipboardDocumentIcon className="h-5 w-5 text-green-700" />
+                <button onClick={() => copy(createdKey)} className="p-2 bg-primary-600 rounded-lg hover:bg-primary-700">
+                  <ClipboardDocumentIcon className="h-5 w-5 text-white" />
                 </button>
               </div>
-              <button onClick={() => setCreatedKey(null)} className="mt-2 text-sm text-green-600 hover:underline">
+              <button onClick={() => setCreatedKey(null)} className="mt-2 text-sm text-gray-400 hover:text-gray-100 hover:underline">
                 Kapat
               </button>
             </div>
           )}
 
           {/* Create Key Form */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
             <h3 className="text-lg font-semibold mb-4">Yeni API Key</h3>
             <div className="flex gap-3 items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Key Adı</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Key Adı</label>
                 <input
                   type="text"
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
                   placeholder="ör: Website Widget, Backend Integration"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tip</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Tip</label>
                 <select
                   value={newKeyType}
                   onChange={(e) => setNewKeyType(e.target.value as 'public' | 'secret')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                  className="px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 rounded-lg focus:outline-none"
                 >
                   <option value="public">Public (widget)</option>
                   <option value="secret">Secret (API)</option>
@@ -260,7 +260,7 @@ export default function IntegrationPage() {
               <button
                 onClick={() => createKeyMutation.mutate()}
                 disabled={!newKeyName.trim() || createKeyMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 <PlusIcon className="h-4 w-4" />
                 Oluştur
@@ -269,7 +269,7 @@ export default function IntegrationPage() {
           </div>
 
           {/* Key List */}
-          <div className="bg-white rounded-xl border border-gray-200 divide-y">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] divide-y divide-white/[0.06]">
             {apiKeys.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 Henüz API key oluşturulmadı
@@ -280,11 +280,11 @@ export default function IntegrationPage() {
                   <div className="flex items-center gap-3">
                     <KeyIcon className="h-5 w-5 text-gray-400" />
                     <div>
-                      <p className="font-medium text-gray-900">{key.name}</p>
+                      <p className="font-medium text-gray-100">{key.name}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
                         <code>{key.key_prefix}...</code>
-                        <span className={`px-1.5 py-0.5 rounded ${
-                          key.key_type === 'public' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                        <span className={`px-1.5 py-0.5 rounded border ${
+                          key.key_type === 'public' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         }`}>
                           {key.key_type}
                         </span>
@@ -300,7 +300,7 @@ export default function IntegrationPage() {
                       if (confirm('Bu API key iptal edilecek. Emin misiniz?'))
                         revokeKeyMutation.mutate(key.id);
                     }}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    className="p-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </button>

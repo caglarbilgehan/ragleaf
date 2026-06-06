@@ -24,11 +24,19 @@ logger = logging.getLogger(__name__)
 chat_router = APIRouter()
 
 # Ragleaf Default System Prompt (fallback when no tenant-specific prompt is defined)
-DEFAULT_SYSTEM_PROMPT = """Sen bir yapay zeka asistanısın.
+# This is now dynamically selected based on language parameter
+DEFAULT_SYSTEM_PROMPT_TR = """Sen bir yapay zeka asistanısın.
 
 Kurallar:
 - Kullanıcının dilinde yanıt ver
 - Emin olmadığın konularda bunu belirt
+"""
+
+DEFAULT_SYSTEM_PROMPT_EN = """You are an AI assistant.
+
+Rules:
+- Respond in the user's language
+- State when you're not sure about something
 """
 
 class ChatRequest(BaseModel):
@@ -142,6 +150,10 @@ async def chat(
         temperature = model_config.temperature or request.temperature or 0.7
         provider = request.provider or model_config.provider
         
+        # Select system prompt based on language parameter
+        language = request.language or "tr"
+        default_system_prompt = DEFAULT_SYSTEM_PROMPT_TR if language == "tr" else DEFAULT_SYSTEM_PROMPT_EN
+        
         # Build model params dict for response
         model_params = {
             "temperature": temperature,
@@ -234,7 +246,11 @@ async def chat(
                     if len(context) > max_context_chars:
                         context = context[:max_context_chars] + "..."
                     
-                    system_prompt = DEFAULT_SYSTEM_PROMPT + f"\n\nAşağıdaki döküman içeriklerini kullanarak kullanıcının sorusunu yanıtla:\n\n{context}"
+                    # Use language-aware system prompt
+                    if language == "en":
+                        system_prompt = default_system_prompt + f"\n\nAnswer the user's question using the following document contents:\n\n{context}"
+                    else:
+                        system_prompt = default_system_prompt + f"\n\nAşağıdaki döküman içeriklerini kullanarak kullanıcının sorusunu yanıtla:\n\n{context}"
                     
                     context_end = time.time()
                     timing_breakdown["context_build_ms"] = round((context_end - context_start) * 1000, 2)
@@ -244,17 +260,26 @@ async def chat(
                 else:
                     # No results found
                     query_analysis = rag_results.get('query_analysis', {})
-                    if query_analysis.get('confidence', 0) < 0.3:
-                        system_prompt = DEFAULT_SYSTEM_PROMPT + f"\n\nNot: Sorgunuz çok belirsiz (güven: {query_analysis.get('confidence', 0):.2f}). Lütfen daha spesifik bir soru sorun veya genel bilgilerimle yanıt vereyim."
+                    if language == "en":
+                        if query_analysis.get('confidence', 0) < 0.3:
+                            system_prompt = default_system_prompt + f"\n\nNote: Your query is very vague (confidence: {query_analysis.get('confidence', 0):.2f}). Please ask a more specific question or I'll respond with my general knowledge."
+                        else:
+                            system_prompt = default_system_prompt + "\n\nNote: No documents found related to your question. I'll respond with my general knowledge."
                     else:
-                        system_prompt = DEFAULT_SYSTEM_PROMPT + "\n\nNot: Sorunuzla ilgili döküman bulunamadı. Genel bilgilerimle yanıt veriyorum."
+                        if query_analysis.get('confidence', 0) < 0.3:
+                            system_prompt = default_system_prompt + f"\n\nNot: Sorgunuz çok belirsiz (güven: {query_analysis.get('confidence', 0):.2f}). Lütfen daha spesifik bir soru sorun veya genel bilgilerimle yanıt vereyim."
+                        else:
+                            system_prompt = default_system_prompt + "\n\nNot: Sorunuzla ilgili döküman bulunamadı. Genel bilgilerimle yanıt veriyorum."
             
             except Exception as e:
                 logger.error(f"Enhanced RAG search error: {e}")
-                system_prompt = DEFAULT_SYSTEM_PROMPT + f"\n\nNot: Döküman aramasında hata oluştu ({str(e)}). Genel bilgilerimle yanıt veriyorum."
+                if language == "en":
+                    system_prompt = default_system_prompt + f"\n\nNote: An error occurred during document search ({str(e)}). I'll respond with my general knowledge."
+                else:
+                    system_prompt = default_system_prompt + f"\n\nNot: Döküman aramasında hata oluştu ({str(e)}). Genel bilgilerimle yanıt veriyorum."
         else:
             # Chat Mode: No document context
-            system_prompt = DEFAULT_SYSTEM_PROMPT
+            system_prompt = default_system_prompt
         
         # Generate response with database parameters
         logger.info(f"Generating response with model: {model_config.model_name}, provider: {provider}")
@@ -475,7 +500,10 @@ async def chat_stream(
             sources = None
             
             if request.mode == "rag":
-                yield f"data: {json.dumps({'type': 'status', 'message': 'Dökümanlar aranıyor...'})}\n\n"
+                if language == "en":
+                    yield f"data: {json.dumps({'type': 'status', 'message': 'Searching documents...'})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'status', 'message': 'Dökümanlar aranıyor...'})}\n\n"
                 
                 # Use enhanced retriever
                 available_docs = enhanced_retriever.get_available_documents()
@@ -500,7 +528,10 @@ async def chat_stream(
                         )
                     
                     if search_results:
-                        yield f"data: {json.dumps({'type': 'status', 'message': f'{len(search_results)} ilgili döküman parçası bulundu'})}\n\n"
+                        if language == "en":
+                            yield f"data: {json.dumps({'type': 'status', 'message': f'Found {len(search_results)} relevant document chunks'})}\n\n"
+                        else:
+                            yield f"data: {json.dumps({'type': 'status', 'message': f'{len(search_results)} ilgili döküman parçası bulundu'})}\n\n"
                         
                         # Build context
                         context_parts = []
@@ -520,12 +551,21 @@ async def chat_stream(
                         yield f"data: {json.dumps({'type': 'sources', 'data': sources})}\n\n"
             
             # Prepare system prompt
-            if request.mode == "rag" and context:
-                system_prompt = DEFAULT_SYSTEM_PROMPT + f"\n\nAşağıdaki döküman içeriklerini kullanarak kullanıcının sorusunu yanıtla:\n\n{context}"
-            else:
-                system_prompt = DEFAULT_SYSTEM_PROMPT
+            language = request.language or "tr"
+            default_system_prompt = DEFAULT_SYSTEM_PROMPT_TR if language == "tr" else DEFAULT_SYSTEM_PROMPT_EN
             
-            yield f"data: {json.dumps({'type': 'status', 'message': 'AI yanıtı oluşturuluyor...'})}\n\n"
+            if request.mode == "rag" and context:
+                if language == "en":
+                    system_prompt = default_system_prompt + f"\n\nAnswer the user's question using the following document contents:\n\n{context}"
+                else:
+                    system_prompt = default_system_prompt + f"\n\nAşağıdaki döküman içeriklerini kullanarak kullanıcının sorusunu yanıtla:\n\n{context}"
+            else:
+                system_prompt = default_system_prompt
+            
+            if language == "en":
+                yield f"data: {json.dumps({'type': 'status', 'message': 'Generating AI response...'})}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'status', 'message': 'AI yanıtı oluşturuluyor...'})}\n\n"
             
             # Get AI service
             provider = request.provider or model_config.provider

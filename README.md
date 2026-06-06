@@ -127,12 +127,66 @@
 | **Python** | 3.11+ | Backend |
 | **Node.js** | 18+ | Frontend'ler |
 | **npm** | 9.5.0+ | Paket yöneticisi |
-| **Docker** | Latest | MongoDB için |
+| **Docker** | Latest | Backend servisleri için |
 | **Git** | Latest | Versiyon kontrolü |
 
 ---
 
 ## 🔧 Development Ortamı Kurulumu
+
+### 🎯 Hızlı Başlangıç (Lokal Dev)
+
+**Backend servisleri Docker'da, frontend'ler lokal olarak çalışır:**
+
+```bash
+# 1. Backend servislerini başlat (PostgreSQL, Redis, OCR, Embedding, API Gateway, MinIO)
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. Platform (React) başlat
+cd platform
+npm run dev
+# http://localhost:5174
+
+# 3. Landing (Next.js) başlat
+cd landing
+npm run dev
+# http://localhost:3000
+```
+
+**Detaylı bilgi için:** [DEV_GUIDE.md](DEV_GUIDE.md)
+
+---
+
+### 🚀 Production Deploy
+
+**Tüm servisleri Docker ile production modunda çalıştır:**
+
+```bash
+# Tek komutla production deploy
+./deploy.sh
+```
+
+Bu betik tüm servisleri build eder ve başlatır.
+
+---
+
+### 📋 Port Şeması
+
+| Servis | Dev Port | Prod Port | Açıklama |
+|--------|----------|-----------|----------|
+| PostgreSQL | 1300 | 1300 | Ana veritabanı (pgvector) |
+| Redis | 1303 | 1303 | Cache ve kuyruk |
+| OCR Service | 1304 | 1304 | PDF/Text extraction |
+| Embedding Service | 1305 | 1305 | ML/Vector generation |
+| API Gateway | 1306 | 1306 | Main backend (FastAPI) |
+| MinIO API | 1308 | 1308 | S3-compatible storage |
+| MinIO Console | 1309 | 1309 | MinIO web interface |
+| Platform | 5174 | 1307 | Admin panel |
+| Landing | 3000 | 1301 | Tanıtım sitesi |
+
+---
+
+## 🔧 Legacy Development Ortamı Kurulumu
 
 ### 1️⃣ MongoDB Kurulumu ve Başlatma
 

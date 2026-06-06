@@ -9,7 +9,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, BackgroundTasks
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -128,6 +128,18 @@ async def create_agent(
     db: Session = Depends(get_db)
 ):
     """Create a new AI agent for the organization."""
+    # Check Trial Expiration
+    if not getattr(org, "is_system", False) and org.plan == "starter" and org.trial_ends_at:
+        now = datetime.now(timezone.utc)
+        trial_ends = org.trial_ends_at
+        if trial_ends.tzinfo is None:
+            trial_ends = trial_ends.replace(tzinfo=timezone.utc)
+        if now > trial_ends:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Deneme süreniz dolmuştur. Devam etmek için lütfen planınızı yükseltin."
+            )
+
     # Check org limit
     current_count = db.query(Agent).filter(Agent.organization_id == org.id).count()
     if current_count >= org.max_agents:
@@ -620,9 +632,53 @@ async def get_embed_code(
 # Agent Document Upload (Tenant self-service)
 # ============================================================================
 
+async def _auto_process_document(document_id: int):
+    """Background task: auto-process and index a document after upload."""
+    import asyncio
+    from backend.database.connection import SessionLocal
+    from backend.services.document_pipeline_service import document_pipeline_service
+
+    # Small delay to let the upload transaction commit
+    await asyncio.sleep(1)
+
+    db = SessionLocal()
+    try:
+        from backend.database.models_v2 import Document as DocModel
+        doc = db.query(DocModel).filter(DocModel.id == document_id).first()
+        if not doc or doc.status != "uploaded":
+            return
+
+        logger.info(f"🤖 Auto-processing document {document_id} ({doc.name})...")
+
+        # Stage 1: Process (parse, OCR, chunk)
+        result = await document_pipeline_service.process_document(document_id, db)
+        if not result.success:
+            logger.error(f"❌ Auto-process failed for doc {document_id}: {result.message}")
+            return
+
+        # Refresh doc to get updated status
+        db.refresh(doc)
+
+        # Stage 3: Index (generate embeddings)
+        if doc.status in ("processed", "enriched"):
+            index_result = await document_pipeline_service.index_document(document_id, db)
+            if index_result.success:
+                logger.info(f"✅ Auto-process+index complete for doc {document_id}")
+            else:
+                logger.warning(f"⚠️ Auto-index failed for doc {document_id}: {index_result.message}")
+        else:
+            logger.info(f"✅ Auto-process complete for doc {document_id} (status={doc.status})")
+
+    except Exception as e:
+        logger.error(f"❌ Auto-process error for doc {document_id}: {e}")
+    finally:
+        db.close()
+
+
 @agents_router.post("/{agent_id}/documents/upload")
 async def upload_agent_document(
     agent_id: int,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     org: Organization = Depends(get_current_org),
     current_user=Depends(get_current_active_user),
@@ -630,12 +686,25 @@ async def upload_agent_document(
 ):
     """
     Upload a document directly to an agent's knowledge base.
-    Tenant self-service: uploads the file, creates Document record, and links to agent.
+    Tenant self-service: uploads the file, creates Document record, links to agent,
+    and automatically starts the processing pipeline in the background.
     """
     from pathlib import Path as FilePath
     
     agent = _get_agent_or_404(agent_id, org.id, db)
     
+    # Check Trial Expiration
+    if not getattr(org, "is_system", False) and org.plan == "starter" and org.trial_ends_at:
+        now = datetime.now(timezone.utc)
+        trial_ends = org.trial_ends_at
+        if trial_ends.tzinfo is None:
+            trial_ends = trial_ends.replace(tzinfo=timezone.utc)
+        if now > trial_ends:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Deneme süreniz dolmuştur. Devam etmek için lütfen planınızı yükseltin."
+            )
+
     # Check org document limit
     current_doc_count = db.query(Document).filter(
         Document.organization_id == org.id
@@ -708,7 +777,10 @@ async def upload_agent_document(
     db.commit()
     db.refresh(doc)
     
-    logger.info(f"✅ Document uploaded: {file.filename} → agent {agent.name} (org={org.slug})")
+    # Auto-process in background
+    background_tasks.add_task(_auto_process_document, doc.id)
+    
+    logger.info(f"✅ Document uploaded: {file.filename} → agent {agent.name} (org={org.slug}), auto-processing started")
     
     return {
         "success": True,
@@ -716,7 +788,443 @@ async def upload_agent_document(
         "filename": file.filename,
         "agent_id": agent.id,
         "status": "uploaded",
-        "note": "Doküman yüklendi. İşlenmesi için /process endpoint'ini kullanın."
+        "auto_processing": True,
+        "note": "Doküman yüklendi ve otomatik işleme başlatıldı."
+    }
+
+
+@agents_router.get("/{agent_id}/documents")
+async def list_agent_documents(
+    agent_id: int,
+    org: Organization = Depends(get_current_org),
+    db: Session = Depends(get_db)
+):
+    """
+    List all documents in an agent's knowledge base with full status info.
+    """
+    agent = _get_agent_or_404(agent_id, org.id, db)
+    
+    links = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == agent.id
+    ).all()
+    
+    documents = []
+    for link in links:
+        doc = db.query(Document).filter(Document.id == link.document_id).first()
+        if doc:
+            # Count how many agents share this document
+            shared_count = db.query(AgentKnowledgeBase).filter(
+                AgentKnowledgeBase.document_id == doc.id
+            ).count()
+            
+            documents.append({
+                "id": doc.id,
+                "name": doc.name,
+                "original_filename": doc.original_filename,
+                "file_type": doc.file_type,
+                "file_size": doc.file_size,
+                "status": doc.status,
+                "processing_stage": doc.processing_stage,
+                "processing_progress": doc.processing_progress or 0,
+                "total_chunks": doc.total_chunks,
+                "vector_indexed": doc.vector_indexed,
+                "language": doc.language or "tr",
+                "created_at": doc.created_at.isoformat() if doc.created_at else None,
+                "processed_at": doc.processed_at.isoformat() if doc.processed_at else None,
+                "shared_agent_count": shared_count,
+                "is_shared": shared_count > 1,
+                "linked_at": link.created_at.isoformat() if link.created_at else None,
+            })
+    
+    return {
+        "agent_id": agent.id,
+        "agent_name": agent.name,
+        "documents": documents,
+        "total": len(documents)
+    }
+
+
+@agents_router.get("/{agent_id}/documents/{document_id}/details")
+async def get_agent_document_details(
+    agent_id: int,
+    document_id: int,
+    org: Organization = Depends(get_current_org),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed logs, dynamic quality score, and system health status for a specific document.
+    """
+    from datetime import timedelta
+    from sqlalchemy import text
+    import json
+    
+    # 1. Validate agent and organization ownership
+    agent = _get_agent_or_404(agent_id, org.id, db)
+    
+    # Check if document is linked to this agent
+    link = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == agent.id,
+        AgentKnowledgeBase.document_id == document_id
+    ).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doküman bu ajana bağlı değil veya bulunamadı"
+        )
+    
+    # 2. Get document
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doküman bulunamadı"
+        )
+        
+    # 3. Calculate Heuristic Quality Score (0-100)
+    base_score = 100
+    suggestions = []
+    
+    if doc.status == "error":
+        base_score = 0
+        suggestions.append(f"Doküman işleme sırasında hata oluştu: {doc.processing_details or 'Bilinmeyen hata'}")
+    else:
+        # Empty document check
+        if doc.status == "processed" and (doc.total_chunks == 0 or doc.total_chunks is None):
+            base_score -= 40
+            suggestions.append("Dokümanda metin bulunamadı veya boş. Lütfen taranmış PDF ise OCR aktif şekilde tekrar yükleyin.")
+            
+        # Large PDF without OCR check
+        if doc.file_type and doc.file_type.lower() == "pdf" and doc.file_size > 2000000 and not doc.ocr_completed:
+            base_score -= 15
+            suggestions.append("Büyük PDF dokümanlarında OCR kullanılmaması bazı taranmış metinlerin atlanmasına yol açabilir.")
+            
+        # Low Chunk Density (large file, few chunks)
+        if doc.file_size > 500000 and doc.total_chunks is not None and doc.total_chunks < 3:
+            base_score -= 20
+            suggestions.append("Dosya boyutuna kıyasla elde edilen parça (chunk) sayısı çok düşük. Parçalama ayarlarını veya dosya içeriğini kontrol edin.")
+            
+        # High Chunk Density (small file, too many chunks)
+        if doc.file_size < 10000 and doc.total_chunks is not None and doc.total_chunks > 50:
+            base_score -= 20
+            suggestions.append("Küçük dosya boyutuna kıyasla çok fazla parça oluşturulmuş, bu durum gereksiz bölünmelere yol açabilir.")
+            
+        # Stuck processing check (processing for > 15 minutes)
+        if doc.status == "processing":
+            reference_time = doc.updated_at or doc.created_at
+            if reference_time:
+                now = datetime.now(timezone.utc) if reference_time.tzinfo else datetime.now()
+                if now - reference_time > timedelta(minutes=15):
+                    base_score -= 30
+                    suggestions.append("İşleme süresi normalden uzun sürüyor. Sistem yükünü veya işlem durumunu kontrol edin.")
+                    
+    # Clamp score
+    quality_score = max(0, min(100, base_score))
+    
+    # Quality Tier mapping
+    if quality_score >= 85:
+        quality_tier = "Mükemmel"
+    elif quality_score >= 60:
+        quality_tier = "İyi"
+    elif quality_score >= 30:
+        quality_tier = "Orta"
+    else:
+        quality_tier = "Düşük"
+        
+    # 4. Parse Logs
+    logs = []
+    if doc.processing_logs:
+        try:
+            if isinstance(doc.processing_logs, str):
+                logs = json.loads(doc.processing_logs)
+            elif isinstance(doc.processing_logs, list):
+                logs = doc.processing_logs
+        except Exception:
+            logs = []
+            
+    # Synthesize fallback logs if empty
+    if not logs:
+        created_time = doc.created_at.isoformat() if doc.created_at else datetime.now().isoformat()
+        logs.append({
+            "timestamp": created_time,
+            "level": "info",
+            "stage": "upload",
+            "progress": 0,
+            "message": "Doküman başarıyla yüklendi."
+        })
+        
+        if doc.status == "processing":
+            logs.append({
+                "timestamp": (doc.updated_at or doc.created_at).isoformat() if (doc.updated_at or doc.created_at) else created_time,
+                "level": "info",
+                "stage": doc.processing_stage or "processing",
+                "progress": doc.processing_progress or 10,
+                "message": doc.processing_details or "Doküman işleniyor."
+            })
+        elif doc.status == "processed":
+            processed_time = doc.processed_at.isoformat() if doc.processed_at else ((doc.updated_at or doc.created_at).isoformat() if (doc.updated_at or doc.created_at) else created_time)
+            if doc.ocr_completed:
+                logs.append({
+                    "timestamp": processed_time,
+                    "level": "success",
+                    "stage": "ocr",
+                    "progress": 50,
+                    "message": "OCR taraması başarıyla tamamlandı."
+                })
+            if doc.vector_indexed:
+                logs.append({
+                    "timestamp": processed_time,
+                    "level": "success",
+                    "stage": "indexing",
+                    "progress": 100,
+                    "message": f"Metin parçalandı ({doc.total_chunks or 0} parça) ve vektör indeksi oluşturuldu."
+                })
+        elif doc.status == "error":
+            error_time = (doc.updated_at or doc.created_at).isoformat() if (doc.updated_at or doc.created_at) else created_time
+            logs.append({
+                "timestamp": error_time,
+                "level": "error",
+                "stage": doc.processing_stage or "error",
+                "progress": doc.processing_progress or 0,
+                "message": f"İşlem başarısız oldu: {doc.processing_details or 'Bilinmeyen hata'}"
+            })
+            
+    # 5. System Health Check Probes
+    db_healthy = False
+    try:
+        db.execute(text("SELECT 1"))
+        db_healthy = True
+    except Exception as e:
+        logger.error(f"Postgres health check failed: {e}")
+        
+    ocr_healthy = False
+    try:
+        import pytesseract
+        pytesseract.get_tesseract_version()
+        ocr_healthy = True
+    except Exception as e:
+        logger.error(f"OCR health check failed: {e}")
+        
+    embedding_healthy = False
+    try:
+        from backend.services.unified_embedding_service import get_unified_embedding_service
+        from backend.database.models import EmbeddingModel
+        service = get_unified_embedding_service()
+        default_model = db.query(EmbeddingModel).filter(
+            EmbeddingModel.is_default == True,
+            EmbeddingModel.is_active == True
+        ).first()
+        if default_model:
+            if default_model.deployment_type == "remote":
+                embedding_healthy = True
+            else:
+                embedding_healthy = default_model.is_downloaded
+        else:
+            active_model = db.query(EmbeddingModel).filter(EmbeddingModel.is_active == True).first()
+            if active_model:
+                embedding_healthy = True
+    except Exception as e:
+        logger.error(f"Embedding health check failed: {e}")
+        
+    return {
+        "document_id": doc.id,
+        "name": doc.name,
+        "original_filename": doc.original_filename,
+        "status": doc.status,
+        "file_type": doc.file_type,
+        "file_size": doc.file_size,
+        "total_chunks": doc.total_chunks,
+        "processing_stage": doc.processing_stage,
+        "processing_progress": doc.processing_progress or 0,
+        "quality": {
+            "score": quality_score,
+            "tier": quality_tier,
+            "suggestions": suggestions
+        },
+        "logs": logs,
+        "system_health": {
+            "database": db_healthy,
+            "ocr": ocr_healthy,
+            "embedding": embedding_healthy
+        }
+    }
+
+
+@agents_router.delete("/{agent_id}/documents/{document_id}")
+async def delete_agent_document(
+    agent_id: int,
+    document_id: int,
+    remove_only: bool = False,
+    org: Organization = Depends(get_current_org),
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Delete a document from an agent's knowledge base.
+    
+    If remove_only=True: only unlinks from this agent (document remains for other agents).
+    If remove_only=False (default): unlinks AND permanently deletes the document if no other agents use it.
+    """
+    agent = _get_agent_or_404(agent_id, org.id, db)
+    
+    # Verify document exists and belongs to org
+    doc = db.query(Document).filter(
+        Document.id == document_id,
+        Document.organization_id == org.id
+    ).first()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Doküman bulunamadı")
+    
+    # Remove KB link
+    link = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == agent.id,
+        AgentKnowledgeBase.document_id == document_id
+    ).first()
+    
+    if not link:
+        raise HTTPException(status_code=404, detail="Doküman bu agent'ın bilgi tabanında bulunamadı")
+    
+    db.delete(link)
+    
+    # Check if other agents still use this document
+    remaining_links = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.document_id == document_id,
+        AgentKnowledgeBase.agent_id != agent.id
+    ).count()
+    
+    permanently_deleted = False
+    if not remove_only and remaining_links == 0:
+        # No other agents use this doc — delete it permanently
+        # Delete physical files
+        import os
+        from backend.services.storage_service import get_storage
+        _storage = get_storage()
+        _storage.delete_document_storage(org.slug, doc.folder_name)
+        
+        # Delete from DB (cascades to chunks, etc.)
+        db.delete(doc)
+        permanently_deleted = True
+        logger.info(f"🗑️ Document permanently deleted: {doc.name} (id={document_id})")
+    else:
+        logger.info(f"🔗 Document unlinked from agent {agent.name}: {doc.name} (id={document_id})")
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "document_id": document_id,
+        "agent_id": agent_id,
+        "action": "deleted" if permanently_deleted else "unlinked",
+        "remaining_agents": remaining_links
+    }
+
+
+@agents_router.post("/{agent_id}/documents/{document_id}/process")
+async def process_agent_document(
+    agent_id: int,
+    document_id: int,
+    background_tasks: BackgroundTasks,
+    org: Organization = Depends(get_current_org),
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Manually trigger processing for a document in an agent's knowledge base.
+    Useful for re-processing failed or uploaded documents.
+    """
+    agent = _get_agent_or_404(agent_id, org.id, db)
+    
+    # Verify document is linked to this agent
+    link = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == agent.id,
+        AgentKnowledgeBase.document_id == document_id
+    ).first()
+    
+    if not link:
+        raise HTTPException(status_code=404, detail="Doküman bu agent'ın bilgi tabanında bulunamadı")
+    
+    # Verify document exists
+    doc = db.query(Document).filter(
+        Document.id == document_id,
+        Document.organization_id == org.id
+    ).first()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Doküman bulunamadı")
+    
+    if doc.status == "processing":
+        raise HTTPException(status_code=400, detail="Doküman zaten işleniyor")
+    
+    # Reset status if error or already processed
+    if doc.status in ("error", "processed", "indexed", "enriched"):
+        doc.status = "uploaded"
+        doc.processing_progress = 0
+        doc.processing_stage = None
+        db.commit()
+    
+    # Trigger processing in background
+    background_tasks.add_task(_auto_process_document, doc.id)
+    
+    return {
+        "success": True,
+        "document_id": doc.id,
+        "agent_id": agent_id,
+        "status": "processing_started",
+        "note": "Doküman işleme başlatıldı."
+    }
+
+
+@agents_router.post("/{agent_id}/documents/{document_id}/share")
+async def share_document_with_agent(
+    agent_id: int,
+    document_id: int,
+    target_agent_id: int,
+    org: Organization = Depends(get_current_org),
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Share a document from one agent's knowledge base with another agent.
+    Both agents must belong to the same organization.
+    """
+    # Verify source agent
+    _get_agent_or_404(agent_id, org.id, db)
+    
+    # Verify target agent
+    target_agent = _get_agent_or_404(target_agent_id, org.id, db)
+    
+    # Verify document is linked to source agent
+    source_link = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == agent_id,
+        AgentKnowledgeBase.document_id == document_id
+    ).first()
+    
+    if not source_link:
+        raise HTTPException(status_code=404, detail="Doküman kaynak agent'ın bilgi tabanında bulunamadı")
+    
+    # Check if already linked to target
+    existing = db.query(AgentKnowledgeBase).filter(
+        AgentKnowledgeBase.agent_id == target_agent_id,
+        AgentKnowledgeBase.document_id == document_id
+    ).first()
+    
+    if existing:
+        return {"success": True, "action": "already_shared", "message": "Doküman zaten bu agent ile paylaşılmış"}
+    
+    # Create link
+    new_link = AgentKnowledgeBase(agent_id=target_agent_id, document_id=document_id)
+    db.add(new_link)
+    db.commit()
+    
+    logger.info(f"📎 Document {document_id} shared with agent {target_agent.name}")
+    
+    return {
+        "success": True,
+        "action": "shared",
+        "document_id": document_id,
+        "target_agent_id": target_agent_id,
+        "target_agent_name": target_agent.name
     }
 
 
@@ -771,3 +1279,4 @@ def _agent_to_response(agent: Agent, db: Session) -> AgentResponse:
         created_at=agent.created_at,
         updated_at=agent.updated_at
     )
+

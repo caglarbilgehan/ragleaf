@@ -74,8 +74,8 @@ const ChunkingSettingsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Chunking Ayarları</h1>
-          <p className="text-gray-600">Dokümanların nasıl parçalara ayrılacağını yapılandırın</p>
+          <h1 className="text-2xl font-bold text-gray-100">Chunking Ayarları</h1>
+          <p className="text-gray-400">Dokümanların nasıl parçalara ayrılacağını yapılandırın</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
           {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -104,7 +104,7 @@ const ChunkingSettingsPage: React.FC = () => {
                 value={config.chunk_size}
                 onChange={(e) => setConfig({ ...config, chunk_size: parseInt(e.target.value) || 500 })}
               />
-              <p className="text-xs text-gray-500">Her metin parçasının maksimum uzunluğu</p>
+              <p className="text-xs text-gray-400">Her metin parçasının maksimum uzunluğu</p>
             </div>
 
             <div className="space-y-2">
@@ -117,7 +117,7 @@ const ChunkingSettingsPage: React.FC = () => {
                 value={config.overlap}
                 onChange={(e) => setConfig({ ...config, overlap: parseInt(e.target.value) || 100 })}
               />
-              <p className="text-xs text-gray-500">Parçalar arası örtüşme miktarı</p>
+              <p className="text-xs text-gray-400">Parçalar arası örtüşme miktarı</p>
             </div>
 
             <div className="space-y-2">
@@ -130,7 +130,7 @@ const ChunkingSettingsPage: React.FC = () => {
                 value={config.batch_size}
                 onChange={(e) => setConfig({ ...config, batch_size: parseInt(e.target.value) || 9 })}
               />
-              <p className="text-xs text-gray-500">Aynı anda işlenecek chunk sayısı</p>
+              <p className="text-xs text-gray-400">Aynı anda işlenecek chunk sayısı</p>
             </div>
 
             <div className="space-y-2">
@@ -143,46 +143,46 @@ const ChunkingSettingsPage: React.FC = () => {
                 value={config.max_memory_mb}
                 onChange={(e) => setConfig({ ...config, max_memory_mb: parseInt(e.target.value) || 512 })}
               />
-              <p className="text-xs text-gray-500">İşlem için ayrılan RAM limiti</p>
+              <p className="text-xs text-gray-400">İşlem için ayrılan RAM limiti</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="border border-blue-500/20 bg-blue-500/[0.02]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-800">
+          <CardTitle className="flex items-center gap-2 text-blue-400">
             <Info className="h-5 w-5" />
             Chunking Nasıl Çalışır?
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-blue-700">
-          <div className="bg-white p-3 rounded border text-xs font-mono">
-            <p className="text-gray-500 mb-2">Örnek: 2000 karakterlik doküman, Chunk=500, Overlap=100</p>
+        <CardContent className="space-y-4 text-sm text-blue-300">
+          <div className="bg-dark-800/60 p-3 rounded border border-white/[0.06] text-xs font-mono">
+            <p className="text-gray-400 mb-2">Örnek: 2000 karakterlik doküman, Chunk=500, Overlap=100</p>
             <p>📄 Doküman → [Chunk 1: 0-500] [Chunk 2: 400-900] [Chunk 3: 800-1300] [Chunk 4: 1200-1700] [Chunk 5: 1600-2000]</p>
           </div>
           
           <div className="space-y-2">
             <p>
               <strong>📏 Chunk Boyutu:</strong> Dokümanı kaç karakterlik parçalara böleceğini belirler. 
-              <span className="text-blue-600"> Küçük chunk = daha hassas arama, büyük chunk = daha fazla bağlam.</span>
+              <span className="text-blue-400"> Küçük chunk = daha hassas arama, büyük chunk = daha fazla bağlam.</span>
             </p>
             <p>
               <strong>🔗 Overlap:</strong> Parçalar arasında örtüşen kısım. 
-              <span className="text-blue-600"> Cümlelerin ortasından kesilmesini önler, anlam bütünlüğünü korur.</span>
+              <span className="text-blue-400"> Cümlelerin ortasından kesilmesini önler, anlam bütünlüğünü korur.</span>
             </p>
             <p>
               <strong>📦 Batch Boyutu:</strong> Aynı anda kaç chunk'ın embedding'e dönüştürüleceği. 
-              <span className="text-blue-600"> Yüksek = hızlı ama daha fazla RAM kullanır.</span>
+              <span className="text-blue-400"> Yüksek = hızlı ama daha fazla RAM kullanır.</span>
             </p>
             <p>
               <strong>💾 Maksimum Bellek:</strong> İşlem için ayrılan RAM limiti. 
-              <span className="text-blue-600"> Aşılırsa işlem yavaşlar veya durur.</span>
+              <span className="text-blue-400"> Aşılırsa işlem yavaşlar veya durur.</span>
             </p>
           </div>
           
-          <div className="mt-3 text-blue-600 bg-blue-100 p-2 rounded">
+          <div className="mt-3 text-blue-300 bg-blue-500/10 border border-blue-500/20 p-2 rounded">
             💡 <strong>Önerilen Değerler:</strong> Chunk: 500-1000, Overlap: 50-200, Batch: 8-16, Bellek: 512-1024 MB
           </div>
         </CardContent>

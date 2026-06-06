@@ -184,7 +184,7 @@ export default function AgentBuilderPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
       </div>
     );
   }
@@ -203,24 +203,24 @@ export default function AgentBuilderPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/agents')} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button onClick={() => navigate('/agents')} className="p-2 hover:bg-dark-600 rounded-lg">
             <ArrowLeftIcon className="h-5 w-5 text-gray-500" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{agent.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-100">{agent.name}</h1>
             <p className="text-sm text-gray-500">Asistan ayarlarını düzenle</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {hasChanges && (
-            <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+            <span className="text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
               Kaydedilmemiş değişiklikler
             </span>
           )}
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending || !hasChanges}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
             <CheckCircleIcon className="h-5 w-5" />
             {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
@@ -229,15 +229,15 @@ export default function AgentBuilderPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+      <div className="flex gap-1 bg-dark-600 p-1 rounded-lg overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === tab.id
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-dark-800/60 text-primary-400 '
+                : 'text-gray-600 hover:text-gray-100'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -247,7 +247,7 @@ export default function AgentBuilderPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
         {activeTab === 'general' && (
           <div className="space-y-5 max-w-2xl">
             <h3 className="text-lg font-semibold border-b pb-2">Genel Bilgiler</h3>
@@ -308,13 +308,13 @@ export default function AgentBuilderPage() {
 
             {/* Current KB */}
             {(kbData?.documents || []).length > 0 ? (
-              <div className="divide-y border rounded-lg">
+              <div className="divide-y divide-white/[0.06] border border-white/[0.06] rounded-lg">
                 {(kbData?.documents || []).map((doc) => (
                   <div key={doc.id} className="flex items-center justify-between p-3">
                     <div className="flex items-center gap-3">
                       <DocumentTextIcon className="h-5 w-5 text-gray-400" />
                       <div>
-                        <p className="font-medium text-sm text-gray-900">{doc.name}</p>
+                        <p className="font-medium text-sm text-gray-100">{doc.name}</p>
                         <p className="text-xs text-gray-500">
                           {doc.file_type} • {doc.total_chunks || 0} chunk
                           {doc.vector_indexed && <span className="text-green-600 ml-2">✓ indexed</span>}
@@ -323,7 +323,7 @@ export default function AgentBuilderPage() {
                     </div>
                     <button
                       onClick={() => removeDocMutation.mutate(doc.id)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                      className="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition-colors"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
@@ -331,7 +331,7 @@ export default function AgentBuilderPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500 border rounded-lg">
+              <div className="text-center py-8 text-gray-500 border border-white/[0.06] bg-dark-700/30 rounded-lg">
                 Henüz doküman eklenmedi
               </div>
             )}
@@ -339,17 +339,17 @@ export default function AgentBuilderPage() {
             {/* Add documents */}
             {availableDocs.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Doküman Ekle</h4>
+                <h4 className="text-sm font-medium text-gray-300 mb-2">Doküman Ekle</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {availableDocs.slice(0, 10).map((doc: any) => (
                     <button
                       key={doc.id}
                       onClick={() => addDocsMutation.mutate([doc.id])}
-                      className="flex items-center gap-2 p-3 text-left border rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+                      className="flex items-center gap-2 p-3 text-left border border-white/[0.06] rounded-lg hover:border-primary-500/50 hover:bg-dark-700/50 transition-colors"
                     >
-                      <PlusIcon className="h-4 w-4 text-indigo-500" />
+                      <PlusIcon className="h-4 w-4 text-primary-400" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                        <p className="text-sm font-medium text-gray-100">{doc.name}</p>
                         <p className="text-xs text-gray-500">{doc.file_type} • {doc.total_chunks || 0} chunk</p>
                       </div>
                     </button>
@@ -395,26 +395,26 @@ export default function AgentBuilderPage() {
               </Field>
             </div>
             <Field label={`Köşe Yuvarlaklığı: ${form.border_radius}px`}>
-              <input type="range" min="0" max="24" value={form.border_radius} onChange={(e) => updateField('border_radius', parseInt(e.target.value))} className="w-full accent-indigo-600" />
+              <input type="range" min="0" max="24" value={form.border_radius} onChange={(e) => updateField('border_radius', parseInt(e.target.value))} className="w-full accent-primary-500" />
             </Field>
             <Field label="">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.show_branding} onChange={(e) => updateField('show_branding', e.target.checked)} className="rounded" />
-                <span className="text-sm text-gray-700">"Powered by Ragleaf" yazısını göster</span>
+                <input type="checkbox" checked={form.show_branding} onChange={(e) => updateField('show_branding', e.target.checked)} className="rounded border-white/[0.06] bg-dark-900 text-primary-600" />
+                <span className="text-sm text-gray-300">"Powered by Ragleaf" yazısını göster</span>
               </label>
             </Field>
             <Field label="">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.auto_open} onChange={(e) => updateField('auto_open', e.target.checked)} className="rounded" />
                 <div>
-                  <span className="text-sm font-medium text-gray-900">Widget Otomatik Açılsın</span>
+                  <span className="text-sm font-medium text-gray-100">Widget Otomatik Açılsın</span>
                   <p className="text-xs text-gray-500">Ziyaretçi siteye girdiğinde chat widget’ı otomatik açılır</p>
                 </div>
               </label>
             </Field>
 
             {/* Preview */}
-            <div className="border rounded-xl p-4 bg-gray-50">
+            <div className="border rounded-xl p-4 bg-dark-700/50">
               <p className="text-xs font-medium text-gray-500 mb-3">Önizleme</p>
               <div className="flex justify-end">
                 <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: form.primary_color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.2)', cursor: 'pointer' }}>
@@ -433,7 +433,7 @@ export default function AgentBuilderPage() {
                 <label className="flex items-center gap-2 cursor-pointer p-3 border rounded-lg">
                   <input type="checkbox" checked={form.is_active} onChange={(e) => updateField('is_active', e.target.checked)} className="rounded" />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Aktif</span>
+                    <span className="text-sm font-medium text-gray-100">Aktif</span>
                     <p className="text-xs text-gray-500">Devre dışı bırakılırsa asistan yanıt vermez</p>
                   </div>
                 </label>
@@ -442,7 +442,7 @@ export default function AgentBuilderPage() {
                 <label className="flex items-center gap-2 cursor-pointer p-3 border rounded-lg">
                   <input type="checkbox" checked={form.is_public} onChange={(e) => updateField('is_public', e.target.checked)} className="rounded" />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Public API</span>
+                    <span className="text-sm font-medium text-gray-100">Public API</span>
                     <p className="text-xs text-gray-500">Widget ve API üzerinden erişilebilir</p>
                   </div>
                 </label>
@@ -470,7 +470,7 @@ export default function AgentBuilderPage() {
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+      {label && <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>}
       {hint && <p className="text-xs text-gray-400 mb-1">{hint}</p>}
       {children}
     </div>

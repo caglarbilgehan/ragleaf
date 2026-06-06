@@ -11,7 +11,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, Boolean, 
-    ForeignKey, Float, Index, text, UniqueConstraint
+    ForeignKey, Float, Index, text, UniqueConstraint, Numeric
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -70,6 +70,34 @@ class AgentTemplate(Base):
 
 
 # ============================================================================
+# Plans (Ücretlendirme & Limit Paketleri)
+# ============================================================================
+
+class Plan(Base):
+    """
+    Plans (Ücretlendirme ve Limit Paketleri).
+    Fiyatlar ve limitler veritabanından yönetilir.
+    """
+    __tablename__ = "plans"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(50), unique=True, nullable=False, index=True) # "starter", "pro", "enterprise"
+    name = Column(String(100), nullable=False)
+    price = Column(Numeric(10, 2), default=0.00) # Aylık fiyat
+    billing_cycle = Column(String(20), default="monthly") # "monthly", "yearly"
+    max_agents = Column(Integer, default=3)
+    max_documents = Column(Integer, default=50)
+    max_queries_per_month = Column(Integer, default=1000)
+    max_storage_mb = Column(Integer, default=500)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __repr__(self):
+        return f"<Plan {self.key} price={self.price}>"
+
+
+# ============================================================================
 # Organization & Team Tables
 # ============================================================================
 
@@ -86,11 +114,13 @@ class Organization(Base):
     logo_url = Column(String(500), nullable=True)
     
     # Plan & Limits
-    plan = Column(String(50), default="free")  # free, starter, pro, enterprise
+    plan = Column(String(50), default="starter")  # starter, pro, enterprise
+    trial_ends_at = Column(DateTime(timezone=True), nullable=True)
     max_agents = Column(Integer, default=3)
     max_documents = Column(Integer, default=50)
     max_queries_per_month = Column(Integer, default=1000)
     max_storage_mb = Column(Integer, default=500)
+    ragleaf_leaves = Column(Integer, default=0, nullable=False)
     
     # Organization-level settings
     settings = Column(JSONB, default={}, nullable=True)
@@ -639,3 +669,134 @@ class CalendarIntegration(Base):
     
     def __repr__(self):
         return f"<CalendarIntegration {self.provider} org={self.organization_id}>"
+
+
+class ContactRequest(Base):
+    """
+    Ragleaf Landing Page Contact Form Submissions.
+    """
+    __tablename__ = "contact_requests"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    email = Column(String(255), nullable=False)
+    subject = Column(String(200), nullable=True)
+    message = Column(Text, nullable=False)
+    status = Column(String(50), default="pending", nullable=False)  # "pending", "resolved"
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    __table_args__ = (
+        Index('idx_contact_status', 'status'),
+        Index('idx_contact_created_at', 'created_at'),
+    )
+
+    def __repr__(self):
+        return f"<ContactRequest {self.id} name={self.name} email={self.email} status={self.status}>"
+
+
+class SponsorshipDeal(Base):
+    """
+    Sponsorluk ve reklam iş birlikleri kayıtları.
+    Influencer asistanları için chat üzerinden sponsorluk teklifleri oluşturulduğunda bu tabloya yazılır.
+    """
+    __tablename__ = "sponsorship_deals"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    public_id = Column(String(36), unique=True, nullable=False, index=True,
+                       default=lambda: f"sp_{uuid.uuid4().hex[:12]}")
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"), nullable=True, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("public_conversations.id", ondelete="SET NULL"), nullable=True)
+    
+    # Sponsor details
+    sponsor_name = Column(String(200), nullable=False)
+    sponsor_email = Column(String(200), nullable=True)
+    product_name = Column(String(200), nullable=False)
+    product_category = Column(String(100), nullable=True)
+    proposed_platforms = Column(JSONB, default=[], nullable=True)  # List of platforms
+    
+    # Financials
+    price = Column(Numeric(10, 2), default=0.00)
+    status = Column(String(30), default="pending", nullable=False, index=True)  # pending, paid, cancelled
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    paid_at = Column(DateTime(timezone=True), nullable=True)
+
+    organization = relationship("Organization")
+    agent = relationship("Agent")
+    conversation = relationship("PublicConversation")
+
+    __table_args__ = (
+        Index('idx_sp_org', 'organization_id'),
+        Index('idx_sp_agent', 'agent_id'),
+        Index('idx_sp_status', 'status'),
+    )
+
+    def __repr__(self):
+        return f"<SponsorshipDeal {self.public_id} sponsor={self.sponsor_name} price={self.price} status={self.status}>"
+
+
+# ============================================================================
+# Ragleaf AI Writer (Otonom İçerik Üretimi)
+# ============================================================================
+
+class WriterArticle(Base):
+    """
+    Ragleaf AI Writer - Otonom veya yarı-otonom üretilen blog içerikleri.
+    """
+    __tablename__ = "writer_articles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    public_id = Column(String(36), unique=True, nullable=False, index=True,
+                       default=lambda: f"art_{uuid.uuid4().hex[:12]}")
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"), nullable=True, index=True)
+    
+    # Content fields
+    title = Column(String(255), nullable=False)
+    slug = Column(String(255), nullable=False, index=True)
+    summary = Column(Text, nullable=True)  # SEO meta description
+    content = Column(Text, nullable=True)  # Markdown/HTML content
+    
+    # SEO & outlines
+    keywords = Column(JSONB, default=[], nullable=True)  # list of strings
+    outline = Column(JSONB, default=[], nullable=True)   # article structure headings
+    
+    # Workflow status: draft → pending_review → approved → published
+    status = Column(String(30), default="draft", nullable=False, index=True)
+    
+    # Configuration
+    mode = Column(String(30), default="semi-autonomous", nullable=False)  # autonomous, semi-autonomous
+    publishing_platform = Column(String(50), default="nextjs", nullable=False)  # nextjs, wordpress, ghost
+    language = Column(String(10), default="tr", nullable=False)
+    
+    # Scheduled & Publishing dates
+    scheduled_at = Column(DateTime(timezone=True), nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Metadata / performance
+    extra_data = Column(JSONB, default={}, nullable=True)  # e.g., token usage, prompt template, SEO score
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    organization = relationship("Organization")
+    agent = relationship("Agent")
+    
+    # Unique constraint: slug must be unique per organization
+    __table_args__ = (
+        UniqueConstraint('organization_id', 'slug', name='uq_article_slug_per_org'),
+        Index('idx_art_org', 'organization_id'),
+        Index('idx_art_agent', 'agent_id'),
+        Index('idx_art_status', 'status'),
+    )
+    
+    def __repr__(self):
+        return f"<WriterArticle {self.public_id} title={self.title} status={self.status}>"
+

@@ -210,6 +210,27 @@ export interface SystemStats {
     total_bytes: number;
     total_mb: number;
   };
+  tenants?: {
+    total: number;
+    active: number;
+    suspended: number;
+    by_plan: Record<string, number>;
+  };
+  agents?: {
+    total: number;
+    active: number;
+  };
+  conversations?: {
+    total: number;
+    total_messages: number;
+  };
+  appointments?: {
+    total: number;
+    pending: number;
+    confirmed: number;
+    completed: number;
+    cancelled: number;
+  };
   ai_services?: {
     total: number;
     active: number;
@@ -309,3 +330,15 @@ export interface ProgressUpdate {
   estimated_remaining_seconds: number;
   error?: string;
 }
+
+export interface ContactRequest {
+  id: number;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  status: 'pending' | 'resolved';
+  created_at: string;
+  updated_at?: string;
+}
+

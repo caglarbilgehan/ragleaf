@@ -18,31 +18,31 @@ interface ConfirmationModalProps {
 const typeConfig = {
     warning: {
         icon: AlertTriangle,
-        iconBg: 'bg-yellow-100',
-        iconColor: 'text-yellow-600',
+        iconBg: 'bg-yellow-500/10',
+        iconColor: 'text-yellow-400',
         confirmBtnClass: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-        borderColor: 'border-yellow-200',
+        borderColor: 'border-yellow-500/20',
     },
     danger: {
         icon: AlertTriangle,
-        iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
+        iconBg: 'bg-red-500/10',
+        iconColor: 'text-red-400',
         confirmBtnClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
-        borderColor: 'border-red-200',
+        borderColor: 'border-red-500/20',
     },
     info: {
         icon: Info,
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
+        iconBg: 'bg-blue-500/10',
+        iconColor: 'text-blue-400',
         confirmBtnClass: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
-        borderColor: 'border-blue-200',
+        borderColor: 'border-blue-500/20',
     },
     success: {
         icon: CheckCircle,
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
+        iconBg: 'bg-green-500/10',
+        iconColor: 'text-green-400',
         confirmBtnClass: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
-        borderColor: 'border-green-200',
+        borderColor: 'border-green-500/20',
     },
 };
 
@@ -94,7 +94,7 @@ export default function ConfirmationModal({
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
                     className={`
-                        bg-white rounded-2xl shadow-2xl max-w-lg w-full pointer-events-auto
+                        bg-dark-800/60 rounded-2xl shadow-2xl max-w-lg w-full pointer-events-auto
                         transform transition-all duration-200 ease-out
                         border ${config.borderColor}
                     `}
@@ -105,7 +105,7 @@ export default function ConfirmationModal({
                         {/* Close button */}
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-dark-600"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -116,7 +116,7 @@ export default function ConfirmationModal({
                                 <IconComponent className={`w-6 h-6 ${config.iconColor}`} />
                             </div>
                             <div className="flex-1 min-w-0 pr-8">
-                                <h3 className="text-lg font-semibold text-gray-900 leading-tight">
+                                <h3 className="text-lg font-semibold text-gray-100 leading-tight">
                                     {title}
                                 </h3>
                             </div>
@@ -125,20 +125,20 @@ export default function ConfirmationModal({
 
                     {/* Content */}
                     <div className="px-6 pb-5">
-                        <div className="text-sm text-gray-600 leading-relaxed">
+                        <div className="text-sm text-gray-300 leading-relaxed">
                             {message}
                         </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50/50 rounded-b-2xl border-t border-gray-100">
+                    <div className="flex items-center justify-end gap-3 px-6 py-4 bg-dark-700/50 rounded-b-2xl border-t border-white/[0.06]">
                         <button
                             onClick={onClose}
                             disabled={isLoading}
                             className="
-                px-4 py-2.5 text-sm font-medium text-gray-700 
-                bg-white border border-gray-300 rounded-xl
-                hover:bg-gray-50 hover:border-gray-400
+                px-4 py-2.5 text-sm font-medium text-gray-300 
+                bg-dark-800/60 border border-white/[0.1] rounded-xl
+                hover:bg-dark-700/50 hover:border-gray-400
                 focus:outline-none focus:ring-2 focus:ring-gray-200
                 transition-all duration-150
                 disabled:opacity-50 disabled:cursor-not-allowed

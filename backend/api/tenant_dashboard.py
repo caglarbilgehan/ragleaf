@@ -44,6 +44,7 @@ class DashboardStats(BaseModel):
     max_documents: int = 50
     max_queries_per_month: int = 1000
     plan: str = "free"
+    ragleaf_leaves: int = 0
 
 
 class DailyUsage(BaseModel):
@@ -139,7 +140,8 @@ async def get_dashboard_stats(
         max_agents=org.max_agents,
         max_documents=org.max_documents,
         max_queries_per_month=org.max_queries_per_month,
-        plan=org.plan
+        plan=org.plan,
+        ragleaf_leaves=org.ragleaf_leaves
     )
 
 

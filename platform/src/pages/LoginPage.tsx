@@ -67,28 +67,31 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Glow effect */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary-500/[0.04] blur-[120px] pointer-events-none" />
+      
+      <div className="max-w-md w-full relative z-10">
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <span className="text-4xl mr-2">🍃</span>
-            <h1 className="text-3xl font-bold text-gray-900">Ragleaf</h1>
+            <h1 className="text-3xl font-bold text-gray-100">Ragleaf</h1>
           </div>
-          <p className="text-gray-600 mt-2">Yönetim Paneli</p>
+          <p className="text-gray-500 mt-2">Yönetim Paneli</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-dark-800/60 backdrop-blur-md rounded-2xl border border-white/[0.06] shadow-2xl p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="label text-gray-700 mb-2 block">
+              <label htmlFor="email" className="label mb-2 block">
                 E-posta Adresi
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <UserIcon className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   {...register('email', { 
@@ -96,13 +99,13 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                     pattern: { value: /^\S+@\S+$/i, message: 'Geçerli bir e-posta adresi girin' }
                   })}
                   type="email"
-                  className={`input pl-10 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  className={`input pl-10 ${errors.email ? 'border-red-500/50 focus-visible:ring-red-500' : ''}`}
                   placeholder="E-posta adresinizi girin"
                   disabled={isLoading}
                 />
               </div>
               {errors.email && (
-                <div className="flex items-center mt-2 text-red-600 text-sm">
+                <div className="flex items-center mt-2 text-red-400 text-sm">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.email.message}
                 </div>
@@ -111,12 +114,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="label text-gray-700 mb-2 block">
+              <label htmlFor="password" className="label mb-2 block">
                 Şifre
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   {...register('password', { 
@@ -124,7 +127,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                     minLength: { value: 4, message: 'En az 4 karakter olmalıdır' }
                   })}
                   type={showPassword ? 'text' : 'password'}
-                  className={`input pl-10 pr-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  className={`input pl-10 pr-10 ${errors.password ? 'border-red-500/50 focus-visible:ring-red-500' : ''}`}
                   placeholder="Şifrenizi girin"
                   disabled={isLoading}
                 />
@@ -135,14 +138,14 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                   disabled={isLoading}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-gray-500 hover:text-gray-300" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-gray-500 hover:text-gray-300" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <div className="flex items-center mt-2 text-red-600 text-sm">
+                <div className="flex items-center mt-2 text-red-400 text-sm">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.password.message}
                 </div>
@@ -171,7 +174,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             <button
               type="button"
               onClick={testConnection}
-              className="w-full px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              className="w-full px-4 py-2 text-sm bg-dark-700 hover:bg-dark-600 text-gray-400 rounded-lg transition-colors border border-white/[0.06]"
             >
               Backend Bağlantısını Test Et
             </button>
@@ -180,7 +183,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
+        <div className="text-center mt-8 text-gray-600 text-sm">
           © 2026 Ragleaf · All rights reserved
         </div>
       </div>

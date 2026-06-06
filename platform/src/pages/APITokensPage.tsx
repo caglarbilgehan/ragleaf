@@ -165,10 +165,10 @@ const APITokensPage: React.FC = () => {
 
   const getModeColor = (mode: string) => {
     switch (mode) {
-      case 'rag': return 'bg-blue-100 text-blue-800';
-      case 'chat': return 'bg-green-100 text-green-800';
-      case 'hybrid': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'rag': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      case 'chat': return 'bg-green-500/10 text-green-400 border border-green-500/20';
+      case 'hybrid': return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+      default: return 'bg-dark-600 text-gray-200';
     }
   };
 
@@ -371,7 +371,7 @@ const APITokensPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">API Token Yönetimi</h1>
+          <h1 className="text-2xl font-bold text-gray-100">API Token Yönetimi</h1>
           <p className="text-gray-600">Dış uygulamalar için API tokenları oluşturun ve yönetin</p>
         </div>
         <div className="flex gap-2">
@@ -391,12 +391,12 @@ const APITokensPage: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Key className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Key className="h-6 w-6 text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Toplam Token</p>
-                <p className="text-2xl font-bold text-gray-900">{tokens.length}</p>
+                <p className="text-sm font-medium text-gray-400">Toplam Token</p>
+                <p className="text-2xl font-bold text-gray-100">{tokens.length}</p>
               </div>
             </div>
           </CardContent>
@@ -405,12 +405,12 @@ const APITokensPage: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Activity className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <Activity className="h-6 w-6 text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Aktif Token</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Aktif Token</p>
+                <p className="text-2xl font-bold text-gray-100">
                   {tokens.filter(t => t.is_active).length}
                 </p>
               </div>
@@ -421,12 +421,12 @@ const APITokensPage: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Zap className="h-6 w-6 text-purple-600" />
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Zap className="h-6 w-6 text-purple-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Toplam İstek</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Toplam İstek</p>
+                <p className="text-2xl font-bold text-gray-100">
                   {tokens.reduce((sum, t) => sum + (t.total_requests || 0), 0)}
                 </p>
               </div>
@@ -437,12 +437,12 @@ const APITokensPage: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-orange-600" />
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <Calendar className="h-6 w-6 text-orange-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Süresi Dolan</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Süresi Dolan</p>
+                <p className="text-2xl font-bold text-gray-100">
                   {tokens.filter(t => t.expires_at && new Date(t.expires_at) < new Date()).length}
                 </p>
               </div>
@@ -479,14 +479,14 @@ const APITokensPage: React.FC = () => {
               key={token.id} 
               className={`transition-all ${
                 token.is_active 
-                  ? 'border-green-200 bg-green-50/30' 
-                  : 'border-gray-200 bg-gray-50/30 opacity-75'
+                  ? 'border-green-500/20 bg-green-500/5' 
+                  : 'border-white/[0.06] bg-dark-700/50 opacity-75'
               }`}
             >
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 bg-white rounded-lg border">
+                    <div className="p-2 bg-dark-800/60 rounded-lg border">
                       {getModeIcon(token.allowed_mode)}
                     </div>
                     
@@ -510,7 +510,7 @@ const APITokensPage: React.FC = () => {
                       </div>
                       
                       {token.description && (
-                        <p className="text-sm text-gray-600 mb-3">{token.description}</p>
+                        <p className="text-sm text-gray-400 mb-3">{token.description}</p>
                       )}
                       
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -534,7 +534,7 @@ const APITokensPage: React.FC = () => {
                       
                       <div className="mt-3 flex items-center gap-2">
                         <span className="text-xs text-gray-500">Key:</span>
-                        <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
+                        <code className="text-xs bg-dark-600 px-2 py-1 rounded font-mono">
                           {token.key_preview || `${token.key_prefix}••••••••••••••••`}
                         </code>
                         <Button
@@ -582,7 +582,7 @@ const APITokensPage: React.FC = () => {
                       size="sm"
                       onClick={() => handleDeleteToken(token.id)}
                       disabled={saving}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 bg-red-500/5"
                       title="Sil"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -596,13 +596,13 @@ const APITokensPage: React.FC = () => {
       </div>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-500/10 border-blue-500/20">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
+            <AlertTriangle className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-300">
               <p className="font-medium mb-1">API Token Kullanımı</p>
-              <ul className="list-disc list-inside space-y-1 text-blue-700">
+              <ul className="list-disc list-inside space-y-1 text-blue-400">
                 <li>Token'ları dış uygulamalardan API'ye erişim için kullanın</li>
                 <li>RAG modu: Belirli departman dökümanları ile çalışır</li>
                 <li>Chat modu: Genel sohbet için kullanılır</li>
@@ -617,7 +617,7 @@ const APITokensPage: React.FC = () => {
       {/* Secret Key Modal */}
       {showSecretModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4 bg-white">
+          <Card className="w-full max-w-md mx-4 bg-dark-800/60">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -638,9 +638,9 @@ const APITokensPage: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Alert className="border-orange-200 bg-orange-50">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <AlertDescription className="text-orange-800">
+              <Alert className="border-orange-500/20 bg-orange-500/10">
+                <AlertTriangle className="h-4 w-4 text-orange-400" />
+                <AlertDescription className="text-orange-200">
                   {secretWarning || '⚠️ Bu secret key\'i güvenli bir yerde saklayın. Bir daha gösterilmeyecek!'}
                 </AlertDescription>
               </Alert>
@@ -771,13 +771,13 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
-      <div className="w-full max-w-4xl mx-4 bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-4xl mx-4 bg-dark-800/60 rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b bg-white rounded-t-lg sticky top-0 z-10">
+        <div className="flex items-center justify-between p-6 border-b bg-dark-800/60 rounded-t-lg sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <Key className="h-6 w-6 text-blue-600" />
+            <Key className="h-6 w-6 text-blue-400" />
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              <h2 className="text-xl font-bold text-gray-100">{title}</h2>
               <p className="text-sm text-gray-500">
                 {isEdit ? 'Mevcut token ayarlarını düzenleyin' : 'Yeni API token oluşturun'}
               </p>
@@ -789,7 +789,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="border-b bg-gray-50">
+        <div className="border-b bg-dark-700/50">
           <div className="flex space-x-8 px-6">
             {[
               { id: 'basic', label: 'Temel Bilgiler', icon: Settings },
@@ -802,8 +802,8 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-primary-500 text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -837,7 +837,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   <select
                     value={formData.allowed_mode}
                     onChange={(e) => updateFormData('allowed_mode', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="rag">RAG - Döküman Tabanlı</option>
                     <option value="chat">Chat - Genel Sohbet</option>
@@ -853,7 +853,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   onChange={(e) => updateFormData('description', e.target.value)}
                   placeholder="Token'ın kullanım amacını açıklayın..."
                   rows={3}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border border-white/[0.1] bg-dark-700 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     formErrors.description ? 'border-red-500' : ''
                   }`}
                 />
@@ -869,12 +869,12 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   <Label>Departmanlar * (RAG/Hybrid modu için)</Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
                     {departments.map((dept) => (
-                      <label key={dept.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <label key={dept.id} className="flex items-center space-x-2 p-2 border border-white/[0.1] rounded-lg hover:bg-dark-700/50 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={formData.department_ids.includes(dept.id)}
                           onChange={() => handleDepartmentToggle(dept.id)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-white/[0.1] text-primary-500 focus:ring-primary-500"
                         />
                         <div>
                           <div className="text-sm font-medium">{dept.name}</div>
@@ -915,7 +915,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   <select
                     value={formData.llm_model_id || ''}
                     onChange={(e) => updateFormData('llm_model_id', e.target.value ? parseInt(e.target.value) : null)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="">Sistem Varsayılanı</option>
                     {llmModels.map((model) => (
@@ -977,7 +977,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   <select
                     value={formData.default_language}
                     onChange={(e) => updateFormData('default_language', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="tr">Türkçe</option>
                     <option value="en">English</option>
@@ -992,7 +992,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                   onChange={(e) => updateFormData('system_prompt', e.target.value)}
                   placeholder="AI'ın davranışını belirleyen özel talimatlar..."
                   rows={4}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border border-white/[0.1] bg-dark-700 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     formErrors.system_prompt ? 'border-red-500' : ''
                   }`}
                 />
@@ -1008,7 +1008,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                     type="checkbox"
                     checked={formData.include_sources}
                     onChange={(e) => updateFormData('include_sources', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-white/[0.1] text-primary-500 focus:ring-primary-500"
                   />
                   <span className="text-sm">Kaynak bilgilerini dahil et</span>
                 </label>
@@ -1018,7 +1018,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                     type="checkbox"
                     checked={formData.include_images}
                     onChange={(e) => updateFormData('include_images', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-white/[0.1] text-primary-500 focus:ring-primary-500"
                   />
                   <span className="text-sm">Görselleri dahil et</span>
                 </label>
@@ -1122,7 +1122,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                             : formData.permissions.filter((p: string) => p !== perm.id);
                           updateFormData('permissions', newPerms);
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-white/[0.1] text-primary-500 focus:ring-primary-500"
                       />
                       <span className="text-sm">{perm.label}</span>
                     </label>
@@ -1156,7 +1156,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                             : formData.allowed_languages.filter((l: string) => l !== lang.code);
                           updateFormData('allowed_languages', newLangs);
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-white/[0.1] text-primary-500 focus:ring-primary-500"
                       />
                       <span className="text-sm">{lang.name}</span>
                     </label>
@@ -1164,9 +1164,9 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
                 </div>
               </div>
 
-              <Alert className="bg-blue-50 border-blue-200">
-                <AlertTriangle className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
+              <Alert className="bg-blue-500/10 border-blue-500/20">
+                <AlertTriangle className="h-4 w-4 text-blue-400" />
+                <AlertDescription className="text-blue-200">
                   <strong>Gelişmiş Ayarlar:</strong> Bu ayarlar deneyimli kullanıcılar içindir. 
                   Varsayılan değerler çoğu kullanım durumu için uygundur.
                 </AlertDescription>
@@ -1176,7 +1176,7 @@ const TokenFormModal: React.FC<TokenFormModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 p-6 border-t bg-gray-50 rounded-b-lg">
+        <div className="flex justify-end gap-2 p-6 border-t bg-dark-700/50 rounded-b-lg">
           <Button variant="outline" onClick={onCancel} disabled={saving}>
             İptal
           </Button>

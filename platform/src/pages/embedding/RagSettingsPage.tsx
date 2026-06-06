@@ -169,8 +169,8 @@ const RagSettingsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">RAG Ayarları</h1>
-          <p className="text-gray-600">Döküman arama ve benzerlik eşiği ayarlarını yapılandırın</p>
+          <h1 className="text-2xl font-bold text-gray-100">RAG Ayarları</h1>
+          <p className="text-gray-400">Döküman arama ve benzerlik eşiği ayarlarını yapılandırın</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
           {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -192,7 +192,7 @@ const RagSettingsPage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="similarity_threshold">Benzerlik Eşiği</Label>
-                <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                <span className="text-sm font-mono bg-dark-600 px-2 py-1 rounded">
                   %{Math.round(config.similarity_threshold * 100)}
                 </span>
               </div>
@@ -206,12 +206,12 @@ const RagSettingsPage: React.FC = () => {
                 onChange={(e) => setConfig({ ...config, similarity_threshold: parseInt(e.target.value) / 100 })}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-gray-500">
+              <div className="flex justify-between text-xs text-gray-400">
                 <span>%0 (Çok Gevşek)</span>
                 <span>%50 (Dengeli)</span>
                 <span>%100 (Çok Sıkı)</span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-400 mt-2">
                 Düşük değer = daha fazla chunk döner (daha geniş sonuçlar)<br/>
                 Yüksek değer = sadece çok benzer chunk'lar döner (daha hassas sonuçlar)
               </p>
@@ -227,13 +227,13 @@ const RagSettingsPage: React.FC = () => {
                 value={config.max_chunks}
                 onChange={(e) => setConfig({ ...config, max_chunks: parseInt(e.target.value) || 5 })}
               />
-              <p className="text-xs text-gray-500">RAG modunda sorguya döndürülecek maksimum chunk sayısı</p>
+              <p className="text-xs text-gray-400">RAG modunda sorguya döndürülecek maksimum chunk sayısı</p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="diversity_threshold">Çeşitlilik Eşiği</Label>
-                <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                <span className="text-sm font-mono bg-dark-600 px-2 py-1 rounded">
                   %{Math.round(config.diversity_threshold * 100)}
                 </span>
               </div>
@@ -247,16 +247,16 @@ const RagSettingsPage: React.FC = () => {
                 onChange={(e) => setConfig({ ...config, diversity_threshold: parseInt(e.target.value) / 100 })}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">Sonuçlar arasında çeşitlilik sağlamak için kullanılır</p>
+              <p className="text-xs text-gray-400">Sonuçlar arasında çeşitlilik sağlamak için kullanılır</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Hybrid Search Settings */}
-      <Card className="border-2 border-purple-200">
+      <Card className="border border-purple-500/20 bg-purple-500/[0.02]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-700">
+          <CardTitle className="flex items-center gap-2 text-purple-400">
             <Combine className="h-5 w-5" />
             Hibrit Arama (Hybrid Search)
           </CardTitle>
@@ -266,12 +266,12 @@ const RagSettingsPage: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Enable/Disable Toggle */}
-          <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
             <div className="space-y-1">
               <Label htmlFor="hybrid_search_enabled" className="text-base font-medium">
                 Hibrit Arama Aktif
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Ürün kodları ve teknik terimler için %100 doğruluk sağlar
               </p>
             </div>
@@ -282,12 +282,12 @@ const RagSettingsPage: React.FC = () => {
           </div>
 
           {config.hybrid_search_enabled && (
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-4 p-4 bg-dark-700/50 rounded-lg">
               {/* Vector Weight */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="hybrid_vector_weight">Vektör Ağırlığı (Anlamsal)</Label>
-                  <span className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                  <span className="text-sm font-mono bg-dark-800/60 px-2 py-1 rounded border">
                     %{Math.round(config.hybrid_vector_weight * 100)}
                   </span>
                 </div>
@@ -308,7 +308,7 @@ const RagSettingsPage: React.FC = () => {
                   }}
                   className="w-full"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   Anlamsal benzerlik araması - "ne demek istiyorsun?" sorusunu anlar
                 </p>
               </div>
@@ -317,7 +317,7 @@ const RagSettingsPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="hybrid_keyword_weight">Anahtar Kelime Ağırlığı (BM25)</Label>
-                  <span className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                  <span className="text-sm font-mono bg-dark-800/60 px-2 py-1 rounded border">
                     %{Math.round(config.hybrid_keyword_weight * 100)}
                   </span>
                 </div>
@@ -338,13 +338,13 @@ const RagSettingsPage: React.FC = () => {
                   }}
                   className="w-full"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   Tam kelime eşleşmesi - "ABC-123" gibi ürün kodlarını birebir bulur
                 </p>
               </div>
 
               {/* Info Box */}
-              <div className="bg-purple-100 p-3 rounded text-sm text-purple-700">
+              <div className="bg-purple-500/10 border border-purple-500/20 p-3 rounded text-sm text-purple-300">
                 <strong>💡 Önerilen Ayarlar:</strong>
                 <ul className="mt-1 space-y-1 text-xs">
                   <li>• <strong>Genel Sorular:</strong> Vektör %60, Kelime %40</li>
@@ -367,12 +367,12 @@ const RagSettingsPage: React.FC = () => {
           <CardDescription>RAG performansını artıran ek özellikler</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
             <div className="space-y-1">
               <Label htmlFor="enable_reranking" className="text-base font-medium">
                 Re-ranking (Yeniden Sıralama)
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Sonuçları sorgu amacına göre yeniden sıralar
               </p>
             </div>
@@ -382,12 +382,12 @@ const RagSettingsPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
             <div className="space-y-1">
               <Label htmlFor="enable_query_expansion" className="text-base font-medium">
                 Query Expansion (Sorgu Genişletme)
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Sorguyu eş anlamlılarla genişleterek daha iyi sonuçlar bulur
               </p>
             </div>
@@ -400,9 +400,9 @@ const RagSettingsPage: React.FC = () => {
       </Card>
 
       {/* Department Access Matrix */}
-      <Card className="border-2 border-green-200">
+      <Card className="border border-green-500/20 bg-green-500/[0.02]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-700">
+          <CardTitle className="flex items-center gap-2 text-green-400">
             <Building2 className="h-5 w-5" />
             Departman Bazlı Döküman Erişimi
           </CardTitle>
@@ -412,12 +412,12 @@ const RagSettingsPage: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Enable/Disable Toggle */}
-          <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
             <div className="space-y-1">
               <Label className="text-base font-medium">
                 Departman Filtreleme Aktif
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 RAG sorguları kullanıcının departmanlarına göre filtrelenir
               </p>
             </div>
@@ -428,14 +428,14 @@ const RagSettingsPage: React.FC = () => {
           </div>
 
           {/* Admin Bypass */}
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
             <div className="space-y-1 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-600" />
+              <Shield className="h-5 w-5 text-blue-400" />
               <div>
                 <Label className="text-base font-medium">
                   Admin Bypass
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-400">
                   Yöneticiler tüm departman dökümanlarına erişebilir
                 </p>
               </div>
@@ -448,21 +448,21 @@ const RagSettingsPage: React.FC = () => {
 
           {departmentMatrix.enabled && (
             <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-3">Erişim Matrisi</h4>
-                <p className="text-xs text-gray-500 mb-4">
+              <div className="bg-dark-700/50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-100 mb-3">Erişim Matrisi</h4>
+                <p className="text-xs text-gray-400 mb-4">
                   Her satır bir departmanı temsil eder. İşaretli sütunlar o departmanın erişebileceği dökümanları gösterir.
                   <br />
-                  <span className="text-green-600">✓ Kendi departmanı (zorunlu, kaldırılamaz)</span>
+                  <span className="text-green-400">✓ Kendi departmanı (zorunlu, kaldırılamaz)</span>
                 </p>
                 
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium text-gray-700">Departman</th>
+                      <tr className="border-b border-white/[0.06]">
+                        <th className="text-left py-2 px-3 font-medium text-gray-300">Departman</th>
                         {DEPARTMENTS.map(dept => (
-                          <th key={dept} className="text-center py-2 px-2 font-medium text-gray-700 text-xs">
+                          <th key={dept} className="text-center py-2 px-2 font-medium text-gray-300 text-xs">
                             {dept.split(' ')[0]}
                           </th>
                         ))}
@@ -472,8 +472,8 @@ const RagSettingsPage: React.FC = () => {
                       {DEPARTMENTS.map(sourceDept => {
                         const access = departmentMatrix.access_rules[sourceDept] || [sourceDept];
                         return (
-                          <tr key={sourceDept} className="border-b hover:bg-gray-100">
-                            <td className="py-2 px-3 font-medium text-gray-900">{sourceDept}</td>
+                          <tr key={sourceDept} className="border-b border-white/[0.06] hover:bg-dark-700/50">
+                            <td className="py-2 px-3 font-medium text-gray-100">{sourceDept}</td>
                             {DEPARTMENTS.map(targetDept => {
                               const hasAccess = access.includes(targetDept);
                               const isSelf = sourceDept === targetDept;
@@ -487,7 +487,7 @@ const RagSettingsPage: React.FC = () => {
                                         ? 'bg-green-500 text-white cursor-not-allowed'
                                         : hasAccess
                                         ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                        : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+                                        : 'bg-dark-500 text-gray-400 hover:bg-dark-400'
                                     }`}
                                     title={isSelf ? 'Kendi departmanı (zorunlu)' : hasAccess ? 'Erişimi kaldır' : 'Erişim ver'}
                                   >
@@ -514,14 +514,14 @@ const RagSettingsPage: React.FC = () => {
       </Card>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="border border-blue-500/20 bg-blue-500/[0.02]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-800">
+          <CardTitle className="flex items-center gap-2 text-blue-400">
             <Info className="h-5 w-5" />
             Benzerlik Eşiği Nasıl Çalışır?
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-blue-700">
+        <CardContent className="space-y-4 text-sm text-blue-300">
           <div className="space-y-3">
             <p>
               <strong>🎯 Benzerlik Skoru:</strong> Her chunk, sorgu ile ne kadar benzer olduğunu gösteren 0.0-1.0 arası bir skor alır.
@@ -530,8 +530,8 @@ const RagSettingsPage: React.FC = () => {
               <strong>📊 Eşik Değeri:</strong> Bu değerin altındaki chunk'lar filtrelenir ve sonuçlara dahil edilmez.
             </p>
             
-            <div className="bg-white p-3 rounded border space-y-2">
-              <p className="text-gray-700 font-semibold">Örnek Senaryolar:</p>
+            <div className="bg-dark-800/60 p-3 rounded border border-white/[0.06] space-y-2">
+              <p className="text-gray-300 font-semibold">Örnek Senaryolar:</p>
               <div className="space-y-1 text-xs">
                 <p>• <strong>Eşik = %20:</strong> Çok geniş sonuçlar, alakasız chunk'lar da gelebilir</p>
                 <p>• <strong>Eşik = %30-40:</strong> ✅ Dengeli, çoğu kullanım için ideal</p>
@@ -541,7 +541,7 @@ const RagSettingsPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="mt-3 text-blue-600 bg-blue-100 p-2 rounded">
+          <div className="mt-3 text-blue-300 bg-blue-500/10 border border-blue-500/20 p-2 rounded">
             💡 <strong>Önerilen Değerler:</strong> Benzerlik: %30-40, Max Chunks: 5-7, Çeşitlilik: %70-80
           </div>
         </CardContent>

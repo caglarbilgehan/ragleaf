@@ -117,7 +117,7 @@ const RAGAnalyticsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">RAG Analytics</h1>
+          <h1 className="text-2xl font-bold text-gray-100">RAG Analytics</h1>
           <p className="text-gray-600">RAG sisteminin kullanım ve performans analitiği</p>
         </div>
         <Button onClick={fetchData} variant="outline" className="flex items-center gap-2">
@@ -140,7 +140,7 @@ const RAGAnalyticsPage: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
               activeTab === tab.id
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -262,7 +262,7 @@ const RAGAnalyticsPage: React.FC = () => {
                 <p className="text-gray-500 text-center py-8">Henüz veri yok</p>
               ) : (
                 documents.top_documents.map((doc, i) => (
-                  <div key={doc.document_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={doc.document_id} className="flex items-center justify-between p-3 bg-dark-700/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold text-gray-400">#{i + 1}</span>
                       <div>
@@ -317,7 +317,7 @@ const RAGAnalyticsPage: React.FC = () => {
                     <div key={i} className="p-4 border rounded-lg">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">{q.query_text}</p>
+                          <p className="font-medium text-gray-100">{q.query_text}</p>
                           <p className="text-sm text-gray-500 mt-1">
                             {q.count} kez soruldu • Son: {q.last_asked ? new Date(q.last_asked).toLocaleDateString('tr-TR') : '-'}
                           </p>
@@ -386,7 +386,7 @@ const RAGAnalyticsPage: React.FC = () => {
                   return (
                     <div key={range} className="flex items-center gap-2">
                       <span className="w-20 text-sm text-gray-600">{range}</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-4">
+                      <div className="flex-1 bg-dark-500 rounded-full h-4">
                         <div
                           className="bg-blue-500 h-4 rounded-full"
                           style={{ width: `${percentage}%` }}

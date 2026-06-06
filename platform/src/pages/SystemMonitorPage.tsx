@@ -78,7 +78,7 @@ const SystemMonitorPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sistem İzleme</h1>
+          <h1 className="text-2xl font-bold text-gray-100">Sistem İzleme</h1>
           <p className="text-gray-600">Sistem kaynak kullanımı izleme ve uyarı eşiklerini yapılandırın</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
@@ -97,7 +97,7 @@ const SystemMonitorPage: React.FC = () => {
           <CardDescription>Sistem bellek kullanımı uyarı eşikleri</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg">
             <div>
               <Label className="font-medium">İzleme Aktif</Label>
               <p className="text-sm text-gray-500">Sistem kaynaklarını izle ve uyarı ver</p>
@@ -149,7 +149,7 @@ const SystemMonitorPage: React.FC = () => {
           {/* Visual Indicator */}
           <div className="mt-4">
             <Label className="mb-2 block">Eşik Görselleştirme</Label>
-            <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
+            <div className="relative h-8 bg-dark-500 rounded-full overflow-hidden">
               <div 
                 className="absolute left-0 top-0 h-full bg-green-500 transition-all"
                 style={{ width: `${config.warning_memory_percent}%` }}
@@ -186,14 +186,14 @@ const SystemMonitorPage: React.FC = () => {
       </Card>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-500/10 border-blue-500/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-800">
+          <CardTitle className="flex items-center gap-2 text-blue-400">
             <Info className="h-5 w-5" />
             Sistem İzleme Hakkında
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-blue-700 space-y-2">
+        <CardContent className="text-sm text-blue-300 space-y-2">
           <p>
             <strong>Uyarı Eşiği:</strong> Bellek kullanımı bu seviyeye ulaştığında sistem uyarı verir. 
             İşlemler yavaşlayabilir.
@@ -202,7 +202,7 @@ const SystemMonitorPage: React.FC = () => {
             <strong>Kritik Eşik:</strong> Bellek kullanımı bu seviyeye ulaştığında kritik uyarı verilir. 
             Yeni işlemler başlatılmayabilir.
           </p>
-          <p className="mt-3 text-blue-600">
+          <p className="mt-3 text-blue-400">
             💡 <strong>Önerilen:</strong> Uyarı: %75, Kritik: %90
           </p>
         </CardContent>

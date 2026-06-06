@@ -80,19 +80,19 @@ export default function ResetModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-dark-800/60 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.06] sticky top-0 bg-dark-800/60 z-10">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
               <RotateCcw className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Döküman Sıfırlama</h3>
+              <h3 className="text-lg font-semibold text-gray-100">Döküman Sıfırlama</h3>
               <p className="text-sm text-gray-500 truncate max-w-[350px]">{documentName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -101,7 +101,7 @@ export default function ResetModal({
         <div className="p-4 space-y-4">
           {/* Reset Level Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Sıfırlama Seviyesi
             </label>
             <div className="space-y-2">
@@ -109,7 +109,7 @@ export default function ResetModal({
               <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 resetLevel === 'indexing' 
                   ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:bg-gray-50'
+                  : 'border-white/[0.06] hover:bg-dark-700/50'
               }`}>
                 <input
                   type="radio"
@@ -121,7 +121,7 @@ export default function ResetModal({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-800">Hafif Sıfırlama (Sadece İndeksleme)</span>
+                    <span className="font-medium text-gray-200">Hafif Sıfırlama (Sadece İndeksleme)</span>
                     <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">~5 sn</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -134,7 +134,7 @@ export default function ResetModal({
               <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 resetLevel === 'processing' 
                   ? 'border-orange-500 bg-orange-50' 
-                  : 'border-gray-200 hover:bg-gray-50'
+                  : 'border-white/[0.06] hover:bg-dark-700/50'
               }`}>
                 <input
                   type="radio"
@@ -146,7 +146,7 @@ export default function ResetModal({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-800">Orta Sıfırlama (İşleme)</span>
+                    <span className="font-medium text-gray-200">Orta Sıfırlama (İşleme)</span>
                     <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">~15 sn</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -159,7 +159,7 @@ export default function ResetModal({
               <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 resetLevel === 'all' 
                   ? 'border-red-500 bg-red-50' 
-                  : 'border-gray-200 hover:bg-gray-50'
+                  : 'border-white/[0.06] hover:bg-dark-700/50'
               }`}>
                 <input
                   type="radio"
@@ -171,7 +171,7 @@ export default function ResetModal({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-800">Tam Sıfırlama (Her Şey)</span>
+                    <span className="font-medium text-gray-200">Tam Sıfırlama (Her Şey)</span>
                     <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">~30 sn</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -184,12 +184,12 @@ export default function ResetModal({
 
           {/* Granular Reset Options (only for processing level) */}
           {resetLevel === 'processing' && (
-            <div className="border border-gray-200 rounded-lg">
+            <div className="border border-white/[0.06] rounded-lg">
               <button
                 onClick={() => setShowResetOptions(!showResetOptions)}
-                className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-3 hover:bg-dark-700/50 transition-colors"
               >
-                <span className="text-sm font-medium text-gray-700">Sıfırlama Seçenekleri</span>
+                <span className="text-sm font-medium text-gray-300">Sıfırlama Seçenekleri</span>
                 {showResetOptions ? (
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 ) : (
@@ -270,7 +270,7 @@ export default function ResetModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl sticky bottom-0">
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-white/[0.06] bg-dark-700/50 rounded-b-xl sticky bottom-0">
           <button
             onClick={onClose}
             className="btn btn-secondary"

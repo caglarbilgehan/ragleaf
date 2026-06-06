@@ -1,64 +1,33 @@
 # 🧪 Test Sonuçları
 
-> Son güncelleme: 2026-06-02
+> Son test tarihi: 2026-06-05
 
-## Sistem Testleri
+## 1. Landing Rota Doğrulama Testi (İngilizce Terimler)
+- **Açıklama:** Landing ve landing-new birleştirilmesi sonrası Next.js static export rotalarının Türkçe yerine İngilizce terimlerle (/about ve /installation) 200 OK döndürdüğünü doğrulama.
+- **Yöntem:** `verify_routes.py` otomasyon betiği çalıştırıldı.
+- **Sonuç:** ✅ BAŞARILI
+- **Log Çıktısı:**
+  ```
+  Checking Ragleaf landing page routes...
+  [OK]                  -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /pricing        -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /developers     -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /legal          -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /contact        -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /about          -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /installation   -> Status: 200, Content-Type: text/html; charset=utf-8
+  [OK]  /blog           -> Status: 200, Content-Type: text/html; charset=utf-8
+  Verification succeeded!
+  ```
 
-### API Gateway
-| Test | Durum | Notlar |
-|------|-------|--------|
-| Health endpoint | ✅ Başarılı | `/health` → 200 OK, v0.2.0 |
-| Storage migration | ✅ Başarılı | 22 dosya syntax kontrolünden geçti |
-| Docker build | ✅ Başarılı | API gateway hatasız başladı |
-| MinIO container | ✅ Başarılı | Health check (port 1308) geçiyor |
+## 2. Küresel Sayfa Düzeni (Layout) Standardizasyonu Testi
+- **Açıklama:** Masaüstü ekranda tüm alt sayfalarda (`/pricing`, `/developers`, `/installation`, `/about`, `/contact`, `/legal`, `/blog`) Ragleaf AI Asistan sidebar'ının gösterildiğinin, sol sütunun 400px boşlukla hizalandığının, Next.js build ve Docker compose build işlemlerinin hatasız çalıştığının doğrulanması.
+- **Yöntem:** Local Next.js build (`npm run build`) ve Docker compose build (`docker compose -f docker-compose.landing.yml build`) komutları çalıştırıldı.
+- **Sonuç:** ✅ BAŞARILI (Next.js ve Docker build işlemleri başarıyla tamamlandı)
 
-### Landing Page
-| Test | Durum | Notlar |
-|------|-------|--------|
-| Buton stilleri (GÖREV-1) | ✅ Başarılı | btn-primary ve btn-ghost unified stile geçirildi |
-| Docker rebuild | ✅ Başarılı | Port 1301 → HTTP 200 |
+## 3. Sitenin En Altına Yapışık (Sticky) Footer Testi
+- **Açıklama:** Footer bileşeninin mobil, tablet ve masaüstü ekranlarında ekranın altında sabit kalıp içeriği örtmesi yerine, sayfa içeriğinin en altında doğal olarak sonlanacak şekilde yapışık durmasının doğrulanması.
+- **Yöntem:** Tarayıcı otomasyonu aracılığıyla `/` ve `/pricing` sayfaları ziyaret edildi, sayfa aşağı kaydırılarak footer konumu ve sayfa sonundaki yerleşimi doğrulandı.
+- **Sonuç:** ✅ BAŞARILI (Footer her iki sayfada da içerik sonuna yerleşiyor ve ekrana yapışıp içeriği kapatmıyor)
 
-### Şablon Sistemi (GÖREV-2)
-| Test | Durum | Notlar |
-|------|-------|--------|
-| Template API | ✅ Başarılı | `GET /api/templates` → 4 şablon döndü |
-| Template seed | ✅ Başarılı | kuafor, dis-hekimi, e-ticaret, restoran |
-| Python syntax | ✅ Başarılı | 7 dosya hatasız |
-| Platform build | ✅ Başarılı | Port 1307 → HTTP 200 |
-| Appointment DB | ✅ Başarılı | 3 yeni tablo oluşturuldu |
-| Chat → Appointment | ✅ Başarılı | APPOINTMENT_JSON post-processing hazır |
-
-### Servis Portları (Canlı)
-| Servis | Port | Durum |
-|--------|------|-------|
-| API Gateway | 1306 | ✅ Healthy |
-| Platform | 1307 | ✅ HTTP 200 |
-| Landing Page | 1301 | ✅ HTTP 200 |
-| MinIO | 1308 | ✅ HTTP 200 |
-| PostgreSQL | 1300 | ✅ Healthy |
-| Redis | 1303 | ✅ Healthy |
-| Embedding | 1305 | ✅ Healthy |
-| OCR | 1304 | ✅ Healthy |
-
-### Bekleyen Manuel Testler
-- [ ] Widget embed testi (harici HTML sayfasında)
-- [ ] Multi-tenant izolasyon testi (farklı org_slug ile)
-- [ ] Google Calendar entegrasyon testi
-- [ ] Widget markdown render testi (tablo, bold, liste)
-
-### Hibrit RAG/LLM + Widget (2026-06-03)
-| Test | Durum | Notlar |
-|------|-------|--------|
-| LLM Fallback (doküman yoksa) | ✅ Başarılı | Genel bilgi ile yanıt veriyor |
-| Token stats NULL handling | ✅ Başarılı | `total_requests or 0` koruması |
-| Widget parseMarkdown | ✅ Başarılı | Bold, tablo, liste, code blocks |
-| Widget autoOpen | ✅ Başarılı | Varsayılan true, agent bazlı override |
-| Dockerfile 3-stage build | ✅ Başarılı | Python + Node Alpine + Production |
-
-### Admin Panel Temizlik (2026-06-03)
-| Test | Durum | Notlar |
-|------|-------|--------|
-| Console hataları (GÖREV-9) | ✅ Başarılı | 12 sayfa kaldırıldı, 0 console hatası |
-| Sidebar temizlik (GÖREV-10) | ✅ Başarılı | 11 menü itemi kaldırıldı |
-| Kullanılmayan import temizliği | ✅ Başarılı | App.tsx + DashboardLayout |
 

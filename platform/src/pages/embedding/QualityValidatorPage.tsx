@@ -68,31 +68,31 @@ const QualityValidatorPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-dark-900 p-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Embedding Kalite Validasyonu</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-100">Embedding Kalite Validasyonu</h1>
+          <p className="mt-2 text-gray-400">
             Embedding modelinizin kalitesini otomatik testlerle doğrulayın
           </p>
         </div>
 
         {/* How It Works */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
             <span className="text-2xl">🔬</span> Bu Sayfa Ne İşe Yarar?
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-blue-800 mb-2">📊 Amaç</h3>
-              <p className="text-sm text-blue-700 mb-3">
+              <h3 className="font-semibold text-blue-400 mb-2">📊 Amaç</h3>
+              <p className="text-sm text-blue-300 mb-3">
                 Embedding modeli, metinleri sayısal vektörlere dönüştürür. Bu sayfa, modelin 
                 <strong> anlamsal benzerliği doğru tespit edip etmediğini</strong> test eder.
               </p>
               
-              <h3 className="font-semibold text-blue-800 mb-2">⚙️ Nasıl Çalışır?</h3>
-              <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+              <h3 className="font-semibold text-blue-400 mb-2">⚙️ Nasıl Çalışır?</h3>
+              <ol className="text-sm text-blue-300 space-y-1 list-decimal list-inside">
                 <li>İki metin seçilir (örn: "Makine öğrenmesi" ve "Machine learning")</li>
                 <li>Her iki metin de vektöre dönüştürülür</li>
                 <li>Vektörler arası <strong>kosinüs benzerliği</strong> hesaplanır (0-1 arası)</li>
@@ -101,15 +101,15 @@ const QualityValidatorPage: React.FC = () => {
             </div>
             
             <div>
-              <h3 className="font-semibold text-blue-800 mb-2">📈 Benzerlik Skorları</h3>
-              <div className="text-sm text-blue-700 space-y-1">
-                <p><span className="font-mono bg-green-100 px-1 rounded">&gt;0.80</span> → Çok benzer (aynı anlam)</p>
-                <p><span className="font-mono bg-yellow-100 px-1 rounded">0.50-0.75</span> → Orta benzerlik (ilişkili konular)</p>
-                <p><span className="font-mono bg-red-100 px-1 rounded">&lt;0.35</span> → Farklı (alakasız konular)</p>
+              <h3 className="font-semibold text-blue-400 mb-2">📈 Benzerlik Skorları</h3>
+              <div className="text-sm text-blue-300 space-y-1">
+                <p><span className="font-mono bg-green-500/20 text-green-300 border border-green-500/30 px-1 rounded">&gt;0.80</span> → Çok benzer (aynı anlam)</p>
+                <p><span className="font-mono bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-1 rounded">0.50-0.75</span> → Orta benzerlik (ilişkili konular)</p>
+                <p><span className="font-mono bg-red-500/20 text-red-300 border border-red-500/30 px-1 rounded">&lt;0.35</span> → Farklı (alakasız konular)</p>
               </div>
               
-              <h3 className="font-semibold text-blue-800 mt-3 mb-2">✅ Başarı Kriterleri</h3>
-              <ul className="text-sm text-blue-700 space-y-1">
+              <h3 className="font-semibold text-blue-400 mt-3 mb-2">✅ Başarı Kriterleri</h3>
+              <ul className="text-sm text-blue-300 space-y-1">
                 <li>• "Yapay zeka" ↔ "Artificial intelligence" → <strong>&gt;0.80</strong> olmalı</li>
                 <li>• "Elma meyve" ↔ "Bilgisayar donanım" → <strong>&lt;0.35</strong> olmalı</li>
                 <li>• Genel skor <strong>%80+</strong> ideal</li>
@@ -119,17 +119,17 @@ const QualityValidatorPage: React.FC = () => {
         </div>
 
         {/* Model Selection and Test */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-dark-800/60 rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Model Seçimi ve Test</h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Test Edilecek Model
             </label>
             <select
               value={modelId}
               onChange={(e) => setModelId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none"
             >
               {availableModels.map((model) => (
                 <option key={model.id} value={model.id}>
@@ -139,9 +139,9 @@ const QualityValidatorPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">📋 Embedding Quality Test Kategorileri (30 Test):</h3>
-            <div className="grid md:grid-cols-3 gap-3 text-sm text-gray-700">
+          <div className="bg-dark-700/50 border border-white/[0.06] rounded-lg p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-100 mb-2">📋 Embedding Quality Test Kategorileri (30 Test):</h3>
+            <div className="grid md:grid-cols-3 gap-3 text-sm text-gray-300">
               <div className="space-y-1">
                 <p>🔥 <strong>Yangın Algılama (6):</strong></p>
                 <p className="text-xs text-gray-500 ml-4">Dedektör, panel, alarm sistemleri</p>
@@ -202,7 +202,7 @@ const QualityValidatorPage: React.FC = () => {
         {validationResult && (
           <>
             {/* Overall Score */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4">Genel Sonuç</h2>
 
               <div className="text-center py-6">
@@ -215,21 +215,21 @@ const QualityValidatorPage: React.FC = () => {
                 <div className="text-3xl mb-4">{getScoreBadge(validationResult.overall_score)}</div>
 
                 <div className="grid grid-cols-3 gap-4 mt-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 font-medium">Toplam Test</p>
-                    <p className="text-3xl font-bold text-gray-900">
+                  <div className="bg-dark-700/50 rounded-lg p-4 border border-white/[0.06]">
+                    <p className="text-sm text-gray-400 font-medium">Toplam Test</p>
+                    <p className="text-3xl font-bold text-gray-100">
                       {validationResult.total_tests}
                     </p>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-green-600 font-medium">Başarılı</p>
-                    <p className="text-3xl font-bold text-green-900">
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                    <p className="text-sm text-green-400 font-medium">Başarılı</p>
+                    <p className="text-3xl font-bold text-green-300">
                       {validationResult.passed_tests}
                     </p>
                   </div>
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <p className="text-sm text-red-600 font-medium">Başarısız</p>
-                    <p className="text-3xl font-bold text-red-900">
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                    <p className="text-sm text-red-400 font-medium">Başarısız</p>
+                    <p className="text-3xl font-bold text-red-300">
                       {validationResult.failed_tests}
                     </p>
                   </div>
@@ -238,7 +238,7 @@ const QualityValidatorPage: React.FC = () => {
             </div>
 
             {/* Detailed Results */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Detaylı Test Sonuçları</h2>
 
               <div className="space-y-4">
@@ -246,42 +246,42 @@ const QualityValidatorPage: React.FC = () => {
                   <div
                     key={index}
                     className={`border rounded-lg p-4 ${
-                      result.passed ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                      result.passed ? 'border-green-500/20 bg-green-500/5' : 'border-red-500/20 bg-red-500/5'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span
-                            className={`text-2xl ${result.passed ? 'text-green-600' : 'text-red-600'}`}
+                            className={`text-2xl ${result.passed ? 'text-green-400' : 'text-red-400'}`}
                           >
                             {result.passed ? '✓' : '✗'}
                           </span>
-                          <span className="font-semibold text-gray-900">Test {index + 1}</span>
+                          <span className="font-semibold text-gray-100">Test {index + 1}</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                           <div>
-                            <span className="text-gray-600">Metin 1:</span>
-                            <p className="font-medium text-gray-900">{result.text1}</p>
+                            <span className="text-gray-400">Metin 1:</span>
+                            <p className="font-medium text-gray-100">{result.text1}</p>
                           </div>
                           <div>
-                            <span className="text-gray-600">Metin 2:</span>
-                            <p className="font-medium text-gray-900">{result.text2}</p>
+                            <span className="text-gray-400">Metin 2:</span>
+                            <p className="font-medium text-gray-100">{result.text2}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm border-t pt-3 mt-3">
+                    <div className="flex items-center justify-between text-sm border-t border-white/[0.06] pt-3 mt-3">
                       <div>
-                        <span className="text-gray-600">Beklenen: </span>
-                        <span className="font-medium">{result.expected}</span>
+                        <span className="text-gray-400">Beklenen: </span>
+                        <span className="font-medium text-gray-300">{result.expected}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Gerçek: </span>
-                        <span className="font-bold">{result.actual_similarity.toFixed(3)}</span>
+                        <span className="text-gray-400">Gerçek: </span>
+                        <span className="font-bold text-gray-200">{result.actual_similarity.toFixed(3)}</span>
                       </div>
-                      <div className={result.passed ? 'text-green-700' : 'text-red-700'}>
+                      <div className={result.passed ? 'text-green-400' : 'text-red-400'}>
                         {result.message}
                       </div>
                     </div>
@@ -294,7 +294,7 @@ const QualityValidatorPage: React.FC = () => {
 
         {/* Empty State */}
         {!validationResult && !loading && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-dark-800/60 rounded-lg shadow p-12 text-center">
             <div className="text-gray-400 mb-4">
               <svg
                 className="mx-auto h-16 w-16"
@@ -310,8 +310,8 @@ const QualityValidatorPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz test yapılmadı</h3>
-            <p className="text-gray-500">
+            <h3 className="text-lg font-medium text-gray-100 mb-2">Henüz test yapılmadı</h3>
+            <p className="text-gray-400">
               Bir model seçin ve "Kalite Validasyonu Başlat" butonuna tıklayın
             </p>
           </div>

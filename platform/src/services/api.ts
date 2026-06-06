@@ -14,7 +14,10 @@ import type {
   ProviderInfo,
   ResetAndReprocessRequest,
   ResetAndReprocessResponse,
+  ContactRequest,
 } from '@/types';
+
+export type { ContactRequest };
 
 // API Base Configuration
 export function getApiBaseUrl(): string {
@@ -617,6 +620,19 @@ export const adminApi = {
 
   resetStuckDocument: async (documentId: number): Promise<any> => {
     const response = await api.post(`/admin/documents/${documentId}/reset`);
+    return response.data;
+  },
+};
+
+// Contact Management API
+export const contactApi = {
+  getContactRequests: async (params?: { status?: string; search?: string; limit?: number; offset?: number }): Promise<ContactRequest[]> => {
+    const response: AxiosResponse<ContactRequest[]> = await api.get('/admin/contacts', { params });
+    return response.data;
+  },
+
+  updateContactStatus: async (id: number, status: 'pending' | 'resolved'): Promise<{ success: boolean; status: string }> => {
+    const response: AxiosResponse<{ success: boolean; status: string }> = await api.patch(`/admin/contacts/${id}/status`, { status });
     return response.data;
   },
 };

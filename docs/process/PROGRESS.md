@@ -1,6 +1,6 @@
 # 🚀 Ragleaf Platform — İlerleme Raporu
 
-> **Son Güncelleme:** 2026-06-03
+> **Son Güncelleme:** 2026-06-06
 > **Proje Başlangıcı:** 2025-11-09 (V05.0.0)
 > **Mevcut Sürüm:** V05.1.0
 
@@ -10,14 +10,14 @@
 
 | Metrik | Değer |
 |--------|-------|
-| 🏗️ Toplam Tamamlanan Görev | 11 |
-| ⏳ Bekleyen Görev | 3 |
-| 📝 İşlenen Prompt | 12 |
-| 🧪 Başarılı Test | 14 |
+| 🏗️ Toplam Tamamlanan Görev | 22 |
+| ⏳ Bekleyen Görev | 0 |
+| 📝 İşlenen Prompt | 19 |
+| 🧪 Başarılı Test | 36 |
 | ❌ Başarısız Test | 0 |
 | ⏳ Bekleyen Manuel Test | 3 |
 | 🐳 Aktif Docker Servis | 8 |
-| 📂 Toplam Değişen Dosya | ~40+ |
+| 📂 Toplam Değişen Dosya | ~75+ |
 
 ---
 
@@ -92,30 +92,58 @@
 - **Durum:** ✅ TAMAMLANDI
 - **Kaynak Prompt:** #8, #9
 
+### ✅ GÖREV-9 — Console Hataları Düzeltme (2026-06-03)
+- Admin panelindeki 7 adet 500/404/401 console hatası çözüldü
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-10 — Admin Paneli Temizlik (2026-06-03)
+- Chunk/Enrichment/Test/Analytics sayfaları ve sidebar linkleri kaldırıldı
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-11 — Agent Bazlı Döküman Yönetimi (2026-06-03)
+- Admin panelden şablon asistanları için döküman yükleme UI
+- Tenant panelden asistan bazlı döküman yükleme UI
+- Döküman paylaşımı, silme (paylaşımlı/izole) ve işleme pipeline entegrasyonu
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-8 — Randevu Hatırlatma Sistemi (2026-06-03)
+- E-posta ve SMS yoluyla otomatik hatırlatma
+- SMTP (Email) & Twilio/NetGSM (SMS) & Mock Fallback servisleri
+- FastAPI lifespan background task scheduler loop ve region kontrolü
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-12 — Tenant Döküman İzleme & Log Sistemi (2026-06-03)
+- Kalite Skoru (Heuristics) hesaplama algoritması ve suggestions desteği
+- Endpoint `/api/agents/{agent_id}/documents/{document_id}/details` (Logs + Score + Health)
+- circular progress bar / circular gauge, log timeline ve sistem sağlık paneli ile premium React modal arayüzü
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-60 — Küresel Sayfa Düzeni (Layout) Standardizasyonu (2026-06-05)
+- Ragleaf AI Asistanı tüm sayfalarda sağ sidebar (400px) olarak gösterildi.
+- Header, sayfa içeriği ve Footer sol sütuna yerleştirildi ve sağdan 400px pay bırakıldı.
+- Mobil görünümde asistanın floating widget/drawer olarak çalışması korundu.
+- **Durum:** ✅ TAMAMLANDI
+- **Kaynak Prompt:** #10
+
+### ✅ GÖREV-61 — Geliştiriciler Sayfası Sol Menü Sticky Yapısı (2026-06-06)
+- Sol taraftaki menünün aşağı kaydırmalarda yapışkan (sticky) kalmasını engelleyen medya sorguları ve body sınıf ezecek kurallar temizlendi.
+- **Durum:** ✅ TAMAMLANDI
+
+### ✅ GÖREV-62 — Asistan Fallback Yanıt Hatası Giderilmesi (2026-06-06)
+- Asistan mesajlarının backend'de HuggingFace router'a `'bot'` rolüyle gönderilmesi sebebiyle oluşan `400 Bad Request` hatası, frontend ve backend'de rol normalleştirmesiyle giderildi.
+- **Durum:** ✅ TAMAMLANDI
+
 ---
 
 ## ⏳ Devam Eden / Bekleyen İşler
 
-### 🔴 GÖREV-9 — Console Hataları Düzeltme
-- **Öncelik:** 🔴 Yüksek
-- **Tarih:** 2026-06-03
-- **Alt görevler:** 7 adet 500/404/401 endpoint hatası
-
-### 🔴 GÖREV-10 — Admin Paneli Temizlik (Chunk/Enrichment Kaldırma)
-- **Öncelik:** 🔴 Yüksek
-- **Tarih:** 2026-06-03
-
-### 🔴 GÖREV-11 — Agent Bazlı Döküman Yönetimi
-- **Öncelik:** 🔴 Yüksek
-- **Tarih:** 2026-06-03
-
-### 🟡 GÖREV-8 — Randevu Hatırlatma Sistemi
-- **Öncelik:** 🟡 Orta
-- **Tarih:** 2026-06-02
-
-### 🟡 GÖREV-12 — Tenant Döküman İzleme & Log Sistemi
-- **Öncelik:** 🟡 Orta
-- **Tarih:** 2026-06-03
+### 🟢 Tüm Görevler Tamamlandı!
+- Devam eden veya bekleyen herhangi bir aktif görev bulunmamaktadır.
 
 ### ⏳ Bekleyen Manuel Testler
 - [ ] Widget embed testi (harici HTML sayfasında)
@@ -152,9 +180,17 @@
 | 7 | Landing Page Mobil Uyum + Widget Auto-Open | 2026-06-02 | ✅ Tamamlandı |
 | 8 | Hibrit RAG/LLM Yanıt Sistemi | 2026-06-03 | ✅ Tamamlandı |
 | 9 | Widget Markdown Render Desteği | 2026-06-03 | ✅ Tamamlandı |
-| 10 | Console Hataları + Admin Temizlik + Döküman Sistemi | 2026-06-03 | ⏳ FUTURE-PLANS |
+| 10 | Console Hataları + Admin Temizlik + Döküman Sistemi | 2026-06-03 | ✅ Tamamlandı |
+| 11 | Proje Analizi ve Detaylı Değerlendirme | 2026-06-05 | ✅ Tamamlandı |
+| 12 | Next.js Landing Page Migration & Bug Fixes | 2026-06-05 | ✅ Tamamlandı |
+| 13 | AI Writer Backend & Database Schema | 2026-06-05 | ✅ Tamamlandı |
+| 14 | Next.js Blog Page Integration | 2026-06-05 | ✅ Tamamlandı |
+| 15 | Unified Landing Folder & Route Renaming | 2026-06-05 | ✅ Tamamlandı |
+| 16 | Küresel Sayfa Düzeni (Layout) Standardizasyonu | 2026-06-05 | ✅ Tamamlandı |
+| 17 | Ragleaf Asistanı Fallback Yanıt Hatası | 2026-06-06 | ✅ Tamamlandı |
 
-> Detaylar için: [`archive/PROMPTS-ARCHIVE.md`](file:///home/cserver/ragleaf/archive/PROMPTS-ARCHIVE.md)
+
+> Detaylar için: [`archive/PROMPTS-ARCHIVE/20260606.md`](file:///home/cserver/ragleaf/archive/PROMPTS-ARCHIVE/20260606.md)
 
 ---
 

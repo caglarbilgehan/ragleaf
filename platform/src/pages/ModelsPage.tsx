@@ -62,21 +62,21 @@ function ModelCard({
   isSettingDefault: boolean;
 }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 w-full">
+    <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6 w-full">
       <div className="flex items-center justify-between">
         {/* Left Section - Model Info */}
         <div className="flex items-center flex-1">
-          <div className="h-12 w-12 rounded-lg flex items-center justify-center mr-4 bg-blue-100">
-            <Bot className="h-6 w-6 text-blue-600" />
+          <div className="h-12 w-12 rounded-lg flex items-center justify-center mr-4 bg-primary-500/10 border border-primary-500/20">
+            <Bot className="h-6 w-6 text-primary-400" />
           </div>
           
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-semibold text-gray-900">{model.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-100">{model.name}</h3>
               {model.is_default && (
                 <Star className="h-5 w-5 text-yellow-500 fill-current" />
               )}
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
                 HuggingFace
               </span>
             </div>
@@ -84,13 +84,13 @@ function ModelCard({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Model:</span>
-                <p className="font-medium text-gray-900">{model.model_name}</p>
+                <p className="font-medium text-gray-100">{model.model_name}</p>
               </div>
               
               {model.description && (
                 <div className="md:col-span-2">
                   <span className="text-gray-600">Açıklama:</span>
-                  <p className="text-gray-700">{model.description}</p>
+                  <p className="text-gray-300">{model.description}</p>
                 </div>
               )}
             </div>
@@ -118,7 +118,7 @@ function ModelCard({
               <button 
                 onClick={() => onSetDefault(model.id, model.name)}
                 disabled={isSettingDefault}
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
               >
                 <Star className="h-3 w-3 mr-1 inline" />
                 Varsayılan Yap
@@ -126,7 +126,7 @@ function ModelCard({
             )}
             <button 
               onClick={() => onEdit(model)}
-              className="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-dark-600 text-gray-300 border border-white/[0.06] hover:bg-dark-500 hover:text-gray-100 transition-colors"
             >
               <Settings className="h-3 w-3 mr-1 inline" />
               Düzenle
@@ -134,7 +134,7 @@ function ModelCard({
             <button
               onClick={() => onDelete(model.id, model.name)}
               disabled={isDeleting}
-              className="px-3 py-1.5 text-xs font-medium rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50"
             >
               <Trash2 className="h-3 w-3" />
             </button>
@@ -300,12 +300,12 @@ export default function ModelsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-dark-700/50">
       {/* Left Sidebar - Provider List */}
-      <div className="w-72 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+      <div className="w-72 bg-dark-800/60 shadow-lg border-r border-white/[0.06] flex flex-col">
         {/* Sidebar Header */}
-        <div className="p-5 border-b border-gray-200">
-          <h1 className="text-lg font-bold text-gray-900">LLM Modelleri</h1>
+        <div className="p-5 border-b border-white/[0.06]">
+          <h1 className="text-lg font-bold text-gray-100">LLM Modelleri</h1>
           <p className="text-xs text-gray-500 mt-1">Provider seçerek modellerini görüntüleyin</p>
         </div>
 
@@ -317,10 +317,10 @@ export default function ModelsPage() {
               [...Array(4)].map((_, i) => (
                 <div key={i} className="p-3 rounded-lg animate-pulse">
                   <div className="flex items-center">
-                    <div className="h-10 w-10 bg-gray-200 rounded-lg mr-3"></div>
+                    <div className="h-10 w-10 bg-dark-500 rounded-lg mr-3"></div>
                     <div className="flex-1">
-                      <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
-                      <div className="h-3 bg-gray-200 rounded w-16"></div>
+                      <div className="h-4 bg-dark-500 rounded w-24 mb-1"></div>
+                      <div className="h-3 bg-dark-500 rounded w-16"></div>
                     </div>
                   </div>
                 </div>
@@ -338,24 +338,22 @@ export default function ModelsPage() {
                   disabled={!provider.has_tokens}
                   className={`w-full flex items-center p-3 rounded-lg transition-all text-left ${
                     selectedProvider?.id === provider.id
-                      ? 'bg-blue-50 border-2 border-blue-500'
+                      ? 'bg-primary-500/10 border-2 border-primary-500'
                       : provider.has_tokens
-                        ? 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                        : 'bg-gray-50 opacity-50 cursor-not-allowed border-2 border-transparent'
+                        ? 'bg-dark-700/50 hover:bg-dark-600 border-2 border-transparent'
+                        : 'bg-dark-700/50 opacity-50 cursor-not-allowed border-2 border-transparent'
                   }`}
                 >
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center mr-3 text-xl ${
                     selectedProvider?.id === provider.id
-                      ? 'bg-blue-100'
-                      : 'bg-gray-100'
+                      ? 'bg-primary-500/20'
+                      : 'bg-dark-600'
                   }`}>
                     {getProviderIcon(provider.name)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`font-medium truncate ${
-                        selectedProvider?.id === provider.id ? 'text-blue-900' : 'text-gray-900'
-                      }`}>
+                      <span className="font-medium truncate text-gray-100">
                         {provider.display_name}
                       </span>
                       {!provider.has_tokens && (
@@ -374,7 +372,7 @@ export default function ModelsPage() {
                     </div>
                   </div>
                   {selectedProvider?.id === provider.id && (
-                    <div className="w-1.5 h-8 bg-blue-500 rounded-full ml-2"></div>
+                    <div className="w-1.5 h-8 bg-primary-500 rounded-full ml-2"></div>
                   )}
                 </button>
               ))
@@ -383,8 +381,8 @@ export default function ModelsPage() {
         </div>
 
         {/* Info */}
-        <div className="p-3 border-t border-gray-200 bg-amber-50">
-          <p className="text-xs text-amber-700">
+        <div className="p-3 border-t border-white/[0.06] bg-amber-500/10 border border-amber-500/20 rounded-b-lg">
+          <p className="text-xs text-amber-400">
             💡 Token eklemek için <strong>AI Sağlayıcıları</strong> sayfasını kullanın
           </p>
         </div>
@@ -393,14 +391,14 @@ export default function ModelsPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Main Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-dark-800/60 border-b border-white/[0.06] px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {selectedProvider && (
                 <span className="text-2xl">{getProviderIcon(selectedProvider.name)}</span>
               )}
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-100">
                   {selectedProvider ? `${selectedProvider.display_name} Modelleri` : 'Modeller'}
                 </h2>
                 <p className="text-sm text-gray-500">
@@ -420,7 +418,7 @@ export default function ModelsPage() {
                   href="https://huggingface.co/inference/models"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-dark-600 rounded-lg hover:bg-dark-500 transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   <span>Provider İstatistikleri</span>
@@ -431,7 +429,7 @@ export default function ModelsPage() {
               {selectedProvider && selectedProvider.has_tokens && (
                 <button
                   onClick={handleAddModelClick}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Model Ekle
@@ -454,12 +452,12 @@ export default function ModelsPage() {
             // Loading
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+                <div key={i} className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6 animate-pulse">
                   <div className="flex items-center">
-                    <div className="h-12 w-12 bg-gray-200 rounded-lg mr-4"></div>
+                    <div className="h-12 w-12 bg-dark-500 rounded-lg mr-4"></div>
                     <div className="flex-1">
-                      <div className="h-5 bg-gray-200 rounded w-1/3 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-5 bg-dark-500 rounded w-1/3 mb-2"></div>
+                      <div className="h-4 bg-dark-500 rounded w-1/2"></div>
                     </div>
                   </div>
                 </div>
@@ -473,7 +471,7 @@ export default function ModelsPage() {
               <p className="text-sm mb-4">{selectedProvider.display_name} için model ekleyin</p>
               <button
                 onClick={handleAddModelClick}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 İlk Modeli Ekle

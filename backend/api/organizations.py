@@ -47,6 +47,7 @@ class OrgUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=200)
     logo_url: Optional[str] = None
     settings: Optional[dict] = None
+    plan: Optional[str] = None
 
 
 class OrgResponse(BaseModel):
@@ -60,6 +61,7 @@ class OrgResponse(BaseModel):
     max_queries_per_month: int
     is_active: bool
     created_at: datetime
+    ragleaf_leaves: int = 0
     
     # Computed stats
     agent_count: Optional[int] = 0
@@ -170,6 +172,7 @@ async def create_organization(
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
         created_at=org.created_at,
+        ragleaf_leaves=org.ragleaf_leaves,
         agent_count=0,
         document_count=0,
         member_count=1
@@ -216,6 +219,7 @@ async def list_my_organizations(
             max_queries_per_month=org.max_queries_per_month,
             is_active=org.is_active,
             created_at=org.created_at,
+            ragleaf_leaves=org.ragleaf_leaves,
             agent_count=agent_count,
             document_count=doc_count,
             member_count=member_count
@@ -248,6 +252,7 @@ async def get_current_organization(
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
         created_at=org.created_at,
+        ragleaf_leaves=org.ragleaf_leaves,
         agent_count=agent_count,
         document_count=doc_count,
         member_count=member_count
@@ -281,6 +286,25 @@ async def update_current_organization(
         org.logo_url = request.logo_url
     if request.settings is not None:
         org.settings = {**(org.settings or {}), **request.settings}
+    if request.plan is not None:
+        if request.plan == "free":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Free planı artık kullanılmamaktadır"
+            )
+        
+        # Query db for plan details
+        plan_db = db.execute(text("SELECT max_agents, max_documents, max_queries_per_month, max_storage_mb FROM plans WHERE key = :key AND is_active = true"), {"key": request.plan}).fetchone()
+        if not plan_db:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Geçersiz plan: {request.plan}"
+            )
+        org.plan = request.plan
+        org.max_agents = plan_db.max_agents
+        org.max_documents = plan_db.max_documents
+        org.max_queries_per_month = plan_db.max_queries_per_month
+        org.max_storage_mb = plan_db.max_storage_mb
     
     db.commit()
     db.refresh(org)
@@ -295,7 +319,8 @@ async def update_current_organization(
         max_documents=org.max_documents,
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
-        created_at=org.created_at
+        created_at=org.created_at,
+        ragleaf_leaves=org.ragleaf_leaves
     )
 
 

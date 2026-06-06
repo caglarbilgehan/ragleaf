@@ -23,6 +23,7 @@ import {
   ArrowLeftRight,
   Shield,
   CalendarDays,
+  CreditCard,
 } from 'lucide-react';
 import { authApi } from '@/services/api';
 import toast from 'react-hot-toast';
@@ -37,7 +38,7 @@ interface DashboardLayoutProps {
 }
 
 const adminNavigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
     name: 'Tenant Yönetimi',
     href: '#',
@@ -46,13 +47,14 @@ const adminNavigation = [
   },
   { name: 'Tenantlar', href: '/admin/tenants', icon: Users },
   { name: 'Hazır Asistanlar', href: '/admin/templates', icon: Sparkles },
+  { name: 'İletişim Talepleri', href: '/admin/contacts', icon: MessageSquare },
   {
     name: 'Sistem',
     href: '#',
     icon: Monitor,
     isHeader: true
   },
-  { name: 'AI Yapılandırma', href: '/admin/ai-config', icon: Settings },
+  { name: 'Plan Yönetimi', href: '/admin/plans', icon: CreditCard },
   { name: 'AI Providers', href: '/ai-providers', icon: Zap },
   { name: 'Sistem İzleme', href: '/system-monitor', icon: Monitor },
   { name: 'Yedekleme', href: '/backup', icon: HardDrive },
@@ -63,6 +65,7 @@ const adminNavigation = [
     icon: Bot,
     isHeader: true
   },
+  { name: 'LLM Yapılandırması', href: '/admin/llm-config', icon: Settings },
   { name: 'LLM Modelleri', href: '/models', icon: Bot },
   { name: 'LLM İstatistikleri', href: '/statistics', icon: BarChart3 },
   {
@@ -72,6 +75,13 @@ const adminNavigation = [
     isHeader: true
   },
   { name: 'Embedding Modelleri', href: '/embedding/models', icon: Package },
+  {
+    name: 'RAG Yönetimi',
+    href: '#',
+    icon: Database,
+    isHeader: true
+  },
+  { name: 'RAG Ayarları', href: '/admin/rag-config', icon: Settings },
 ];
 
 const tenantNavigation = [
@@ -83,6 +93,7 @@ const tenantNavigation = [
     isHeader: true
   },
   { name: 'Asistanlarım', href: '/agents', icon: Bot },
+  { name: 'AI Yazar', href: '/tenant/writer', icon: Sparkles },
   { name: 'Randevular', href: '/tenant/appointments', icon: CalendarDays },
   { name: 'Dokümanlar', href: '/tenant/documents', icon: Upload },
   { name: 'Konuşmalar', href: '/tenant/conversations', icon: MessageSquare },
@@ -140,12 +151,12 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100">
+    <div className="h-screen flex overflow-hidden bg-dark-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 flex z-40 md:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-dark-800">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -169,9 +180,9 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
       {/* Main content */}
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
         {/* Top navigation */}
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+        <div className="relative z-10 flex-shrink-0 flex h-16 bg-dark-800/80 backdrop-blur-md border-b border-white/[0.06]">
           <button
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 md:hidden"
+            className="px-4 border-r border-white/[0.06] text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 md:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-6 w-6" />
@@ -181,12 +192,12 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
             {/* Search bar */}
             <div className="flex-1 flex">
               <div className="w-full flex md:ml-0">
-                <div className="relative w-full text-gray-400 focus-within:text-gray-600 max-w-lg">
+                <div className="relative w-full text-gray-500 focus-within:text-gray-300 max-w-lg">
                   <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                     <Search className="h-5 w-5" />
                   </div>
                   <input
-                    className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent"
+                    className="block w-full h-full pl-8 pr-3 py-2 border-transparent bg-transparent text-gray-100 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent"
                     placeholder="Ara..."
                     type="search"
                   />
@@ -202,8 +213,8 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
                   onClick={handleViewSwitch}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     viewMode === 'tenant'
-                      ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 ring-1 ring-amber-300'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 ring-1 ring-amber-500/30'
+                      : 'bg-dark-600 text-gray-400 hover:bg-dark-500'
                   }`}
                   title={viewMode === 'admin' ? 'Müşteri Paneline Geç' : 'Yönetim Paneline Dön'}
                 >
@@ -212,7 +223,7 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
                     {viewMode === 'admin' ? 'Müşteri Görünümü' : 'Yönetim Paneli'}
                   </span>
                   {viewMode === 'tenant' && (
-                    <Shield className="h-3 w-3 text-amber-600" />
+                    <Shield className="h-3 w-3 text-amber-500" />
                   )}
                 </button>
               )}
@@ -230,12 +241,12 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
                   </div>
                 </div>
                 <div className="hidden md:block">
-                  <div className="text-sm font-medium text-gray-700">{user.full_name || user.email}</div>
+                  <div className="text-sm font-medium text-gray-200">{user.full_name || user.email}</div>
                   <div className="text-xs text-gray-500">{user.email}</div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="p-1 rounded-full text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-800 focus:ring-primary-500 transition-colors"
                   title="Çıkış Yap"
                 >
                   <LogOut className="h-5 w-5" />
@@ -260,12 +271,12 @@ export default function DashboardLayout({ children, user, onLogout }: DashboardL
 
 function SidebarContent({ navigation, currentPath }: { navigation: any[]; currentPath: string }) {
   return (
-    <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
+    <div className="flex flex-col h-0 flex-1 border-r border-white/[0.06] bg-dark-800">
       {/* Logo */}
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4 mb-8">
           <span className="text-2xl mr-2">🍃</span>
-          <h1 className="text-xl font-bold text-gray-900">Ragleaf</h1>
+          <h1 className="text-xl font-bold text-gray-100">Ragleaf</h1>
         </div>
 
         {/* Navigation */}
@@ -279,7 +290,7 @@ function SidebarContent({ navigation, currentPath }: { navigation: any[]; curren
                     <item.icon className="mr-2 h-4 w-4" />
                     {item.name}
                   </div>
-                  <div className="mt-1 border-t border-gray-200"></div>
+                  <div className="mt-1 border-t border-white/[0.06]"></div>
                 </div>
               );
             }
@@ -292,12 +303,12 @@ function SidebarContent({ navigation, currentPath }: { navigation: any[]; curren
                 key={item.name}
                 to={item.href}
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                  ? 'bg-primary-100 text-primary-900 border-r-2 border-primary-600'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-primary-500/10 text-primary-400 border-r-2 border-primary-500'
+                  : 'text-gray-400 hover:bg-white/[0.03] hover:text-gray-200'
                   }`}
               >
                 <item.icon
-                  className={`mr-3 flex-shrink-0 h-5 w-5 ${isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
+                  className={`mr-3 flex-shrink-0 h-5 w-5 ${isActive ? 'text-primary-500' : 'text-gray-500 group-hover:text-gray-400'
                     }`}
                 />
                 {item.name}
@@ -308,8 +319,8 @@ function SidebarContent({ navigation, currentPath }: { navigation: any[]; curren
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-        <div className="text-xs text-gray-500 text-center w-full">
+      <div className="flex-shrink-0 flex border-t border-white/[0.06] p-4">
+        <div className="text-xs text-gray-600 text-center w-full">
           © 2026 Ragleaf
         </div>
       </div>

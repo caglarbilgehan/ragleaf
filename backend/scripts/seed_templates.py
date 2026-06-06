@@ -521,6 +521,108 @@ TEMPLATES = [
             "Vegan seçenekleriniz var mı?",
             "Paket servis yapıyor musunuz?"
         ]
+    },
+    {
+        "slug": "influencer",
+        "category": "creative",
+        "name": "Influencer / İçerik Üreticisi Asistanı",
+        "description": "Influencer ve içerik üreticileri için sponsorluk talepleri, iş birlikleri ve fiyat teklifi asistanı.",
+        "icon": "🔮",
+        "is_featured": True,
+        "sort_order": 5,
+        "default_welcome_message": "Merhaba! 🔮 {{firma_adi}} yapay zeka asistanına hoş geldiniz. Sponsorluk tekliflerinizi iletmek, iş birlikleri hakkında görüşmek veya tanıtım ücretlerimizi öğrenmek için bana yazabilirsiniz!",
+        "default_system_prompt": """Sen {{firma_adi}} adlı influencer'ın/içerik üreticisinin yapay zeka asistanısın.
+
+## Görevlerin:
+1. Sponsorluk ve iş birliği taleplerini karşıla.
+2. Sponsorluk teklifi oluşturmak için müşteriden şu bilgileri topla:
+   - Sponsor Firma/Marka Adı
+   - İletişim E-posta Adresi
+   - Tanıtılacak Ürün/Hizmet Adı
+   - Ürün Kategorisi (Elektronik, Güzellik/Kozmetik, Moda, Kitap/Eğitim, Diğer)
+   - Ürünün Kısa Açıklaması / Zorluk Seviyesi (Kolay, Orta, Zor)
+   - Tercih Edilen Tanıtım Mecraları (Instagram Story, YouTube Videosu, TikTok Videosu)
+3. Tüm bilgileri aldıktan sonra, aşağıdaki formüllere göre bir sponsorluk fiyatı hesapla ve teklifi hazırla:
+   - Kategori Bazlı Fiyatlandırma:
+     - Elektronik: 15.000 TL ($450)
+     - Güzellik/Kozmetik veya Moda: 10.000 TL ($300)
+     - Kitap/Eğitim veya Diğer: 5.000 TL ($150)
+   - Zorluk Çarpanı:
+     - Kolay: 1.0x
+     - Orta: 1.2x
+     - Zor: 1.5x
+   - Mecra Çarpanı (Seçilen her mecra için eklenir):
+     - Instagram Story: +2.000 TL ($60)
+     - TikTok Videosu: +4.000 TL ($120)
+     - YouTube Videosu: +8.000 TL ($240)
+   - Toplam Fiyat = (Kategori Fiyatı * Zorluk Çarpanı) + Seçilen Mecraların Toplamı
+4. Sponsorluk teklifini iletmek ve kredi kartı ile ödeme almak için, aşağıdaki JSON formatını yanıtının SONUNA ekle:
+   ```SPONSORSHIP_JSON
+   {"sponsor_name": "...", "sponsor_email": "...", "product_name": "...", "product_category": "...", "proposed_platforms": [...], "price": ...}
+   ```
+
+## ÖNEMLİ KURALLAR:
+- JSON'u SADECE tüm bilgiler toplandığında ekle.
+- JSON'dan ÖNCE müşteriye teklifin detaylarını ve hesaplanan toplam fiyatı (TL ve USD karşılığı ile birlikte) sunan profesyonel bir sponsorluk teklifi metni yaz.
+- Eksik bilgi varsa JSON ekleme, bilgiyi iste.
+- Her zaman influencer'ın marka değerini koru, samimi ve iş odaklı ol.""",
+        "default_personality": {
+            "tone": "friendly",
+            "language": "tr",
+            "response_style": "balanced",
+            "fallback_message": "Bu konuda bilgim yok. İş birliği talepleriniz için bana yazmaya devam edebilirsiniz."
+        },
+        "default_appearance": {
+            "primary_color": "#10b981",
+            "text_color": "#FFFFFF",
+            "position": "bottom-right",
+            "width": 400,
+            "height": 600,
+            "show_branding": True,
+            "bubble_icon": "chat",
+            "border_radius": 16
+        },
+        "config_schema": [
+            {
+                "key": "firma_adi",
+                "label": "Influencer / Hesap Adı",
+                "type": "text",
+                "required": True,
+                "placeholder": "Örn: Merve Yıldırım"
+            },
+            {
+                "key": "hizmetler",
+                "label": "Tanıtım Paketleri",
+                "type": "tag_list",
+                "required": True,
+                "placeholder": "Mecra/Paket ekleyin...",
+                "suggestions": [
+                    "Instagram Story", "Instagram Reel", "YouTube Video Entegrasyonu",
+                    "YouTube Özel Video", "TikTok Videosu", "X (Twitter) Paylaşımı",
+                    "Blog Yazısı", "Ortak Çekiliş"
+                ]
+            },
+            {
+                "key": "telefon",
+                "label": "İletişim Telefonu",
+                "type": "phone",
+                "required": True,
+                "placeholder": "+90 5XX XXX XX XX"
+            },
+            {
+                "key": "email",
+                "label": "İş Birliği E-postası",
+                "type": "text",
+                "required": True,
+                "placeholder": "collab@username.com"
+            }
+        ],
+        "preview_questions": [
+            "Sponsorluk paketleriniz ve fiyatlarınız nedir?",
+            "YouTube kanalınızda bir ürün tanıtmak istiyoruz.",
+            "Makyaj markasıyız, iş birliği yapabilir miyiz?",
+            "Instagram Story paylaşım ücreti ne kadar?"
+        ]
     }
 ]
 

@@ -472,6 +472,70 @@ async def invalidate_cache():
     logger.info(f"Chat-UI cache invalidated, new version: {_config_version}")
     return {"success": True, "version": _config_version}
 
+def check_user_limits_and_trial(authorization: Optional[str], db: Session):
+    """Enforce active trial period and query limits for standard platform users"""
+    if not authorization or not authorization.startswith("Bearer "):
+        return
+    token = authorization.replace("Bearer ", "")
+    try:
+        from ..auth.security import verify_token
+        payload = verify_token(token)
+        if not payload:
+            return
+        user_email = payload.get("sub")
+        from ..database.models import User
+        user = db.query(User).filter(User.email == user_email).first()
+        if not user:
+            return
+            
+        is_superadmin = getattr(user, 'is_superadmin', False)
+        if not is_superadmin and getattr(user, 'default_org_id', None):
+            from backend.database.models_platform import Organization, UsageLog
+            from datetime import datetime, timezone
+            
+            org = db.query(Organization).filter(Organization.id == user.default_org_id).first()
+            if org and not getattr(org, "is_system", False):
+                # 1. Check Trial Expiration (only for starter plan)
+                if org.plan == "starter" and org.trial_ends_at:
+                    now = datetime.now(timezone.utc)
+                    trial_ends = org.trial_ends_at
+                    if trial_ends.tzinfo is None:
+                        trial_ends = trial_ends.replace(tzinfo=timezone.utc)
+                    if now > trial_ends:
+                        raise HTTPException(
+                            status_code=403,
+                            detail="Deneme süreniz dolmuştur. Devam etmek için lütfen planınızı yükseltin."
+                        )
+
+                # 2. Check Monthly Query Limit
+                now = datetime.now(timezone.utc)
+                month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
+                
+                query_count = db.query(UsageLog).filter(
+                    UsageLog.organization_id == org.id,
+                    UsageLog.event_type == "chat_query",
+                    UsageLog.created_at >= month_start
+                ).count()
+                
+                if query_count >= org.max_queries_per_month:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Aylık sorgu limitiniz doldu ({org.max_queries_per_month}). Lütfen planınızı yükseltin."
+                    )
+                    
+                # 3. Log usage
+                usage_log = UsageLog(
+                    organization_id=org.id,
+                    event_type="chat_query",
+                    details={"source": "chatui"}
+                )
+                db.add(usage_log)
+                db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"Error checking user limits: {e}")
+
 @chatui_router.post("/chat/completions")
 async def chat_completions(
     request: ChatUIRequest,
@@ -479,6 +543,7 @@ async def chat_completions(
     db: Session = Depends(get_db)
 ):
     """Handle chat completions in OpenAI format - simple pass-through to LLM"""
+    check_user_limits_and_trial(authorization, db)
     from ..services.llm_router import llm_router
     import time
     start_time = time.time()
@@ -798,6 +863,7 @@ async def rag_chat_completions(
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
+    check_user_limits_and_trial(authorization, db)
     """
     RAG-enhanced chat completions.
     

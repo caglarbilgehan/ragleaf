@@ -28,11 +28,15 @@ import TenantWidget from './pages/tenant/TenantWidget';
 import TenantDocuments from './pages/tenant/TenantDocuments';
 import TenantUsers from './pages/tenant/TenantUsers';
 import TenantAppointments from './pages/tenant/TenantAppointments';
+import TenantWriter from './pages/tenant/TenantWriter';
 // Admin Pages
 import TenantsPage from './pages/admin/TenantsPage';
 import TenantDetailPage from './pages/admin/TenantDetailPage';
 import TemplateManagementPage from './pages/admin/TemplateManagementPage';
-import AIConfigPage from './pages/admin/AIConfigPage';
+import LLMConfigPage from './pages/admin/LLMConfigPage';
+import RAGConfigPage from './pages/admin/RAGConfigPage';
+import ContactRequestsPage from './pages/admin/ContactRequestsPage';
+import PlansPage from './pages/admin/PlansPage';
 import { authApi } from '@/services/api';
 import type { User } from '@/types';
 
@@ -75,8 +79,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -101,9 +105,12 @@ function App() {
         <Route path="/" element={<Navigate to="/tenant" replace />} />
         <Route path="/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/tenant" replace />} />
         <Route path="/admin/tenants" element={isAdmin ? <TenantsPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/contacts" element={isAdmin ? <ContactRequestsPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/plans" element={isAdmin ? <PlansPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/admin/tenants/:tenantId" element={isAdmin ? <TenantDetailPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/admin/templates" element={isAdmin ? <TemplateManagementPage /> : <Navigate to="/tenant" replace />} />
-        <Route path="/admin/ai-config" element={isAdmin ? <AIConfigPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/llm-config" element={isAdmin ? <LLMConfigPage /> : <Navigate to="/tenant" replace />} />
+        <Route path="/admin/rag-config" element={isAdmin ? <RAGConfigPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/models" element={isAdmin ? <ModelsPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/system-monitor" element={isAdmin ? <SystemMonitorPage /> : <Navigate to="/tenant" replace />} />
         <Route path="/backup" element={isAdmin ? <BackupPage /> : <Navigate to="/tenant" replace />} />
@@ -127,6 +134,7 @@ function App() {
         <Route path="/tenant/documents" element={<TenantDocuments />} />
         <Route path="/tenant/users" element={<TenantUsers />} />
         <Route path="/tenant/appointments" element={<TenantAppointments />} />
+        <Route path="/tenant/writer" element={<TenantWriter />} />
 
         <Route path="/login" element={<Navigate to={defaultPath} replace />} />
         <Route path="*" element={<Navigate to={defaultPath} replace />} />

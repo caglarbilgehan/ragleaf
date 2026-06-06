@@ -309,11 +309,11 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center" style={{ marginTop: 0 }}>
-            <div className="h-screen w-full bg-white flex flex-col">
+            <div className="h-screen w-full bg-dark-800/60 flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-primary-600 to-primary-700">
+                <div className="flex items-center justify-between p-6 border-b border-white/[0.06] bg-gradient-to-r from-primary-600 to-primary-700">
                     <div className="flex items-center text-white">
-                        <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+                        <div className="h-10 w-10 bg-dark-800/60/20 rounded-lg flex items-center justify-center mr-4">
                             <FileText className="h-5 w-5" />
                         </div>
                         <div>
@@ -323,12 +323,12 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                     </div>
                     <div className="flex items-center gap-4">
                         {/* Tab Buttons */}
-                        <div className="flex bg-white/20 rounded-lg p-1">
+                        <div className="flex bg-dark-800/60/20 rounded-lg p-1">
                             <button
                                 onClick={() => setActiveTab('metadata')}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'metadata'
-                                    ? 'bg-white text-primary-700'
-                                    : 'text-white hover:bg-white/10'
+                                    ? 'bg-dark-800/60 text-primary-700'
+                                    : 'text-white hover:bg-dark-800/60/10'
                                     }`}
                             >
                                 <Globe className="h-4 w-4 inline mr-1" />
@@ -337,8 +337,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                             <button
                                 onClick={() => setActiveTab('preview')}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'preview'
-                                    ? 'bg-white text-primary-700'
-                                    : 'text-white hover:bg-white/10'
+                                    ? 'bg-dark-800/60 text-primary-700'
+                                    : 'text-white hover:bg-dark-800/60/10'
                                     }`}
                             >
                                 <Eye className="h-4 w-4 inline mr-1" />
@@ -348,8 +348,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                 <button
                                     onClick={() => setActiveTab('enrichment')}
                                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'enrichment'
-                                        ? 'bg-white text-primary-700'
-                                        : 'text-white hover:bg-white/10'
+                                        ? 'bg-dark-800/60 text-primary-700'
+                                        : 'text-white hover:bg-dark-800/60/10'
                                         }`}
                                 >
                                     <FileJson className="h-4 w-4 inline mr-1" />
@@ -361,8 +361,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                     <button
                                         onClick={() => setActiveTab('chunks')}
                                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'chunks'
-                                            ? 'bg-white text-primary-700'
-                                            : 'text-white hover:bg-white/10'
+                                            ? 'bg-dark-800/60 text-primary-700'
+                                            : 'text-white hover:bg-dark-800/60/10'
                                             }`}
                                     >
                                         <Sparkles className="h-4 w-4 inline mr-1" />
@@ -371,8 +371,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                     <button
                                         onClick={() => setActiveTab('visual')}
                                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'visual'
-                                            ? 'bg-white text-primary-700'
-                                            : 'text-white hover:bg-white/10'
+                                            ? 'bg-dark-800/60 text-primary-700'
+                                            : 'text-white hover:bg-dark-800/60/10'
                                             }`}
                                     >
                                         <Layers className="h-4 w-4 inline mr-1" />
@@ -392,15 +392,15 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                     {activeTab === 'metadata' && (
                         <div className="w-full space-y-8">
                             {/* Document Basic Info */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                                     <FileText className="h-5 w-5 mr-2 text-primary-600" />
                                     Döküman Bilgileri
                                 </h3>
                                 <div className="space-y-4">
                                     {/* Döküman Adı - Full width on top */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Döküman Adı</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Döküman Adı</label>
                                         <input
                                             type="text"
                                             value={documentName}
@@ -414,21 +414,21 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                     {/* ID and Original Filename - Side by side (20% / 80%) */}
                                     <div className="flex gap-4">
                                         <div className="w-1/5">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                                            <label className="block text-sm font-medium text-gray-300 mb-1">ID</label>
                                             <input
                                                 type="text"
                                                 value={document.id}
                                                 disabled
-                                                className="input w-full bg-gray-100 cursor-not-allowed text-center font-mono"
+                                                className="input w-full bg-dark-600 cursor-not-allowed text-center font-mono"
                                             />
                                         </div>
                                         <div className="w-4/5">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Orijinal Dosya Adı</label>
+                                            <label className="block text-sm font-medium text-gray-300 mb-1">Orijinal Dosya Adı</label>
                                             <input
                                                 type="text"
                                                 value={originalFilename}
                                                 disabled
-                                                className="input w-full bg-gray-100 cursor-not-allowed"
+                                                className="input w-full bg-dark-600 cursor-not-allowed"
                                             />
                                         </div>
                                     </div>
@@ -436,8 +436,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                             </div>
 
                             {/* Language Selection */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                                     <Globe className="h-5 w-5 mr-2 text-primary-600" />
                                     Döküman Dili
                                 </h3>
@@ -448,11 +448,11 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                             onClick={() => setLanguage(lang.code)}
                                             className={`p-4 rounded-lg border-2 transition-all ${language === lang.code
                                                 ? 'border-primary-500 bg-primary-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                : 'border-white/[0.06] hover:border-white/[0.1]'
                                                 }`}
                                         >
                                             <span className="text-2xl block text-center mb-1">{lang.flag}</span>
-                                            <span className="text-sm font-medium text-gray-700 block text-center">{lang.name}</span>
+                                            <span className="text-sm font-medium text-gray-300 block text-center">{lang.name}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -524,14 +524,14 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                             </div>
 
                             {/* Metadata Fields */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                                     <Tag className="h-5 w-5 mr-2 text-primary-600" />
                                     Metadata Bilgileri
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Kategori</label>
                                         <AutocompleteInput
                                             value={metadata.category}
                                             onChange={(value: string) => setMetadata({ ...metadata, category: value })}
@@ -540,7 +540,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Marka</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Marka</label>
                                         <AutocompleteInput
                                             value={metadata.brand}
                                             onChange={(value: string) => setMetadata({ ...metadata, brand: value })}
@@ -549,7 +549,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                         />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Departman</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Departman</label>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                             {[
                                                 'Teknik Servis',
@@ -567,7 +567,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                         key={dept}
                                                         className={`flex items-center gap-2 p-2 rounded-lg border-2 cursor-pointer transition-all ${isSelected
                                                             ? 'border-primary-500 bg-primary-50'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                            : 'border-white/[0.06] hover:border-white/[0.1]'
                                                             }`}
                                                     >
                                                         <input
@@ -584,14 +584,14 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                             }}
                                                             className="h-4 w-4 text-primary-600 focus:ring-primary-500 rounded"
                                                         />
-                                                        <span className="text-sm text-gray-700">{dept}</span>
+                                                        <span className="text-sm text-gray-300">{dept}</span>
                                                     </label>
                                                 );
                                             })}
                                         </div>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Bilgisi</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Ürün Bilgisi</label>
                                         <input
                                             type="text"
                                             value={metadata.product_info}
@@ -601,7 +601,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                         />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Etiketler</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Etiketler</label>
                                         <TagAutocomplete
                                             tags={metadata.tags}
                                             onTagsChange={(tags: string[]) => setMetadata({ ...metadata, tags })}
@@ -628,9 +628,9 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
                     {activeTab === 'preview' && (
                         <div className="w-full h-full">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                    <h3 className="text-lg font-semibold text-gray-100 flex items-center">
                                         <Eye className="h-5 w-5 mr-2 text-primary-600" />
                                         Döküman Önizleme
                                     </h3>
@@ -639,7 +639,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <FileText className="h-24 w-24 text-gray-300 mb-6" />
 
-                                    <h4 className="text-xl font-medium text-gray-900 mb-2">
+                                    <h4 className="text-xl font-medium text-gray-100 mb-2">
                                         {document.original_filename}
                                     </h4>
 
@@ -671,8 +671,8 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
                     {activeTab === 'chunks' && (
                         <div className="w-full">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+                            <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6 mb-6">
+                                <h3 className="text-lg font-semibold text-gray-100 mb-2 flex items-center">
                                     <Layers className="h-5 w-5 mr-2 text-primary-600" />
                                     Chunk Zenginleştirme
                                 </h3>
@@ -697,7 +697,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                 onClick={() => startEditingChunk(chunk)}
                                                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedChunkId === (chunk.id || (chunk as any).index)
                                                     ? 'border-primary-500 bg-primary-50'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                    : 'border-white/[0.06] hover:border-white/[0.1] bg-dark-800/60'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between mb-2">
@@ -719,7 +719,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                         )}
                                                     </div>
                                                 </div>
-                                                <p className="text-sm text-gray-700 line-clamp-3">
+                                                <p className="text-sm text-gray-300 line-clamp-3">
                                                     {chunk.content.substring(0, 150)}...
                                                 </p>
                                             </div>
@@ -727,7 +727,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                     </div>
 
                                     {/* Enrichment Editor */}
-                                    <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-0 max-h-[600px] overflow-y-auto">
+                                    <div className="lg:col-span-3 bg-dark-800/60 rounded-xl  border border-white/[0.06] p-6 sticky top-0 max-h-[600px] overflow-y-auto">
                                         {selectedChunkId ? (
                                             <div className="space-y-4">
                                                 {/* Full Chunk Content */}
@@ -736,7 +736,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                         (c: DocumentChunk) => (c.id || (c as any).index) === selectedChunkId
                                                     );
                                                     return selectedChunk ? (
-                                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                                        <div className="bg-dark-700/50 rounded-lg p-4 border border-white/[0.06]">
                                                             <div className="flex items-center justify-between mb-2">
                                                                 <span className="text-xs font-semibold text-primary-600 bg-primary-100 px-2 py-1 rounded">
                                                                     Chunk #{selectedChunk.chunk_index + 1}
@@ -746,7 +746,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                                 </span>
                                                             </div>
                                                             <div className="max-h-48 overflow-y-auto">
-                                                                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                                                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
                                                                     {selectedChunk.content}
                                                                 </p>
                                                             </div>
@@ -754,11 +754,11 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                     ) : null;
                                                 })()}
 
-                                                <h4 className="font-semibold text-gray-900 pt-2 border-t">Zenginleştirme Düzenle</h4>
+                                                <h4 className="font-semibold text-gray-100 pt-2 border-t">Zenginleştirme Düzenle</h4>
 
                                                 {/* Suggested Questions */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
                                                         <MessageCircle className="h-4 w-4 mr-1" />
                                                         Önerilen Sorular
                                                     </label>
@@ -791,7 +791,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
                                                 {/* Special Instructions */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2">
                                                         Özel Talimatlar
                                                     </label>
                                                     <textarea
@@ -805,7 +805,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
                                                 {/* Tags */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Etiketler</label>
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Etiketler</label>
                                                     <div className="flex gap-2 mb-2">
                                                         <input
                                                             type="text"
@@ -844,7 +844,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                         
                                                         return (
                                                             <>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
                                                         <Image className="h-4 w-4 mr-1" />
                                                         İlişkili Görseller ({validSelectedImages.length})
                                                         {selectedImages.length > validSelectedImages.length && (
@@ -865,7 +865,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                                         <img
                                                                             src={`${getApiBaseUrl()}/admin/documents/asset/file?path=${encodeURIComponent(asset.file_path)}&token=${token}`}
                                                                             alt={asset.caption || `Görsel ${asset.asset_metadata?.index}`}
-                                                                            className="w-full h-20 object-cover rounded border border-gray-200"
+                                                                            className="w-full h-20 object-cover rounded border border-white/[0.06]"
                                                                         />
                                                                         <button
                                                                             onClick={() => setSelectedImages(prev => prev.filter(id => id !== assetId))}
@@ -884,7 +884,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
 
                                                     {/* Add More Images */}
                                                     {hasAssets && (
-                                                        <details className="bg-gray-50 rounded-lg border border-gray-200">
+                                                        <details className="bg-dark-700/50 rounded-lg border border-white/[0.06]">
                                                             <summary className="px-3 py-2 cursor-pointer text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
                                                                 <span>+ Daha Fazla Görsel İlişkilendir</span>
                                                             </summary>
@@ -900,7 +900,7 @@ export default function DocumentEditModal({ document, onClose }: DocumentEditMod
                                                                             alt={asset.caption || `Görsel ${asset.asset_metadata?.index}`}
                                                                             className="w-full h-16 object-cover"
                                                                         />
-                                                                        <div className="bg-gray-100 text-xs px-1 py-0.5 text-center truncate">
+                                                                        <div className="bg-dark-600 text-xs px-1 py-0.5 text-center truncate">
                                                                             S.{asset.asset_metadata?.page}
                                                                         </div>
                                                                     </div>

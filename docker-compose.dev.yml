@@ -1,0 +1,306 @@
+# =====================================================================
+# Ragleaf Docker Compose - Development Mode
+#
+# KULLANIM:
+#   Backend servislerini başlat: docker-compose -f docker-compose.dev.yml up -d
+#   Logları izle:              docker-compose -f docker-compose.dev.yml logs -f
+#   Durdur:                    docker-compose -f docker-compose.dev.yml down
+#
+# PORT ŞEMASI (1300-1309):
+#   1300 - PostgreSQL
+#   1303 - Redis
+#   1304 - OCR Service
+#   1305 - Embedding Service
+#   1306 - API Gateway
+#   1308 - MinIO S3 API
+#   1309 - MinIO Console
+#
+# NOT: Platform (1307) ve Landing (1301) bu dosyada DEĞİL.
+#      Bunlar lokal olarak npm run dev ile çalıştırılacak.
+# =====================================================================
+
+services:
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ragleaf_postgres_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+        reservations:
+          memory: 200M
+    mem_swappiness: 10
+    oom_score_adj: "-900"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ragleaf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ragleaf_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-ragleaf_db}
+    ports:
+      - "1300:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ragleaf} -d ${POSTGRES_DB:-ragleaf_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Redis Cache
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: ragleaf_redis_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 50M
+    mem_swappiness: 10
+    oom_score_adj: "-900"
+    ports:
+      - "1303:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # OCR Service (PDF/Text Extraction)
+  # ===========================================
+  ocr-service:
+    build:
+      context: .
+      dockerfile: docker/ocr-service/Dockerfile
+    container_name: ragleaf_ocr_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 800M
+        reservations:
+          memory: 400M
+    mem_swappiness: 100
+    oom_score_adj: "850"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "1304:8001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Embedding Service (ML/Vector Generation)
+  # GPU/CPU otomatik algılanır!
+  # ===========================================
+  embedding-service:
+    build:
+      context: .
+      dockerfile: docker/embedding-service/Dockerfile
+    container_name: ragleaf_embedding_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1800M
+        reservations:
+          memory: 800M
+    mem_swappiness: 80
+    oom_score_adj: "700"
+    environment:
+      REDIS_URL: redis://redis:6379/1
+      DEVICE: auto # Otomatik GPU/CPU algılama
+      DEFAULT_MODEL: intfloat/multilingual-e5-base # 768 boyut - DB ile uyumlu
+    ports:
+      - "1305:8002"
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # API Gateway (Main Backend)
+  # ===========================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api-gateway/Dockerfile
+    container_name: ragleaf_api_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    mem_swappiness: 80
+    oom_score_adj: "600"
+    env_file:
+      - .env
+    environment:
+      TZ: Europe/Istanbul
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ragleaf}:${POSTGRES_PASSWORD:-ragleaf_pass}@postgres:5432/${POSTGRES_DB:-ragleaf_db}
+      REDIS_URL: redis://redis:6379/2
+      OCR_SERVICE_URL: http://ocr-service:8001
+      EMBEDDING_SERVICE_URL: http://embedding-service:8002
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:1306}
+      PUBLIC_CHAT_URL: ${PUBLIC_CHAT_URL:-http://localhost:1306}
+      STORAGE_ROOT: /app/storage
+      DEFAULT_TENANT_SLUG: ${DEFAULT_TENANT_SLUG:-default}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-ragleaf}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-ragleaf_minio_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ragleaf}
+      MINIO_USE_SSL: "false"
+    ports:
+      - "1306:8000"
+    volumes:
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+      - ./backend:/app/backend  # Hot-reload için backend kodunu mount et
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # MinIO — S3-Compatible Object Storage
+  # ===========================================
+  minio:
+    image: minio/minio:latest
+    container_name: ragleaf_minio_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-ragleaf}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-ragleaf_minio_secret}
+    ports:
+      - "1308:9000"  # S3 API
+      - "1309:9001"  # MinIO Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Platform (React/Vite — app.ragleaf.com)
+  # ===========================================
+  platform:
+    build:
+      context: ./platform
+      dockerfile: Dockerfile
+    container_name: ragleaf_platform_dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 100M
+    mem_swappiness: 100
+    oom_score_adj: 500
+    ports:
+      - "1307:5174"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5174" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ragleaf-network
+
+  # ===========================================
+  # Landing Page (ragleaf.com)
+  # ===========================================
+  landing-page:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: ragleaf_landing_dev
+    restart: unless-stopped
+    ports:
+      - "1301:80"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+    networks:
+      - ragleaf-network
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres_data:
+  redis_data:
+  huggingface_cache:
+  minio_data:
+
+# ===========================================
+# Networks
+# ===========================================
+networks:
+  ragleaf-network:
+    driver: bridge

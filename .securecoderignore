@@ -1,0 +1,13 @@
+node_modules/
+node_modules/**
+**/node_modules/**
+.git/
+.git/**
+**/dist/**
+**/build/**
+**/.next/**
+**/.next
+**/storage/**
+**/storage
+**/logs/**
+**/logs

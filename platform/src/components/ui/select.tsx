@@ -41,7 +41,7 @@ const SelectTrigger = React.forwardRef<
   return (
     <button
       ref={ref}
-      className={`flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${className || ''}`}
+      className={`flex h-10 w-full items-center justify-between rounded-md border border-white/[0.1] bg-dark-700/50 px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
       onClick={() => setOpen(!open)}
       {...props}
     >
@@ -82,7 +82,7 @@ const SelectContent = React.forwardRef<
       />
       <div
         ref={ref}
-        className={`absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto ${className || ''}`}
+        className={`absolute top-full left-0 z-50 w-full mt-1 bg-dark-800/60 border border-white/[0.06] rounded-md shadow-lg max-h-60 overflow-auto ${className || ''}`}
         {...props}
       >
         {children}
@@ -102,8 +102,8 @@ const SelectItem = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={`relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-gray-100 ${
-        isSelected ? 'bg-gray-100' : ''
+      className={`relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-dark-600 ${
+        isSelected ? 'bg-dark-600' : ''
       } ${className || ''}`}
       onClick={() => {
         onValueChange(itemValue)

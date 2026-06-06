@@ -134,11 +134,11 @@ export default function BackupManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-            <Database className="h-5 w-5 text-blue-600" />
+          <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center mr-3">
+            <Database className="h-5 w-5 text-blue-400" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Yedekleme Yönetimi</h2>
+            <h2 className="text-xl font-semibold text-gray-100">Yedekleme Yönetimi</h2>
             <p className="text-sm text-gray-500">Sistem yapılandırması ve kullanıcı verilerini yedekleyin</p>
           </div>
         </div>
@@ -146,14 +146,14 @@ export default function BackupManager() {
           <button
             onClick={loadData}
             disabled={isLoading}
-            className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={handleCreateBackup}
             disabled={isCreating}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 flex items-center"
           >
             {isCreating ? (
               <>
@@ -172,25 +172,25 @@ export default function BackupManager() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-dark-800/60 rounded-lg border border-white/[0.06] p-4">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <Database className="h-5 w-5 text-green-600" />
+            <div className="h-10 w-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+              <Database className="h-5 w-5 text-green-400" />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Toplam Yedek</p>
-              <p className="text-2xl font-semibold text-gray-900">{backups.length}</p>
+              <p className="text-2xl font-semibold text-gray-100">{backups.length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-dark-800/60 rounded-lg border border-white/[0.06] p-4">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <HardDrive className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+              <HardDrive className="h-5 w-5 text-blue-400" />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Toplam Boyut</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-2xl font-semibold text-gray-100">
                 {backups.reduce((acc, b) => acc + b.size_bytes, 0) > 0 
                   ? formatSize(backups.reduce((acc, b) => acc + b.size_bytes, 0))
                   : '0 B'}
@@ -198,14 +198,14 @@ export default function BackupManager() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-dark-800/60 rounded-lg border border-white/[0.06] p-4">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Clock className="h-5 w-5 text-purple-600" />
+            <div className="h-10 w-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+              <Clock className="h-5 w-5 text-purple-400" />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Son Yedek</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-100">
                 {backups.length > 0 
                   ? formatDate(backups[0].created_at)
                   : 'Yok'}
@@ -216,9 +216,9 @@ export default function BackupManager() {
       </div>
 
       {/* Backup List */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Yedek Listesi</h3>
+      <div className="bg-dark-800/60 rounded-lg border border-white/[0.06]">
+        <div className="px-4 py-3 border-b border-white/[0.06]">
+          <h3 className="text-lg font-medium text-gray-100">Yedek Listesi</h3>
         </div>
         <BackupList
           backups={backups}
@@ -229,12 +229,12 @@ export default function BackupManager() {
       </div>
 
       {/* Logs Section */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-dark-800/60 rounded-lg border border-white/[0.06]">
         <button
           onClick={() => setShowLogs(!showLogs)}
-          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-dark-700/50"
         >
-          <h3 className="text-lg font-medium text-gray-900">İşlem Logları</h3>
+          <h3 className="text-lg font-medium text-gray-100">İşlem Logları</h3>
           {showLogs ? (
             <ChevronUp className="h-5 w-5 text-gray-500" />
           ) : (
@@ -242,7 +242,7 @@ export default function BackupManager() {
           )}
         </button>
         {showLogs && (
-          <div className="border-t border-gray-200">
+          <div className="border-t border-white/[0.06]">
             <BackupLogs logs={logs} />
           </div>
         )}

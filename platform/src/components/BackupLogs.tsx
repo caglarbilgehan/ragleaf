@@ -21,25 +21,25 @@ export default function BackupLogs({ logs }: BackupLogsProps) {
   }
 
   return (
-    <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+    <div className="divide-y divide-white/[0.04] max-h-96 overflow-y-auto">
       {logs.map((log) => (
-        <div key={log.id} className="px-4 py-3 hover:bg-gray-50">
+        <div key={log.id} className="px-4 py-3 hover:bg-dark-700/50">
           <div className="flex items-start">
             {/* Status Icon */}
             <div className="flex-shrink-0 mr-3">
               {log.status === 'success' && (
-                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="h-8 w-8 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
                 </div>
               )}
               {log.status === 'error' && (
-                <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <XCircle className="h-4 w-4 text-red-600" />
+                <div className="h-8 w-8 bg-red-500/10 rounded-full flex items-center justify-center">
+                  <XCircle className="h-4 w-4 text-red-400" />
                 </div>
               )}
               {log.status === 'started' && (
-                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-blue-600" />
+                <div className="h-8 w-8 bg-blue-500/10 rounded-full flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-blue-400" />
                 </div>
               )}
             </div>
@@ -58,13 +58,13 @@ export default function BackupLogs({ logs }: BackupLogsProps) {
                   {log.operation === 'delete' && (
                     <Trash2 className="h-4 w-4 text-gray-400 mr-1" />
                   )}
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-gray-100">
                     {getOperationLabel(log.operation)}
                   </span>
-                  <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
-                    log.status === 'success' ? 'bg-green-100 text-green-800' :
-                    log.status === 'error' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-blue-800'
+                  <span className={`ml-2 px-2 py-0.5 text-xs rounded-full border ${
+                    log.status === 'success' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                    log.status === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                    'bg-blue-500/10 text-blue-400 border-blue-500/20'
                   }`}>
                     {getStatusLabel(log.status)}
                   </span>
@@ -75,7 +75,7 @@ export default function BackupLogs({ logs }: BackupLogsProps) {
               </div>
               
               {log.filename && (
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Dosya: <span className="font-mono text-xs">{log.filename}</span>
                 </p>
               )}

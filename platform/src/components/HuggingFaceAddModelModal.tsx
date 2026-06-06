@@ -121,25 +121,25 @@ export default function HuggingFaceAddModelModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+      <div className="bg-dark-800/60 rounded-lg shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">HuggingFace Model Ekle</h2>
+            <h2 className="text-xl font-semibold text-gray-100">HuggingFace Model Ekle</h2>
             <p className="text-sm text-gray-600 mt-1">
               HuggingFace Hub'dan model arayın ve projenize ekleyin
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-300 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-white/[0.06]">
           <div className="flex space-x-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -149,7 +149,7 @@ export default function HuggingFaceAddModelModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchModels()}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-white/[0.1] rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <button
@@ -181,13 +181,13 @@ export default function HuggingFaceAddModelModal({
               <p className="text-sm">Farklı anahtar kelimeler deneyin</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-white/[0.04]">
               {models.map((model) => (
-                <div key={model.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={model.id} className="p-6 hover:bg-dark-700/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-semibold text-gray-100">
                           {model.modelId}
                         </h3>
                         {model.pipeline_tag && (
@@ -221,13 +221,13 @@ export default function HuggingFaceAddModelModal({
                           {model.tags.slice(0, 5).map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                              className="px-2 py-1 text-xs bg-dark-600 text-gray-300 rounded"
                             >
                               {tag}
                             </span>
                           ))}
                           {model.tags.length > 5 && (
-                            <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                            <span className="px-2 py-1 text-xs bg-dark-600 text-gray-300 rounded">
                               +{model.tags.length - 5} daha
                             </span>
                           )}
@@ -256,14 +256,14 @@ export default function HuggingFaceAddModelModal({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
+        <div className="p-6 border-t border-white/[0.06] bg-dark-700/50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               <strong>Not:</strong> Eklenen modeller otomatik olarak yapılandırılacak ve kullanıma hazır hale gelecektir.
             </div>
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+              className="px-4 py-2 text-gray-300 bg-dark-500 rounded-md hover:bg-dark-400 transition-colors"
             >
               Kapat
             </button>

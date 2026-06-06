@@ -12,6 +12,7 @@ interface WidgetConfig {
   placeholder: string;
   autoOpen: boolean;
   autoOpenDelay: number;
+  layoutMode: 'floating' | 'split' | 'fullscreen';
 }
 
 interface Message {
@@ -29,6 +30,7 @@ const DEFAULT_CONFIG: Partial<WidgetConfig> = {
   placeholder: 'Mesajınızı yazın...',
   autoOpen: true,
   autoOpenDelay: 1500,
+  layoutMode: 'floating',
 };
 
 const CSS = `
@@ -139,6 +141,50 @@ const CSS = `
   .ragleaf-window { width: 100vw; height: 100vh; max-height: 100vh; bottom: 0; right: 0; left: 0; border-radius: 0; }
   .ragleaf-bubble { bottom: 16px; right: 16px; }
 }
+
+/* Layout Variations */
+.ragleaf-bubble.hidden {
+  display: none !important;
+}
+.ragleaf-window.split {
+  bottom: 0 !important;
+  top: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.1) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: all !important;
+}
+.ragleaf-window.split.right {
+  right: 0 !important;
+  left: auto !important;
+  border-left: 1px solid #e5e7eb;
+}
+.ragleaf-window.split.left {
+  left: 0 !important;
+  right: auto !important;
+  border-right: 1px solid #e5e7eb;
+}
+.ragleaf-window.split .ragleaf-close {
+  display: none !important;
+}
+
+.ragleaf-window.fullscreen {
+  bottom: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: all !important;
+}
 `;
 
 const CHAT_ICON = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>';
@@ -191,6 +237,10 @@ class RagleafWidget {
           this.config.primaryColor = info.appearance.primary_color;
           this.applyColors();
         }
+        if (info.appearance?.layout_mode) {
+          this.config.layoutMode = info.appearance.layout_mode;
+          this.applyLayoutMode();
+        }
         // Read auto_open setting from agent appearance
         if (info.appearance && typeof info.appearance.auto_open === 'boolean') {
           this.config.autoOpen = info.appearance.auto_open;
@@ -226,6 +276,7 @@ class RagleafWidget {
     });
 
     this.applyColors();
+    this.applyLayoutMode();
 
     // Show welcome message
     if (this.config.welcomeMessage) {
@@ -265,6 +316,28 @@ class RagleafWidget {
     if (header) header.style.background = this.config.primaryColor;
   }
 
+  private applyLayoutMode() {
+    const bubble = this.shadow.querySelector('.ragleaf-bubble') as HTMLElement;
+    const windowEl = this.shadow.querySelector('.ragleaf-window') as HTMLElement;
+    
+    if (!bubble || !windowEl) return;
+    
+    windowEl.classList.remove('split', 'fullscreen');
+    bubble.classList.remove('hidden');
+    
+    if (this.config.layoutMode === 'split') {
+      windowEl.classList.add('split');
+      bubble.classList.add('hidden');
+      this.isOpen = true;
+      windowEl.classList.add('open');
+    } else if (this.config.layoutMode === 'fullscreen') {
+      windowEl.classList.add('fullscreen');
+      bubble.classList.add('hidden');
+      this.isOpen = true;
+      windowEl.classList.add('open');
+    }
+  }
+
   private updateHeader() {
     const h3 = this.shadow.querySelector('.ragleaf-header h3');
     if (h3) h3.textContent = this.config.title;
@@ -273,14 +346,15 @@ class RagleafWidget {
   private toggle() {
     this.isOpen = !this.isOpen;
     this.windowEl.classList.toggle('open', this.isOpen);
-    if (this.isOpen) { this.inputEl.focus(); this.scrollToBottom(); }
+    if (this.isOpen) { this.inputEl.focus(); this.scrollToTop(); }
   }
 
   private renderMessages() {
-    this.messagesEl.innerHTML = this.messages.map(m =>
+    const reversed = [...this.messages].reverse();
+    this.messagesEl.innerHTML = reversed.map(m =>
       `<div class="ragleaf-msg ${m.role}">${m.role === 'assistant' ? this.parseMarkdown(m.content) : this.escapeHtml(m.content)}</div>`
     ).join('');
-    this.scrollToBottom();
+    this.scrollToTop();
   }
 
   private parseMarkdown(text: string): string {
@@ -355,8 +429,8 @@ class RagleafWidget {
     return html;
   }
 
-  private scrollToBottom() {
-    requestAnimationFrame(() => { this.messagesEl.scrollTop = this.messagesEl.scrollHeight; });
+  private scrollToTop() {
+    requestAnimationFrame(() => { this.messagesEl.scrollTop = 0; });
   }
 
   private showTyping() {
@@ -364,8 +438,8 @@ class RagleafWidget {
     div.className = 'ragleaf-msg typing';
     div.id = 'ragleaf-typing';
     div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-    this.messagesEl.appendChild(div);
-    this.scrollToBottom();
+    this.messagesEl.insertBefore(div, this.messagesEl.firstChild);
+    this.scrollToTop();
   }
 
   private hideTyping() {
@@ -448,6 +522,7 @@ class RagleafWidget {
     position: (script.getAttribute('data-position') as any) || undefined,
     title: script.getAttribute('data-title') || undefined,
     autoOpen: script.getAttribute('data-auto-open') !== 'false',
+    layoutMode: (script.getAttribute('data-layout-mode') as any) || undefined,
   };
 
   // Clean undefined values

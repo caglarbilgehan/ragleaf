@@ -125,9 +125,9 @@ export default function DocumentSummarySection({ documentId, documentName }: Doc
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 rounded-lg p-4 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
-        <div className="h-20 bg-gray-200 rounded"></div>
+      <div className="bg-dark-700/50 rounded-lg p-4 animate-pulse">
+        <div className="h-4 bg-dark-500 rounded w-1/4 mb-3"></div>
+        <div className="h-20 bg-dark-500 rounded"></div>
       </div>
     );
   }
@@ -172,8 +172,8 @@ export default function DocumentSummarySection({ documentId, documentName }: Doc
 
       {summaryData?.has_summary ? (
         <div className="space-y-3">
-          <div className="bg-white rounded-lg p-4 border border-purple-100 max-h-48 overflow-y-auto">
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-dark-800/60 rounded-lg p-4 border border-purple-100 max-h-48 overflow-y-auto">
+            <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
               {summaryData.summary}
             </p>
           </div>

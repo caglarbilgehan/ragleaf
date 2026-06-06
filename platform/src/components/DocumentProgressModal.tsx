@@ -200,13 +200,13 @@ export default function DocumentProgressModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 !mt-0 !mb-0" style={{ marginTop: '0 !important', marginBottom: '0 !important', top: '0', left: '0', right: '0', bottom: '0' }}>
-      <div className="h-screen w-full bg-white flex flex-col relative">
+      <div className="h-screen w-full bg-dark-800/60 flex flex-col relative">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-3">
             {progressData && getStatusIcon(progressData.status)}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-100">
                 {operation === 'indexing'
                   ? 'Döküman İndeksleniyor'
                   : progressData?.processing_stage === 'reprocessing' || progressData?.processing_details?.includes('Yeniden işleme')
@@ -216,7 +216,7 @@ export default function DocumentProgressModal({
               <p className="text-sm text-gray-500">{documentName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -251,7 +251,7 @@ export default function DocumentProgressModal({
                     <span>İlerleme</span>
                     <span>{progressData.processing_progress}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
+                  <div className="w-full bg-dark-500 rounded-full h-4">
                     <div
                       className={`h-4 rounded-full transition-all duration-300 ${getProgressColor(progressData.processing_progress)}`}
                       style={{ width: `${progressData.processing_progress}%` }}
@@ -261,9 +261,9 @@ export default function DocumentProgressModal({
 
                 {/* Processing Steps Stepper */}
                 <div className="w-full">
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">İşlem Adımları</label>
+                  <label className="text-sm font-medium text-gray-300 mb-3 block">İşlem Adımları</label>
                   <div className="flex items-center justify-between relative">
-                    <div className="absolute top-4 left-0 right-0 h-1 bg-gray-200 z-0"></div>
+                    <div className="absolute top-4 left-0 right-0 h-1 bg-dark-500 z-0"></div>
                     <div
                       className="absolute top-4 left-0 h-1 bg-blue-500 z-0 transition-all duration-500"
                       style={{
@@ -283,7 +283,7 @@ export default function DocumentProgressModal({
                               ? 'bg-green-500 text-white'
                               : isCurrent
                                 ? 'bg-blue-500 text-white animate-pulse ring-4 ring-blue-200'
-                                : 'bg-gray-200 text-gray-400'
+                                : 'bg-dark-500 text-gray-400'
                               }`}
                           >
                             {isCompleted ? '✓' : step.icon}
@@ -304,8 +304,8 @@ export default function DocumentProgressModal({
                   <div className="space-y-6">
                     {/* Current Stage */}
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Mevcut Aşama</label>
-                      <p className="text-lg text-gray-900 flex items-center gap-2">
+                      <label className="text-sm font-medium text-gray-300">Mevcut Aşama</label>
+                      <p className="text-lg text-gray-100 flex items-center gap-2">
                         <span className="text-xl">{CURRENT_STEPS.find(s => s.key === progressData.processing_stage)?.icon || '📋'}</span>
                         {getStageText(progressData.processing_stage)}
                       </p>
@@ -314,8 +314,8 @@ export default function DocumentProgressModal({
                     {/* Details */}
                     {progressData.processing_details && (
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Detaylar</label>
-                        <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                        <label className="text-sm font-medium text-gray-300">Detaylar</label>
+                        <p className="text-sm text-gray-600 bg-dark-700/50 p-3 rounded-lg">
                           {progressData.processing_details}
                         </p>
                       </div>
@@ -323,10 +323,10 @@ export default function DocumentProgressModal({
 
                     {/* Status */}
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Durum</label>
+                      <label className="text-sm font-medium text-gray-300">Durum</label>
                       <div className="flex items-center space-x-2 mt-1">
                         {getStatusIcon(progressData.status)}
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-gray-100">
                           {progressData.status === 'processing' && 'İşleniyor'}
                           {progressData.status === 'processed' && 'Başarıyla Tamamlandı'}
                           {progressData.status === 'failed' && 'İşleme Başarısız'}
@@ -337,7 +337,7 @@ export default function DocumentProgressModal({
                     {/* Updated At */}
                     {progressData.updated_at && (
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Son Güncelleme</label>
+                        <label className="text-sm font-medium text-gray-300">Son Güncelleme</label>
                         <p className="text-sm text-gray-600">
                           {new Date(progressData.updated_at).toLocaleString('tr-TR')}
                         </p>
@@ -347,7 +347,7 @@ export default function DocumentProgressModal({
                     {/* Resource Usage */}
                     {progressData.system_stats && (
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Sistem Kaynakları</label>
+                        <label className="text-sm font-medium text-gray-300">Sistem Kaynakları</label>
                         <div className="mt-2 grid grid-cols-2 gap-3">
                           <div className="bg-blue-50 p-3 rounded-lg">
                             <div className="text-xs text-blue-600 font-medium">RAM Kullanımı</div>
@@ -371,7 +371,7 @@ export default function DocumentProgressModal({
                     {/* Real-time Logs from Backend */}
                     <div>
                       <div className="mb-2 flex items-center justify-between">
-                        <label className="text-sm font-medium text-gray-700">İşlem Logları (Gerçek Zamanlı)</label>
+                        <label className="text-sm font-medium text-gray-300">İşlem Logları (Gerçek Zamanlı)</label>
                         <span className="text-xs text-gray-400">{logs.length} kayıt</span>
                       </div>
                       <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-80 overflow-y-auto">
@@ -406,7 +406,7 @@ export default function DocumentProgressModal({
 
                     {/* System Commands */}
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Sistem Komutları</label>
+                      <label className="text-sm font-medium text-gray-300">Sistem Komutları</label>
                       <div className="mt-2 bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-xs max-h-40 overflow-y-auto">
                         <div className="space-y-1">
                           {progressData.processing_stage === 'initialization' && (
@@ -488,7 +488,7 @@ export default function DocumentProgressModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between p-6 border-t bg-gray-50 mt-auto">
+        <div className="flex justify-between p-6 border-t bg-dark-700/50 mt-auto">
           <div className="flex space-x-3">
             {(progressData?.is_processing || progressData?.status === 'processing') && (
               <>
@@ -544,7 +544,7 @@ export default function DocumentProgressModal({
 
           <button
             onClick={onClose}
-            className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700"
+            className="px-3 py-1 bg-dark-400 text-white rounded text-sm hover:bg-gray-700"
           >
             Kapat
           </button>

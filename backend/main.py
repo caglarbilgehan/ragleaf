@@ -246,12 +246,36 @@ def create_app() -> FastAPI:
     # Document Pipeline API (3-stage processing)
     from backend.api.document_pipeline import router as document_pipeline_router
 
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Startup
+        import asyncio
+        from backend.services.reminder_scheduler import start_reminder_scheduler, stop_reminder_scheduler
+        from backend.services.writer_scheduler import start_writer_scheduler, stop_writer_scheduler
+        
+        scheduler_task = asyncio.create_task(start_reminder_scheduler())
+        logger.info("⏰ Startup: Background reminder scheduler loop initiated")
+        
+        writer_scheduler_task = asyncio.create_task(start_writer_scheduler())
+        logger.info("⏰ Startup: Background AI Writer scheduler loop initiated")
+        
+        yield
+        # Shutdown
+        await stop_reminder_scheduler(scheduler_task)
+        logger.info("⏰ Shutdown: Background reminder scheduler stopped")
+        
+        await stop_writer_scheduler(writer_scheduler_task)
+        logger.info("⏰ Shutdown: Background AI Writer scheduler stopped")
+
     app = FastAPI(
         title=APP_NAME,
         version=APP_VERSION,
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
+        lifespan=lifespan
     )
 
     # --- Middlewares ---
@@ -335,15 +359,15 @@ def create_app() -> FastAPI:
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key, X-Language"
                 response.headers["Access-Control-Max-Age"] = "3600"
                 return response
             elif origin and _is_origin_allowed(origin, cors_origins):
                 response = Response()
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-Router-Model, X-Router-Route, x-inference-provider"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-Router-Model, X-Router-Route, x-inference-provider, X-Language"
                 response.headers["Access-Control-Max-Age"] = "3600"
                 return response
             else:
@@ -365,12 +389,12 @@ def create_app() -> FastAPI:
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key, X-Language"
             elif _is_origin_allowed(origin, cors_origins):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-Router-Model, X-Router-Route, x-inference-provider"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-Router-Model, X-Router-Route, x-inference-provider, X-Language"
                 response.headers["Access-Control-Expose-Headers"] = "x-inference-provider, x-router-model, X-Router-Model, X-Router-Route"
 
         # StreamingResponse ile dönen SSE'leri tanı: text/event-stream
@@ -485,6 +509,10 @@ def create_app() -> FastAPI:
     from backend.api.appointments import appointments_router
     app.include_router(appointments_router, prefix="/api", tags=["appointments"])
 
+    # AI Writer API (otonom/yarı-otonom makale üretimi)
+    from backend.api.writer import writer_router
+    app.include_router(writer_router, prefix="/api", tags=["ai-writer"])
+
     # Calendar Integration API (Google Calendar, iCal)
     from backend.api.calendar_integration import calendar_router
     app.include_router(calendar_router, prefix="/api", tags=["calendar"])
@@ -492,6 +520,11 @@ def create_app() -> FastAPI:
     # Admin Tenant Management API
     from backend.api.admin_tenants import admin_tenants_router
     app.include_router(admin_tenants_router, prefix="/api", tags=["admin-tenants"])
+
+    # Contact Requests API
+    from backend.api.contacts import contacts_router, contacts_public_router
+    app.include_router(contacts_public_router, prefix="/v1", tags=["contact-public"])
+    app.include_router(contacts_router, tags=["contact-admin"])
 
     # --- Widget CDN ---
     import os

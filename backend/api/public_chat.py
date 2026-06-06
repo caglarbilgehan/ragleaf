@@ -13,7 +13,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from fastapi import APIRouter, HTTPException, Depends, Request, Query, status
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -94,6 +94,8 @@ class AgentInfoResponse(BaseModel):
 @public_chat_router.get("/agents/{agent_public_id}/info", response_model=AgentInfoResponse)
 async def get_agent_public_info(
     agent_public_id: str,
+    req: Request,
+    lang: Optional[str] = None,
     auth: AgentAuth = Depends(get_agent_from_api_key),
     db: Session = Depends(get_db)
 ):
@@ -106,16 +108,32 @@ async def get_agent_public_info(
     # Verify the requested agent matches the API key's agent
     if agent.public_id != agent_public_id:
         raise HTTPException(status_code=403, detail="API key bu agent için geçerli değil")
+        
+    # Determine the requested language
+    requested_lang = lang
+    if not requested_lang:
+        requested_lang = req.headers.get("x-language") or req.headers.get("X-Language")
+        
+    name = agent.name
+    description = agent.description
+    welcome_message = agent.welcome_message
+    
+    # Translate default agent info for Ragleaf System Agent if requested in English
+    if requested_lang == "en":
+        if agent.public_id == "ag_ragleaf_system01" or "ragleaf" in agent.name.lower():
+            name = "Ragleaf Assistant"
+            description = "Ragleaf System Assistant"
+            welcome_message = "Hello! 👋 I am Ragleaf Assistant. I can help you with platform usage, agent creation, integrations, and technical support. How can I help you?"
     
     return AgentInfoResponse(
         id=agent.public_id,
-        name=agent.name,
-        description=agent.description,
-        welcome_message=agent.welcome_message,
+        name=name,
+        description=description,
+        welcome_message=welcome_message,
         appearance=agent.appearance,
         personality={
             "tone": (agent.personality or {}).get("tone", "professional"),
-            "language": (agent.personality or {}).get("language", "tr")
+            "language": requested_lang if requested_lang in ("tr", "en") else (agent.personality or {}).get("language", "tr")
         }
     )
 
@@ -134,6 +152,36 @@ async def chat_completion(
     start_time = time.time()
     agent = auth.agent
     org = auth.organization
+
+    # --- Trial & Limits Enforcements ---
+    if not getattr(org, "is_system", False):
+        # 1. Check Trial Expiration (only for starter plan)
+        if org.plan == "starter" and org.trial_ends_at:
+            now = datetime.now(timezone.utc)
+            trial_ends = org.trial_ends_at
+            if trial_ends.tzinfo is None:
+                trial_ends = trial_ends.replace(tzinfo=timezone.utc)
+            if now > trial_ends:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Deneme süreniz dolmuştur. Devam etmek için lütfen planınızı yükseltin."
+                )
+
+        # 2. Check Monthly Query Limit
+        now = datetime.now(timezone.utc)
+        month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
+        
+        query_count = db.query(UsageLog).filter(
+            UsageLog.organization_id == org.id,
+            UsageLog.event_type == "chat_query",
+            UsageLog.created_at >= month_start
+        ).count()
+        
+        if query_count >= org.max_queries_per_month:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Aylık sorgu limitiniz doldu ({org.max_queries_per_month}). Lütfen planınızı yükseltin."
+            )
     
     # --- Rate Limiting ---
     from backend.middleware.rate_limiter import check_rate_limit
@@ -180,7 +228,70 @@ async def chat_completion(
         content=user_message.content
     )
     db.add(user_msg)
-    
+
+    # --- Check for PROMOTION command trigger ---
+    cleaned_content = user_message.content.strip().lower()
+    if cleaned_content in ("promotion", "/promotion", "promo"):
+        response_text = ""
+        try:
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            system_overview_path = os.path.join(base_dir, "docs", "promotions", "system_overview.md")
+            
+            if os.path.exists(system_overview_path):
+                with open(system_overview_path, "r", encoding="utf-8") as f:
+                    response_text = f.read()
+            else:
+                response_text = "### 🍃 Ragleaf Tanıtım ve Destek Programları\n\nDestek programları dokümanları `docs/promotions/` klasörü altında hazırlandı."
+        except Exception as ex:
+            response_text = f"Tanıtım dökümanları hazırlandı, ancak okunurken bir hata oldu: {ex}"
+            
+        response_time_ms = 5
+        assistant_msg = PublicMessage(
+            conversation_id=conversation.id,
+            role="assistant",
+            content=response_text,
+            tokens_used=0,
+            model_used="system_command",
+            response_time_ms=response_time_ms
+        )
+        db.add(assistant_msg)
+        
+        conversation.message_count = (conversation.message_count or 0) + 2
+        conversation.last_message_at = datetime.now(timezone.utc)
+        if conversation.message_count == 2:
+            agent.total_conversations = (agent.total_conversations or 0) + 1
+        agent.total_messages = (agent.total_messages or 0) + 2
+        
+        usage_log = UsageLog(
+            organization_id=org.id,
+            agent_id=agent.id,
+            event_type="chat_query",
+            tokens_used=0,
+            details={
+                "model": "system_command",
+                "response_time_ms": response_time_ms,
+                "session_id": session_id,
+                "command": cleaned_content
+            }
+        )
+        db.add(usage_log)
+        db.commit()
+        
+        completion_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
+        return ChatCompletionResponse(
+            id=completion_id,
+            created=int(time.time()),
+            model="system_command",
+            choices=[ChatCompletionChoice(
+                message=ChatCompletionMessage(role="assistant", content=response_text),
+                finish_reason="stop"
+            )],
+            usage=ChatCompletionUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+            agent_name=agent.name,
+            response_time_ms=response_time_ms
+        )
+
     # --- Build RAG Context ---
     context = ""
     sources = []
@@ -190,15 +301,23 @@ async def chat_completion(
     except Exception as e:
         logger.error(f"RAG context error for agent {agent.id}: {e}")
     
+    # Determine the requested language
+    requested_lang = None
+    if request.metadata and isinstance(request.metadata, dict):
+        requested_lang = request.metadata.get("lang")
+    if not requested_lang:
+        requested_lang = req.headers.get("x-language") or req.headers.get("X-Language")
+        
     # --- Build System Prompt ---
-    system_prompt = _build_system_prompt(agent, context)
+    system_prompt = _build_system_prompt(agent, context, requested_lang=requested_lang)
     
     # --- Build Messages for LLM ---
     llm_messages = [{"role": "system", "content": system_prompt}]
     
     # Add conversation history (last N messages from request)
     for msg in request.messages[:-1]:
-        llm_messages.append({"role": msg.role, "content": msg.content})
+        role = "assistant" if msg.role in ("bot", "assistant") else msg.role
+        llm_messages.append({"role": role, "content": msg.content})
     
     # Add current message
     llm_messages.append({"role": "user", "content": user_message.content})
@@ -222,8 +341,11 @@ async def chat_completion(
         response_text = fallback
         model_used = "fallback"
     
-    # --- Post-process: Extract Appointment ---
+    # --- Post-process: Extract Appointment & Sponsorship Deals ---
     response_text = await _process_appointment_from_response(
+        response_text, agent, conversation, db
+    )
+    response_text = await _process_sponsorship_from_response(
         response_text, agent, conversation, db
     )
     
@@ -264,6 +386,10 @@ async def chat_completion(
         }
     )
     db.add(usage_log)
+    
+    # Increment Ragleaf leaves for the organization (1 leaf per chat query)
+    org.ragleaf_leaves = (org.ragleaf_leaves or 0) + 1
+    db.add(org)
     
     db.commit()
     
@@ -428,27 +554,46 @@ async def _build_rag_context(
             return "", []
 
 
-def _build_system_prompt(agent: Agent, context: str) -> str:
+def _build_system_prompt(agent: Agent, context: str, requested_lang: Optional[str] = None) -> str:
     """Build the full system prompt for the agent with RAG context."""
     personality = agent.personality or {}
     tone = personality.get("tone", "professional")
-    language = personality.get("language", "tr")
+    
+    # Override language if requested_lang is provided and valid (e.g. "tr", "en")
+    language = requested_lang if requested_lang in ("tr", "en") else personality.get("language", "tr")
+    if not language or language == "auto":
+        language = "tr"
+        
     response_style = personality.get("response_style", "balanced")
     
     # Base system prompt
     base_prompt = agent.system_prompt or f"Sen {agent.name} adlı bir AI asistansın."
+    if language == "en" and (agent.public_id == "ag_ragleaf_system01" or "ragleaf" in agent.name.lower()):
+        base_prompt = "You are an AI assistant named Ragleaf Assistant. Help the user with platform features, code integrations, and sadakat (leaves) loyalty system."
     
     # Add tone instructions
-    tone_instructions = {
+    tone_instructions_tr = {
         "professional": "Profesyonel ve resmi bir dil kullan.",
         "friendly": "Samimi ve sıcak bir dil kullan, ama bilgilendirici ol.",
         "casual": "Rahat ve günlük bir dil kullan."
     }
     
-    style_instructions = {
+    tone_instructions_en = {
+        "professional": "Use a professional and formal tone.",
+        "friendly": "Use a friendly and warm tone, but be informative.",
+        "casual": "Use a relaxed and casual tone."
+    }
+    
+    style_instructions_tr = {
         "concise": "Yanıtlarını kısa ve öz tut.",
         "detailed": "Detaylı ve kapsamlı yanıtlar ver.",
         "balanced": "Yanıtlarını dengeli tut — gerektiğinde detay ver, gerektiğinde özet."
+    }
+    
+    style_instructions_en = {
+        "concise": "Keep your responses short and concise.",
+        "detailed": "Provide detailed and comprehensive responses.",
+        "balanced": "Keep your responses balanced — provide details when needed, summarize when appropriate."
     }
     
     language_instructions = {
@@ -456,6 +601,10 @@ def _build_system_prompt(agent: Agent, context: str) -> str:
         "en": "Always respond in English.",
         "auto": "Kullanıcının dilinde yanıt ver."
     }
+    
+    # Select instructions based on language
+    tone_instructions = tone_instructions_en if language == "en" else tone_instructions_tr
+    style_instructions = style_instructions_en if language == "en" else style_instructions_tr
     
     system = f"""{base_prompt}
 
@@ -467,7 +616,28 @@ def _build_system_prompt(agent: Agent, context: str) -> str:
     # Add appointment instructions for template-based agents
     template_slug = personality.get("template_slug")
     if template_slug:
-        system += """
+        if language == "en":
+            system += """
+## APPOINTMENT SYSTEM INSTRUCTIONS
+When a customer wants to make an appointment, collect the following information:
+1. Name
+2. Phone number
+3. Desired date and time
+4. Service type
+
+AFTER collecting ALL information, add the following JSON format at the END of your response to confirm the appointment:
+```APPOINTMENT_JSON
+{"customer_name": "...", "customer_phone": "...", "appointment_date": "YYYY-MM-DDTHH:MM:SS", "service_type": "...", "duration_minutes": 60}
+```
+
+IMPORTANT RULES:
+- Add the JSON ONLY when all information is collected
+- Write a friendly confirmation message to the customer BEFORE the JSON
+- If information is missing, don't add JSON, ask for the information
+- Clarify if date/time information is unclear
+"""
+        else:
+            system += """
 ## RANDEVU SİSTEMİ TALİMATI
 Müşteri randevu almak istediğinde şu bilgileri topla:
 1. İsim
@@ -489,7 +659,17 @@ TÜM bilgileri aldıktan sonra, randevuyu onaylamak için aşağıdaki JSON form
     
     # Add RAG context
     if context:
-        system += f"""
+        if language == "en":
+            system += f"""
+Answer the user's question using the following knowledge base contents.
+For topics not found in the knowledge base, respond based on your general knowledge and the information in the system prompt.
+
+--- KNOWLEDGE BASE ---
+{context}
+--- END OF KNOWLEDGE BASE ---
+"""
+        else:
+            system += f"""
 Aşağıdaki bilgi tabanı içeriklerini kullanarak kullanıcının sorusunu yanıtla.
 Bilgi tabanında bulunmayan konularda genel bilgin ve sistem promptundaki bilgilere dayanarak yanıt ver.
 
@@ -502,14 +682,24 @@ Bilgi tabanında bulunmayan konularda genel bilgin ve sistem promptundaki bilgil
             "fallback_message",
             ""
         )
-        system += f"""
+        if language == "en":
+            system += f"""
+No documents are available in the knowledge base yet. Respond according to the following rules:
+1. Help the user based on the information in the system prompt and your general knowledge.
+2. Try to understand the user's question and provide a helpful response as much as possible.
+3. If you have no knowledge about the question or it's a very specific topic, state this politely.
+"""
+            if fallback:
+                system += f"4. In situations where you truly cannot respond, suggest: '{fallback}'\n"
+        else:
+            system += f"""
 Bilgi tabanında henüz doküman bulunmuyor. Aşağıdaki kurallara göre yanıt ver:
 1. Sistem promptundaki bilgilere ve genel bilgine dayanarak kullanıcıya yardımcı ol.
 2. Kullanıcının sorusunu anlamaya çalış ve mümkün olduğunca faydalı bir yanıt ver.
 3. Eğer soru hakkında hiçbir bilgin yoksa veya çok spesifik bir konuysa, bunu nazikçe belirt.
 """
-        if fallback:
-            system += f"4. Gerçekten yanıt veremediğin durumlarda şunu öner: '{fallback}'\n"
+            if fallback:
+                system += f"4. Gerçekten yanıt veremediğin durumlarda şunu öner: '{fallback}'\n"
     
     return system
 
@@ -716,5 +906,74 @@ async def _process_appointment_from_response(
         
     except Exception as e:
         logger.error(f"Failed to create appointment from chat: {e}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+
+
+async def _process_sponsorship_from_response(
+    response_text: str,
+    agent: Agent,
+    conversation: PublicConversation,
+    db: Session
+) -> str:
+    """
+    Detect SPONSORSHIP_JSON block in LLM response.
+    If found, create a real SponsorshipDeal in DB and remove the JSON block.
+    Returns cleaned response text with a confirmation reference.
+    """
+    # Look for SPONSORSHIP_JSON block
+    pattern = r'```SPONSORSHIP_JSON\s*\n?(.*?)\n?\s*```'
+    match = re.search(pattern, response_text, re.DOTALL)
+    
+    if not match:
+        return response_text
+        
+    json_str = match.group(1).strip()
+    
+    try:
+        deal_data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to parse sponsorship JSON: {e}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+        
+    # Validate required fields
+    required = ["sponsor_name", "product_name", "price"]
+    missing = [f for f in required if not deal_data.get(f)]
+    if missing:
+        logger.warning(f"Sponsorship JSON missing fields: {missing}")
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        return cleaned
+        
+    try:
+        from backend.database.models_platform import SponsorshipDeal
+        
+        deal = SponsorshipDeal(
+            organization_id=agent.organization_id,
+            agent_id=agent.id,
+            conversation_id=conversation.id,
+            sponsor_name=deal_data["sponsor_name"],
+            sponsor_email=deal_data.get("sponsor_email"),
+            product_name=deal_data["product_name"],
+            product_category=deal_data.get("product_category"),
+            proposed_platforms=deal_data.get("proposed_platforms", []),
+            price=deal_data["price"],
+            status="pending"
+        )
+        db.add(deal)
+        db.flush()
+        
+        logger.info(
+            f"🔮 Sponsorship deal proposed: {deal.public_id} "
+            f"sponsor={deal.sponsor_name} product={deal.product_name} price={deal.price}"
+        )
+        
+        # Remove JSON block and append confirmation
+        cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+        cleaned += f"\n\n✅ *Sponsorluk teklifiniz başarıyla oluşturuldu! (Teklif Ref: {deal.public_id})*"
+        
+        return cleaned
+    except Exception as e:
+        logger.error(f"Failed to create sponsorship deal from chat: {e}")
         cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
         return cleaned

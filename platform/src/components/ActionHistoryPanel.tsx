@@ -118,7 +118,7 @@ const ActionHistoryPanel: React.FC<ActionHistoryPanelProps> = ({ documentId }) =
         <select
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
-          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-sm border border-white/[0.1] rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Tüm İşlemler</option>
           <option value="process">İşle</option>
@@ -140,7 +140,7 @@ const ActionHistoryPanel: React.FC<ActionHistoryPanelProps> = ({ documentId }) =
             {paginatedHistory.map((item) => (
               <div
                 key={item.id}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                className="border border-white/[0.06] rounded-lg p-4 hover:bg-dark-700/50"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
@@ -151,7 +151,7 @@ const ActionHistoryPanel: React.FC<ActionHistoryPanelProps> = ({ documentId }) =
                     )}
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-100">
                           {getActionLabel(item.action)}
                         </span>
                         {item.result === 'success' && item.duration_ms && (
@@ -184,7 +184,7 @@ const ActionHistoryPanel: React.FC<ActionHistoryPanelProps> = ({ documentId }) =
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
               <div className="text-sm text-gray-600">
                 Sayfa {currentPage} / {totalPages}
               </div>
@@ -192,14 +192,14 @@ const ActionHistoryPanel: React.FC<ActionHistoryPanelProps> = ({ documentId }) =
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50 disabled:bg-dark-600 disabled:cursor-not-allowed"
                 >
                   Önceki
                 </button>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50 disabled:bg-dark-600 disabled:cursor-not-allowed"
                 >
                   Sonraki
                 </button>

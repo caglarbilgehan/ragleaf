@@ -1,76 +1,90 @@
-# 📋 Bekleyen Görevler (FUTURE-PLANS)
+# Ragleaf Future Roadmap & Product Architecture
 
-> Son güncelleme: 2026-06-03
-
----
-
-## ✅ Tamamlanan Görevler
-
-### GÖREV-1: Landing Page Buton Stilleri ✅
-### GÖREV-2: Sektörel Hazır AI Asistan Şablonları ✅
-- Kuaför, Diş Hekimi, E-Ticaret, Restoran şablonları
-- Randevu sistemi (DB + API + AI chat entegrasyonu)
-- Template Wizard + Appointments Dashboard
-- Google Calendar OAuth2 + iCal feed
-### GÖREV-3: Admin Paneli Refaktör ✅
-### GÖREV-4: İlerleme Takip & Arşivleme Sistemi ✅
-### GÖREV-5: AI/LLM Yapılandırma Ayarlarını Yönetim Paneline Taşıma ✅
-- Global AI config endpoint'leri (backend)
-- Admin "AI Yapılandırma" sayfası (LLM + RAG)
-- Agent builder'dan Model & RAG sekmesi kaldırıldı
-- Agent oluşturma global config'den besleniyor
-### GÖREV-6: Varsayılan Panel → Müşteri Paneli ✅
-### GÖREV-7: Landing Page Mobil Uyum + Widget Auto-Open ✅
-- Hamburger menü CSS class-based toggle + responsive iyileştirmeler
-- Widget autoOpen varsayılan true + agent builder toggle
-### Hibrit RAG/LLM + Widget Markdown ✅
-- LLM fallback yanıt sistemi (doküman yoksa bile yanıt)
-- Widget markdown render desteği (tablo, bold, liste, code blocks)
-- LLM Router bug fix (NULL handling, rollback prevention)
-- Dockerfile 3-stage build optimizasyonu
-### GÖREV-9: Console Hataları Düzeltme ✅
-- 12 gereksiz sayfa kaldırılarak 500/404/401 hatalar çözüldü
-### GÖREV-10: Admin Paneli Temizlik ✅
-- Chunk/Enrichment/Test/Analytics sayfaları ve sidebar linkleri kaldırıldı
+This document outlines the migration strategy to Next.js (React) and the product definitions for **Ragleaf AI Assistant** and the newly planned autonomous content generation suite: **Ragleaf AI Writer**.
 
 ---
 
-## 🔴 Yüksek Öncelik
+## 1. Product Taxonomy
 
-### GÖREV-11: Agent Bazlı Döküman Yönetimi (Tenant + Şablon)
-**Tarih:** 2026-06-03
-**Açıklama:** Hazır şablonlar (kuaför vb.) için admin panelinden döküman yükleme. Tenant'lar kendi agentları için döküman yükleyebilmeli. Agent bazlı döküman işleme (embedding). Dökümanlar paylaşımlı veya izole kullanılabilmeli.
-**Alt görevler:**
-- [ ] Admin panelden şablon agentları için döküman yükleme UI
-- [ ] Tenant panelden agent bazlı döküman yükleme UI
-- [ ] Döküman → agent ilişkilendirme (çoklu-agent paylaşım)
-- [ ] Döküman işleme pipeline (upload → chunk → embed)
-- [ ] İzole vs paylaşımlı döküman modu
+```mermaid
+graph TD
+    R[Ragleaf Brand] --> A[Ragleaf AI Assistant]
+    R --> W[Ragleaf AI Writer]
+    
+    A --> A1[Web Chat Widget]
+    A --> A2[Appointment Booking]
+    A --> A3[Conversational Payments]
+    
+    W --> W1[Autonomous Content Engine]
+    W --> W2[Multi-State Review Pipeline]
+    W --> W3[Scheduler & Publishing API]
+```
 
----
+### A. Ragleaf AI Assistant (Mevcut Ürün)
+*   **Açıklama:** Web sitelerine yerleştirilen, dokümanlarla eğitilen, 7/24 konuşabilen, randevu alabilen ve doğrudan sohbet içinde ödeme toplayabilen interaktif sohbet robotu.
+*   **Geliştirme Odağı:** Widget performans iyileştirmeleri, yeni sohbet kanalları (WhatsApp, Telegram) entegrasyonu, ödeme ağ geçitlerinin genişletilmesi.
 
-## 🟡 Orta Öncelik
-
-### GÖREV-8: Randevu Hatırlatma Sistemi
-**Tarih:** 2026-06-02
-**Açıklama:** Randevu öncesi SMS veya email ile hatırlatma
-**Alt görevler:**
-- [ ] Email hatırlatma servisi (SMTP)
-- [ ] SMS entegrasyonu (Twilio/NetGSM)
-- [ ] Hatırlatma zamanlayıcı (30 dk, 1 saat, 1 gün öncesi)
-
-### GÖREV-12: Tenant Döküman İzleme & Log Sistemi
-**Tarih:** 2026-06-03
-**Açıklama:** Tenantlar tarafından yüklenen dökümanlarda analiz, kalite kontrolü, sistem sağlığı izleme ve log tutma
-**Alt görevler:**
-- [ ] Döküman işleme durumu dashboard
-- [ ] Kalite skoru ve hata raporlama
-- [ ] İşleme logları görüntüleme
-- [ ] Sistem sağlık izleme
+### B. Ragleaf AI Writer (Yeni Ürün)
+*   **Açıklama:** Sektör trendlerini takip eden, anahtar kelimelere göre SEO uyumlu blog yazıları yazan ve içerik takvimi yöneten yapay zeka yazar ürünü.
+*   **Geliştirme Odağı:** LLM entegrasyonlu makale üretici, insan-denetimli (Human-in-the-loop) onay iş akışı, WordPress/Next.js otomatik yayınlama API'leri.
 
 ---
 
-## 🟢 Düşük Öncelik
+## 2. Next.js Migration Strategy (Frontend Göçü)
 
-*(Şu an yok)*
+Vanilla HTML/JS altyapısından Next.js App Router yapısına geçiş planı:
+
+1.  **Layouts & Global State:**
+    *   `src/app/layout.js` dosyası içinde ortak Header, Footer ve persistent (sayfa geçişlerinde durumunu/geçmişini koruyan) **Ragleaf AI Assistant** bileşeni yer alacaktır.
+2.  **Routing:**
+    *   Tüm alt sayfalar (`kurulum`, `pricing`, `developers`, `hakkinda`, `contact`, `legal`) `src/app/[page]/page.js` şeklinde Next.js routing yapısına taşınacak.
+3.  **Styling:**
+    *   Bileşen stillerinin daha temiz yönetilmesi ve performans için **TailwindCSS** kullanılacaktır.
+4.  **SEO & Speed:**
+    *   Google ve arama motorları için `generateMetadata` fonksiyonları kullanılarak SEO meta etiketleri dinamik yönetilecek.
+    *   Sayfalar önceden statik olarak derlenip (SSG - Static Site Generation) Vercel veya Dockerize Nginx üzerinde sunulacak.
+
+---
+
+## 3. Ragleaf AI Writer Blog Otomasyonu İş Akışı
+
+AI Writer'ın arka planda otonom içerik üretmesi için kurgulanan modüler mimari:
+
+```mermaid
+sequenceDiagram
+    participant C as Cron / Scheduler
+    participant LLM as LLM Engine
+    participant DB as Database (Drafts)
+    participant Panel as Admin Panel (Review)
+    participant Web as Next.js Blog (Public)
+
+    C->>LLM: 1. Generate Article Topic & Outline (based on SEO trends)
+    LLM->>LLM: 2. Write Draft Content (incorporating knowledge base)
+    LLM->>DB: 3. Save as "Draft (Pending Review)"
+    Panel->>Admin: 4. Notification: New Draft Ready
+    Admin->>Panel: 5. Review, Edit & Approve Draft
+    Panel->>DB: 6. Update status to "Approved"
+    DB->>Web: 7. Publish & Revalidate Blog Page (Automatic)
+```
+
+### A. İçerik Durumları (Workflow States)
+1.  **Draft (Taslak):** AI tarafından yazılmış, ham içerik.
+2.  **Pending Review (Onay Bekliyor):** Editör incelemesine hazır içerik.
+3.  **Approved (Onaylandı):** Yayınlanmak üzere zamanlanmış veya doğrudan yayına alınabilir içerik.
+4.  **Published (Yayınlandı):** Canlı blog sayfasında yayında olan içerik.
+
+### B. Otomasyon Modları
+*   **Yarı-Otonom (Önerilen):** Yazılar taslak olarak oluşturulur, admin panelinde editör incelemesinden ve tek tıkla onayından sonra yayına girer.
+*   **Tam Otonom:** Belirlenen periyotlarda (örn. haftada 2 kez) AI yazıyı yazar ve editör müdahalesi olmadan doğrudan yayına alır.
+
+---
+
+## 4. Bekleyen Görevler (Pending Tasks)
+
+## 4. Bekleyen Görevler (Pending Tasks)
+
+*   🔴 **Yüksek Öncelik:** RAG Yönetimi Sidebar ve Sayfası Entegrasyonu
+    *   **Açıklama:** Yönetim panelinde RAG ayarlarını ve LLM yapılandırmasını ayrıştırarak daha temiz bir mimari sunma. "Sistem" altındaki genel "AI Yapılandırma" menüsünü kaldırıp, "LLM Yönetimi" altına "LLM Yapılandırması" (/admin/llm-config) ve ayrı bir "RAG Yönetimi" sidebar başlığı oluşturarak "RAG Ayarları" (/admin/rag-config) sayfasını ekleme.
+*   🟢 **Düşük Öncelik:** Blog Otomasyonu & AI Writer Modülü Geliştirmeleri
+    *   **Açıklama:** AI Writer taslak içerik üretimi onay mekanizması ve Next.js revalidation yapısının panel tarafındaki admin kontrollerine entegrasyonu.
 

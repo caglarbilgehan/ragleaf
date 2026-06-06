@@ -18,6 +18,7 @@ export interface Organization {
   max_queries_per_month: number;
   is_active: boolean;
   created_at: string;
+  ragleaf_leaves: number;
   agent_count?: number;
   document_count?: number;
   member_count?: number;
@@ -68,6 +69,60 @@ export interface KnowledgeBaseDocument {
   total_chunks: number | null;
   vector_indexed: boolean;
   created_at: string | null;
+}
+
+export interface AgentDocument {
+  id: number;
+  name: string;
+  original_filename: string;
+  file_type: string;
+  file_size: number;
+  status: string;
+  processing_stage: string | null;
+  processing_progress: number;
+  total_chunks: number | null;
+  vector_indexed: boolean;
+  language: string;
+  created_at: string | null;
+  processed_at: string | null;
+  shared_agent_count: number;
+  is_shared: boolean;
+  linked_at: string | null;
+}
+
+export interface DocumentQualityInfo {
+  score: number;
+  tier: string;
+  suggestions: string[];
+}
+
+export interface DocumentLogEntry {
+  timestamp: string;
+  level: 'info' | 'warning' | 'error' | 'success';
+  stage: string;
+  progress: number;
+  message: string;
+}
+
+export interface SystemHealthStatus {
+  database: boolean;
+  ocr: boolean;
+  embedding: boolean;
+}
+
+export interface DocumentDetailsResponse {
+  document_id: number;
+  name: string;
+  original_filename: string;
+  status: string;
+  file_type: string;
+  file_size: number;
+  total_chunks: number | null;
+  processing_stage: string | null;
+  processing_progress: number;
+  quality: DocumentQualityInfo;
+  logs: DocumentLogEntry[];
+  system_health: SystemHealthStatus;
 }
 
 // ============================================================================
@@ -140,6 +195,40 @@ export const agentApi = {
     await api.delete(`/api/agents/${agentId}/knowledge/${docId}`);
   },
 
+  // Agent Document Management (GÖREV-11)
+  listDocuments: async (agentId: number): Promise<{ agent_id: number; agent_name: string; documents: AgentDocument[]; total: number }> => {
+    const res = await api.get(`/api/agents/${agentId}/documents`);
+    return res.data;
+  },
+
+  uploadDocument: async (agentId: number, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post(`/api/agents/${agentId}/documents/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
+  deleteDocument: async (agentId: number, docId: number, removeOnly: boolean = false): Promise<any> => {
+    const res = await api.delete(`/api/agents/${agentId}/documents/${docId}`, {
+      params: { remove_only: removeOnly },
+    });
+    return res.data;
+  },
+
+  processDocument: async (agentId: number, docId: number): Promise<any> => {
+    const res = await api.post(`/api/agents/${agentId}/documents/${docId}/process`);
+    return res.data;
+  },
+
+  shareDocument: async (agentId: number, docId: number, targetAgentId: number): Promise<any> => {
+    const res = await api.post(`/api/agents/${agentId}/documents/${docId}/share`, null, {
+      params: { target_agent_id: targetAgentId },
+    });
+    return res.data;
+  },
+
   // API Keys
   listApiKeys: async (id: number): Promise<AgentAPIKey[]> => {
     const res = await api.get(`/api/agents/${id}/api-keys`);
@@ -153,6 +242,11 @@ export const agentApi = {
   
   revokeApiKey: async (agentId: number, keyId: number): Promise<void> => {
     await api.delete(`/api/agents/${agentId}/api-keys/${keyId}`);
+  },
+
+  getDocumentDetails: async (agentId: number, docId: number): Promise<DocumentDetailsResponse> => {
+    const res = await api.get(`/api/agents/${agentId}/documents/${docId}/details`);
+    return res.data;
   },
 };
 
@@ -385,6 +479,10 @@ export const adminTenantApi = {
     await api.patch(`/api/admin/tenants/${id}`, data);
   },
 
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/admin/tenants/${id}`);
+  },
+
   getUsers: async (id: number): Promise<any> => {
     const res = await api.get(`/api/admin/tenants/${id}/users`);
     return res.data;
@@ -404,4 +502,122 @@ export const adminTenantApi = {
     const res = await api.get(`/api/admin/tenants/${id}/appointments`);
     return res.data;
   },
+
+  uploadDocumentToAgent: async (tenantId: number, agentId: number, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post(`/api/admin/tenants/${tenantId}/agents/${agentId}/documents/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
 };
+
+// ============================================================================
+// Plan Management API (GÖREV-24)
+// ============================================================================
+
+export interface Plan {
+  id: number;
+  key: string;
+  name: string;
+  price: number;
+  billing_cycle: string;
+  max_agents: number;
+  max_documents: number;
+  max_queries_per_month: number;
+  max_storage_mb: number;
+  is_active: boolean;
+}
+
+export const adminPlanApi = {
+  list: async (): Promise<Plan[]> => {
+    const res = await api.get('/api/admin/plans');
+    return res.data;
+  },
+
+  update: async (id: number, data: Partial<Omit<Plan, 'id' | 'key'>>): Promise<Plan> => {
+    const res = await api.put(`/api/admin/plans/${id}`, data);
+    return res.data;
+  },
+};
+
+// ============================================================================
+// AI Writer API (Otonom İçerik Üretimi)
+// ============================================================================
+
+export interface WriterArticle {
+  id: number;
+  public_id: string;
+  organization_id: number;
+  agent_id: number | null;
+  title: string;
+  slug: string;
+  summary: string | null;
+  content: string | null;
+  keywords: string[];
+  outline: string[];
+  status: 'draft' | 'pending_review' | 'approved' | 'published';
+  mode: 'autonomous' | 'semi-autonomous';
+  publishing_platform: 'nextjs' | 'wordpress' | 'ghost';
+  scheduled_at: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string | null;
+  extra_data?: Record<string, any> | null;
+}
+
+export interface ArticleCreateRequest {
+  topic: string;
+  keywords: string[];
+  language: string;
+  agent_id?: number | null;
+  mode: 'autonomous' | 'semi-autonomous';
+  publishing_platform: 'nextjs' | 'wordpress' | 'ghost';
+}
+
+export interface ArticleUpdateRequest {
+  title?: string;
+  slug?: string;
+  summary?: string;
+  content?: string;
+  keywords?: string[];
+  outline?: string[];
+  status?: 'draft' | 'pending_review' | 'approved' | 'published';
+  mode?: 'autonomous' | 'semi-autonomous';
+  publishing_platform?: 'nextjs' | 'wordpress' | 'ghost';
+  scheduled_at?: string | null;
+}
+
+export const writerApi = {
+  list: async (params?: { status?: string; agent_id?: number }): Promise<WriterArticle[]> => {
+    const res = await api.get('/api/writer/articles', { params });
+    return res.data;
+  },
+
+  get: async (publicId: string): Promise<WriterArticle> => {
+    const res = await api.get(`/api/writer/articles/${publicId}`);
+    return res.data;
+  },
+
+  generate: async (data: ArticleCreateRequest): Promise<WriterArticle> => {
+    const res = await api.post('/api/writer/generate', data);
+    return res.data;
+  },
+
+  update: async (publicId: string, data: ArticleUpdateRequest): Promise<WriterArticle> => {
+    const res = await api.put(`/api/writer/articles/${publicId}`, data);
+    return res.data;
+  },
+
+  publish: async (publicId: string): Promise<WriterArticle> => {
+    const res = await api.post(`/api/writer/articles/${publicId}/publish`);
+    return res.data;
+  },
+
+  delete: async (publicId: string): Promise<void> => {
+    await api.delete(`/api/writer/articles/${publicId}`);
+  },
+};
+
+

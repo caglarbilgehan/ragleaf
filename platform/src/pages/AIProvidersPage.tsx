@@ -470,7 +470,7 @@ const AIProvidersPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Provider Yönetimi</h1>
+          <h1 className="text-2xl font-bold text-gray-100">AI Provider Yönetimi</h1>
           <p className="text-gray-600">Provider ve token yapılandırmasını yönetin</p>
         </div>
         <div className="flex gap-2">
@@ -487,13 +487,13 @@ const AIProvidersPage: React.FC = () => {
 
       {/* Active Provider Info */}
       {activeProvider && (
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className="bg-primary-500/10 border border-primary-500/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="text-4xl">{getProviderIcon(activeProvider.name)}</div>
               <div>
-                <p className="text-sm text-gray-600">Aktif Provider</p>
-                <h3 className="text-xl font-bold text-gray-900">{activeProvider.display_name}</h3>
+                <p className="text-sm text-gray-400">Aktif Provider</p>
+                <h3 className="text-xl font-bold text-gray-100">{activeProvider.display_name}</h3>
                 <p className="text-sm text-gray-500">
                   Model: {activeProvider.default_model_display_name || activeProvider.default_model || 'Belirtilmemiş'} • 
                   {activeProvider.active_token_count} aktif token
@@ -532,10 +532,10 @@ const AIProvidersPage: React.FC = () => {
               key={provider.id} 
               className={`transition-all ${
                 provider.is_active 
-                  ? 'border-blue-500 bg-blue-50/50' 
+                  ? 'border-primary-500 bg-primary-500/10' 
                   : provider.is_enabled 
-                    ? 'border-gray-200' 
-                    : 'border-gray-200 bg-gray-50 opacity-60'
+                    ? 'border-white/[0.06] bg-dark-800/60' 
+                    : 'border-white/[0.06] bg-dark-700/50 opacity-60'
               }`}
             >
               <CardContent className="pt-6">
@@ -569,13 +569,13 @@ const AIProvidersPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-lg">{provider.display_name}</h3>
                         {provider.is_active && (
-                          <Badge className="bg-blue-500">
+                          <Badge className="bg-primary-600 text-white">
                             <Star className="h-3 w-3 mr-1" />
                             Aktif
                           </Badge>
                         )}
                         {!provider.has_tokens && (
-                          <Badge variant="outline" className="text-orange-600 border-orange-300">
+                          <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20">
                             <AlertTriangle className="h-3 w-3 mr-1" />
                             Token Yok
                           </Badge>
@@ -605,7 +605,7 @@ const AIProvidersPage: React.FC = () => {
                         size="sm"
                         onClick={() => handleSetActiveProvider(provider.id)}
                         disabled={saving}
-                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                        className="text-primary-400 border border-primary-500/20 bg-primary-500/5 hover:bg-primary-500/10"
                       >
                         <Zap className="h-4 w-4 mr-1" />
                         Aktif Yap
@@ -626,8 +626,8 @@ const AIProvidersPage: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeleteProvider(provider.id)}
-                      disabled={saving || provider.is_active}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      disabled={saving}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 bg-red-500/5"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -642,7 +642,7 @@ const AIProvidersPage: React.FC = () => {
       {/* Add Provider Modal */}
       {showAddProvider && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4 bg-white">
+          <Card className="w-full max-w-md mx-4 bg-dark-800/60">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Yeni Provider Ekle</CardTitle>
@@ -691,13 +691,13 @@ const AIProvidersPage: React.FC = () => {
       {/* Token Management Modal */}
       {editingProvider && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
-          <div className="w-full max-w-2xl mx-4 bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl mx-4 bg-dark-800/60 rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-white rounded-t-lg">
+            <div className="flex items-center justify-between p-6 border-b bg-dark-800/60 rounded-t-lg">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{getProviderIcon(editingProvider.name)}</span>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">{editingProvider.display_name}</h2>
+                  <h2 className="text-xl font-bold text-gray-100">{editingProvider.display_name}</h2>
                   <p className="text-sm text-gray-500">Token Yönetimi</p>
                 </div>
               </div>
@@ -707,7 +707,7 @@ const AIProvidersPage: React.FC = () => {
             </div>
             
             {/* Content */}
-            <div className="p-6 space-y-4 bg-white">
+            <div className="p-6 space-y-4 bg-dark-800/60">
               {/* Add Token Button */}
               <div className="flex justify-between items-center">
                 <p className="text-sm text-gray-600">
@@ -721,7 +721,7 @@ const AIProvidersPage: React.FC = () => {
               
               {/* Add Token Form */}
               {showAddToken && (
-                <div className="border-2 border-dashed border-blue-300 bg-blue-50 rounded-lg p-4 space-y-3">
+                <div className="border border-dashed border-primary-500/30 bg-primary-500/5 rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-xs font-medium">Token Adı (opsiyonel)</Label>
@@ -729,7 +729,7 @@ const AIProvidersPage: React.FC = () => {
                         value={newToken.display_name}
                         onChange={(e) => setNewToken({ ...newToken, display_name: e.target.value })}
                         placeholder={`${editingProvider.display_name} Token ${providerTokens.length + 1}`}
-                        className="h-9 bg-white"
+                        className="h-9 bg-dark-800/60"
                       />
                     </div>
                     <div>
@@ -738,7 +738,7 @@ const AIProvidersPage: React.FC = () => {
                         value={newToken.api_url}
                         onChange={(e) => setNewToken({ ...newToken, api_url: e.target.value })}
                         placeholder={getDefaultApiUrl(editingProvider.name)}
-                        className="h-9 bg-white"
+                        className="h-9 bg-dark-800/60"
                       />
                     </div>
                   </div>
@@ -749,7 +749,7 @@ const AIProvidersPage: React.FC = () => {
                       value={newToken.api_key}
                       onChange={(e) => setNewToken({ ...newToken, api_key: e.target.value })}
                       placeholder="API key girin..."
-                      className="h-9 bg-white font-mono text-sm"
+                      className="h-9 bg-dark-800/60 font-mono text-sm"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
@@ -766,7 +766,7 @@ const AIProvidersPage: React.FC = () => {
               
               {/* Token List */}
               {providerTokens.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <div className="text-center py-12 bg-dark-700/50 rounded-lg">
                   <Key className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                   <p className="text-gray-600 font-medium">Henüz token eklenmemiş</p>
                   <p className="text-sm text-gray-500 mt-1">Token eklemeden bu provider kullanılamaz.</p>
@@ -786,19 +786,19 @@ const AIProvidersPage: React.FC = () => {
                         draggedTokenId === token.id 
                           ? 'opacity-50 scale-[0.98]' 
                           : dragOverTokenId === token.id 
-                            ? 'border-blue-400 bg-blue-50 shadow-md' 
+                            ? 'border-primary-500 bg-primary-500/10 shadow-md' 
                             : token.is_active && token.is_available 
-                              ? 'bg-green-50 border-green-200' 
+                              ? 'bg-green-500/10 border-green-500/20' 
                               : token.is_active 
-                                ? 'bg-yellow-50 border-yellow-200'
-                                : 'bg-gray-50 border-gray-200 opacity-60'
+                                ? 'bg-amber-500/10 border-amber-500/20'
+                                : 'bg-dark-700/50 border-white/[0.06] opacity-60'
                       } ${!saving ? 'cursor-grab active:cursor-grabbing' : ''}`}
                     >
                       <div className="flex items-center gap-4">
                         {/* Drag Handle & Priority */}
                         <div className="flex items-center gap-1">
                           <div 
-                            className="p-1 rounded hover:bg-gray-200 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+                            className="p-1 rounded hover:bg-dark-500 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-300"
                             title="Sürükle-bırak ile sırala"
                           >
                             <GripVertical className="h-4 w-4" />
@@ -807,8 +807,8 @@ const AIProvidersPage: React.FC = () => {
                             <button
                               onClick={() => handleMoveToken(token.id, 'up')}
                               disabled={idx === 0 || saving}
-                              className={`p-0.5 rounded hover:bg-gray-200 transition-colors ${
-                                idx === 0 ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700'
+                              className={`p-0.5 rounded hover:bg-dark-500 transition-colors ${
+                                idx === 0 ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 hover:text-gray-300'
                               }`}
                               title="Yukarı taşı"
                             >
@@ -817,8 +817,8 @@ const AIProvidersPage: React.FC = () => {
                             <button
                               onClick={() => handleMoveToken(token.id, 'down')}
                               disabled={idx === providerTokens.length - 1 || saving}
-                              className={`p-0.5 rounded hover:bg-gray-200 transition-colors ${
-                                idx === providerTokens.length - 1 ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700'
+                              className={`p-0.5 rounded hover:bg-dark-500 transition-colors ${
+                                idx === providerTokens.length - 1 ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 hover:text-gray-300'
                               }`}
                               title="Aşağı taşı"
                             >
@@ -833,7 +833,7 @@ const AIProvidersPage: React.FC = () => {
                             {editingTokenId === token.id ? (
                               <input
                                 autoFocus
-                                className="font-semibold border border-blue-300 rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="font-semibold border border-white/[0.1] bg-dark-700/50 text-gray-100 rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 value={editingTokenName}
                                 onChange={(e) => setEditingTokenName(e.target.value)}
                                 onKeyDown={(e) => {
@@ -847,27 +847,27 @@ const AIProvidersPage: React.FC = () => {
                                 <span className="font-semibold">{token.display_name}</span>
                                 <button
                                   onClick={() => { setEditingTokenId(token.id); setEditingTokenName(token.display_name); }}
-                                  className="text-gray-400 hover:text-gray-600 p-0.5"
+                                  className="text-gray-400 hover:text-gray-300 p-0.5"
                                   title="Adı düzenle"
                                 >
                                   <Pencil className="h-3 w-3" />
                                 </button>
                               </>
                             )}
-                            {idx === 0 && token.is_active && (
-                              <Badge className="bg-blue-500 text-white text-xs">Birincil</Badge>
-                            )}
+                             {idx === 0 && token.is_active && (
+                               <Badge className="bg-primary-600 text-white text-xs">Birincil</Badge>
+                             )}
                             {token.is_available === false && token.is_active && (
                               <Badge variant="destructive" className="text-xs">Hata</Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <span className="font-mono bg-gray-100 px-2 py-0.5 rounded">
+                            <span className="font-mono bg-dark-600 px-2 py-0.5 rounded">
                               {showTokens[token.id] && apiKeys[token.id] 
                                 ? apiKeys[token.id].substring(0, 24) + '...'
                                 : '••••••••••••••••'}
                             </span>
-                            <button onClick={() => toggleShowToken(token.id)} className="hover:text-gray-700 p-1">
+                            <button onClick={() => toggleShowToken(token.id)} className="hover:text-gray-300 p-1">
                               {showTokens[token.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                             </button>
                           </div>
@@ -883,14 +883,14 @@ const AIProvidersPage: React.FC = () => {
                         <Button variant="outline" size="sm" onClick={() => handleTestToken(token.id)} disabled={saving} title="Test Et">
                           <TestTube className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleDeleteToken(token.id)} 
-                          disabled={saving}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                          title="Sil"
-                        >
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           onClick={() => handleDeleteToken(token.id)} 
+                           disabled={saving}
+                           className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 bg-red-500/5"
+                           title="Sil"
+                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -899,25 +899,25 @@ const AIProvidersPage: React.FC = () => {
                 </div>
               )}
               
-              {/* Info */}
-              {providerTokens.length > 1 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-                  💡 Tokenları sürükle-bırak veya ok butonlarıyla sıralayın. İlk token başarısız olursa sıradaki denenir.
-                </div>
-              )}
+               {/* Info */}
+               {providerTokens.length > 1 && (
+                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm text-blue-300">
+                   💡 Tokenları sürükle-bırak veya ok butonlarıyla sıralayın. İlk token başarısız olursa sıradaki denenir.
+                 </div>
+               )}
             </div>
           </div>
         </div>
       )}
 
       {/* Info Card */}
-      <Card className="bg-amber-50 border-amber-200">
+      <Card className="bg-amber-500/10 border-amber-500/20">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
+            <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-300">
               <p className="font-medium mb-1">Nasıl Çalışır?</p>
-              <ol className="list-decimal list-inside space-y-1 text-amber-700">
+              <ol className="list-decimal list-inside space-y-1 text-amber-400">
                 <li>Provider ekleyin (HuggingFace, OpenAI, DeepSeek vb.)</li>
                 <li>Her provider için en az bir API token ekleyin</li>
                 <li>Token'ı olan provider'ı aktif yapın</li>

@@ -155,7 +155,7 @@ export default function TagAutocomplete({
                 {isOpen && filteredSuggestions.length > 0 && (
                     <div
                         ref={dropdownRef}
-                        className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                        className="absolute z-50 w-full mt-1 bg-dark-800/60 border border-white/[0.06] rounded-lg shadow-lg max-h-48 overflow-y-auto"
                     >
                         {filteredSuggestions.map((suggestion, index) => (
                             <button
@@ -163,7 +163,7 @@ export default function TagAutocomplete({
                                 type="button"
                                 onClick={() => addTag(suggestion)}
                                 className={`w-full px-3 py-2 text-left text-sm hover:bg-primary-50 transition-colors ${
-                                    index === highlightedIndex ? 'bg-primary-100 text-primary-700' : 'text-gray-700'
+                                    index === highlightedIndex ? 'bg-primary-100 text-primary-700' : 'text-gray-300'
                                 }`}
                             >
                                 {suggestion}

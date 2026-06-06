@@ -111,7 +111,7 @@ export default function UsersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Kullanıcı Yönetimi</h1>
+            <h1 className="text-2xl font-bold text-gray-100">Kullanıcı Yönetimi</h1>
             <p className="text-gray-600">Sistem kullanıcılarını yönetin</p>
           </div>
           <button 
@@ -124,9 +124,9 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Kullanıcılar</h3>
+        <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06]">
+        <div className="px-6 py-4 border-b border-white/[0.06]">
+          <h3 className="text-lg font-semibold text-gray-100">Kullanıcılar</h3>
         </div>
         
         {isLoading ? (
@@ -136,8 +136,8 @@ export default function UsersPage() {
           </div>
         ) : users && users.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-white/[0.04]">
+              <thead className="bg-dark-700/50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Kullanıcı
@@ -159,9 +159,9 @@ export default function UsersPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-dark-800/60 divide-y divide-white/[0.04]">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-dark-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
@@ -172,19 +172,19 @@ export default function UsersPage() {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name || user.email}</div>
+                          <div className="text-sm font-medium text-gray-100">{user.full_name || user.email}</div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
+                      <div className="text-sm text-gray-100">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                         user.is_admin 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-red-500/10 text-red-400 border-red-500/20' 
+                          : 'bg-dark-600 text-gray-200 border-white/[0.06]'
                       }`}>
                         {user.is_admin ? (
                           <>
@@ -200,10 +200,10 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                         user.is_active 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                          : 'bg-red-500/10 text-red-400 border-red-500/20'
                       }`}>
                         {user.is_active ? (
                           <>
@@ -247,7 +247,7 @@ export default function UsersPage() {
         ) : (
           <div className="p-12 text-center">
             <Users className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Henüz kullanıcı yok</h3>
+            <h3 className="text-xl font-semibold text-gray-100 mb-2">Henüz kullanıcı yok</h3>
             <p className="text-gray-500 mb-6">
               İlk kullanıcıyı eklemek için "Yeni Kullanıcı" butonuna tıklayın.
             </p>
@@ -259,22 +259,22 @@ export default function UsersPage() {
       {/* Right Sidebar */}
       <div className="w-80 space-y-6">
         {/* Current User Info */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h4 className="font-medium text-gray-900 mb-4">Mevcut Kullanıcı Bilgileri</h4>
+        <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6">
+          <h4 className="font-medium text-gray-100 mb-4">Mevcut Kullanıcı Bilgileri</h4>
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Toplam Kullanıcı:</span>
+              <span className="text-gray-400">Toplam Kullanıcı:</span>
               <span className="font-medium">{users?.length || 0}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Aktif Kullanıcı:</span>
+              <span className="text-gray-400">Aktif Kullanıcı:</span>
               <div className="flex items-center">
                 <UserCheck className="h-4 w-4 text-green-500 mr-1" />
                 <span className="font-medium">{users?.filter(u => u.is_active).length || 0}</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Admin Kullanıcı:</span>
+              <span className="text-gray-400">Admin Kullanıcı:</span>
               <div className="flex items-center">
                 <Shield className="h-4 w-4 text-blue-500 mr-1" />
                 <span className="font-medium">{users?.filter(u => u.is_admin).length || 0}</span>
@@ -284,9 +284,9 @@ export default function UsersPage() {
         </div>
 
         {/* Planned Features */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h4 className="font-medium text-gray-900 mb-4">Planlanan Özellikler</h4>
-          <ul className="text-sm text-gray-600 space-y-2">
+        <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6">
+          <h4 className="font-medium text-gray-100 mb-4">Planlanan Özellikler</h4>
+          <ul className="text-sm text-gray-400 space-y-2">
             <li>• Kullanıcı ekleme/düzenleme/silme</li>
             <li>• Rol tabanlı yetki yönetimi</li>
             <li>• Kullanıcı aktivite logları</li>
@@ -298,13 +298,13 @@ export default function UsersPage() {
 
       {/* Add User Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-dark-400 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-dark-800/60 rounded-lg shadow-2xl p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Yeni Kullanıcı Ekle</h3>
+              <h3 className="text-lg font-semibold text-gray-100">Yeni Kullanıcı Ekle</h3>
               <button 
                 onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-300"
               >
                 ×
               </button>
@@ -313,7 +313,7 @@ export default function UsersPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   E-posta *
                 </label>
                 <input
@@ -328,7 +328,7 @@ export default function UsersPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     Ad
                   </label>
                   <input
@@ -340,7 +340,7 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     Soyad
                   </label>
                   <input
@@ -354,7 +354,7 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Şifre *
                 </label>
                 <input
@@ -373,9 +373,9 @@ export default function UsersPage() {
                     type="checkbox"
                     checked={formData.is_admin}
                     onChange={(e) => setFormData({ ...formData, is_admin: e.target.checked })}
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="rounded border-white/[0.1] text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Admin yetkisi</span>
+                  <span className="ml-2 text-sm text-gray-300">Admin yetkisi</span>
                 </label>
 
                 <label className="flex items-center">
@@ -383,9 +383,9 @@ export default function UsersPage() {
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="rounded border-white/[0.1] text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Aktif</span>
+                  <span className="ml-2 text-sm text-gray-300">Aktif</span>
                 </label>
               </div>
 

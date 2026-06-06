@@ -250,10 +250,10 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+      <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-100 flex items-center">
               <Image className="h-5 w-5 mr-2 text-primary-600" />
               Görsel Zenginleştirme
             </h3>
@@ -275,7 +275,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+      <div className="bg-dark-800/60 rounded-xl  border border-white/[0.06] p-4 mb-4">
         <div className="flex items-center gap-4">
           {/* Page Filter */}
           <div className="flex items-center gap-2">
@@ -305,7 +305,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -322,8 +322,8 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
       {/* Main Content */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
         {/* Left Panel - Image List */}
-        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-          <div className="p-3 border-b bg-gray-50 font-medium text-sm text-gray-700 flex items-center">
+        <div className="lg:col-span-1 bg-dark-800/60 rounded-xl  border border-white/[0.06] overflow-hidden flex flex-col">
+          <div className="p-3 border-b bg-dark-700/50 font-medium text-sm text-gray-300 flex items-center">
             <FileText className="h-4 w-4 mr-2" />
             Görsel Listesi
           </div>
@@ -342,7 +342,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
                   className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     selectedAssetId === asset.id
                       ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-500'
-                      : 'border-gray-200 bg-white hover:bg-gray-50'
+                      : 'border-white/[0.06] bg-dark-800/60 hover:bg-dark-700/50'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
@@ -375,12 +375,12 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
         </div>
 
         {/* Right Panel - Image Detail */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+        <div className="lg:col-span-2 bg-dark-800/60 rounded-xl  border border-white/[0.06] overflow-hidden flex flex-col">
           {selectedAsset ? (
             <>
               {/* Image Preview */}
-              <div className="p-4 border-b bg-gray-50">
-                <div className="flex items-center justify-center bg-white rounded-lg border border-gray-200 p-4 max-h-[300px] overflow-hidden">
+              <div className="p-4 border-b bg-dark-700/50">
+                <div className="flex items-center justify-center bg-dark-800/60 rounded-lg border border-white/[0.06] p-4 max-h-[300px] overflow-hidden">
                   <img
                     src={`${getApiBaseUrl()}/admin/documents/asset/file?path=${encodeURIComponent(selectedAsset.file_path)}&token=${token}`}
                     alt={selectedAsset.caption || 'Asset'}
@@ -396,7 +396,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Caption */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     Başlık (Caption)
                   </label>
                   <input
@@ -410,7 +410,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
 
                 {/* OCR Text */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
                     OCR Metni
                     {ocrChanged && (
                       <span className="ml-2 text-xs text-amber-600 flex items-center">
@@ -435,7 +435,7 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     <Tag className="h-4 w-4 inline mr-1" />
                     Etiketler
                   </label>
@@ -467,16 +467,16 @@ export default function VisualEnrichmentTab({ documentId, token }: VisualEnrichm
 
                 {/* Linked Chunks */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     <Link2 className="h-4 w-4 inline mr-1" />
                     İlişkili Chunk'lar
                   </label>
-                  <div className="border border-gray-200 rounded-lg max-h-[200px] overflow-y-auto">
+                  <div className="border border-white/[0.06] rounded-lg max-h-[200px] overflow-y-auto">
                     {chunks.length > 0 ? (
                       chunks.map((chunk) => (
                         <label
                           key={chunk.id}
-                          className={`flex items-start gap-2 p-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 ${
+                          className={`flex items-start gap-2 p-2 border-b last:border-b-0 cursor-pointer hover:bg-dark-700/50 ${
                             selectedChunks.includes(chunk.id) ? 'bg-primary-50' : ''
                           }`}
                         >

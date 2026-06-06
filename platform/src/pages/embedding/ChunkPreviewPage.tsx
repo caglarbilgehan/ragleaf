@@ -95,10 +95,10 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-dark-700/50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Chunk Önizleme ve Test</h1>
+          <h1 className="text-3xl font-bold text-gray-100">Chunk Önizleme ve Test</h1>
           <p className="mt-2 text-gray-600">
             Chunk ayarlarınızı test edin ve metnin nasıl parçalanacağını gerçek zamanlı görün
           </p>
@@ -107,12 +107,12 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Settings */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6 sticky top-6">
               <h2 className="text-xl font-semibold mb-4">Chunk Ayarları</h2>
 
               {/* Chunk Size */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Chunk Boyutu: {chunkSize} karakter
                 </label>
                 <input
@@ -122,7 +122,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                   step="50"
                   value={chunkSize}
                   onChange={(e) => setChunkSize(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-2 bg-dark-500 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>100</span>
@@ -132,7 +132,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
 
               {/* Chunk Overlap */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Overlap: {chunkOverlap} karakter
                 </label>
                 <input
@@ -142,7 +142,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                   step="10"
                   value={chunkOverlap}
                   onChange={(e) => setChunkOverlap(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-2 bg-dark-500 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0</span>
@@ -189,7 +189,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                   {loading ? 'Oluşturuluyor...' : 'Önizleme Oluştur'}
                 </button>
 
-                <label className="block w-full text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 cursor-pointer font-medium">
+                <label className="block w-full text-center bg-dark-600 text-gray-300 px-4 py-2 rounded-lg hover:bg-dark-500 cursor-pointer font-medium">
                   <input
                     type="file"
                     accept=".txt"
@@ -201,7 +201,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
 
                 <button
                   onClick={loadSampleText}
-                  className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 font-medium"
+                  className="w-full bg-dark-600 text-gray-300 px-4 py-2 rounded-lg hover:bg-dark-500 font-medium"
                 >
                   Örnek Metin Yükle
                 </button>
@@ -212,26 +212,26 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
           {/* Right Panel - Preview */}
           <div className="lg:col-span-2 space-y-6">
             {/* Text Input */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Metin Girişi</h2>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Analiz edilecek metni buraya girin veya dosya yükleyin..."
-                className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full h-64 p-4 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>
 
             {/* Chunks Preview */}
             {preview && preview.chunks.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-dark-800/60 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold">
                     Chunk Önizlemesi ({preview.chunks.length} adet)
                   </h2>
                   <div className="flex items-center gap-4 text-xs">
                     <span className="flex items-center gap-1">
-                      <span className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></span>
+                      <span className="w-3 h-3 bg-dark-600 border border-white/[0.1] rounded"></span>
                       Normal
                     </span>
                     <span className="flex items-center gap-1">
@@ -268,7 +268,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                       if (beginEnd >= endStart && hasBeginOverlap && hasEndOverlap) {
                         // Entire text is overlap
                         return (
-                          <span className="bg-gradient-to-r from-orange-200 to-purple-200 text-gray-900 px-0.5 rounded">
+                          <span className="bg-gradient-to-r from-orange-200 to-purple-200 text-gray-100 px-0.5 rounded">
                             {text}
                           </span>
                         );
@@ -301,11 +301,11 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                     return (
                       <div
                         key={index}
-                        className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 transition-colors"
+                        className="border border-white/[0.06] rounded-lg p-4 hover:border-blue-400 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-700">
+                            <span className="font-semibold text-sm text-gray-300">
                               Chunk {index + 1}
                             </span>
                             <span className="text-xs text-gray-400">
@@ -313,7 +313,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                             </span>
                           </div>
                           <div className="flex gap-3 text-xs text-gray-500">
-                            <span className="bg-gray-100 px-2 py-0.5 rounded">Boyut: {chunk.length}</span>
+                            <span className="bg-dark-600 px-2 py-0.5 rounded">Boyut: {chunk.length}</span>
                             {hasBeginOverlap && (
                               <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-medium">
                                 ← {beginOverlapLength} kar.
@@ -326,7 +326,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                             )}
                           </div>
                         </div>
-                        <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded border-l-4 border-blue-500">
+                        <div className="text-sm text-gray-200 bg-dark-700/50 p-3 rounded border-l-4 border-blue-500">
                           {renderChunkText()}
                         </div>
                         {(hasBeginOverlap || hasEndOverlap) && (
@@ -354,7 +354,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
 
             {/* Empty State */}
             {!preview && (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
+              <div className="bg-dark-800/60 rounded-lg shadow p-12 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg
                     className="mx-auto h-16 w-16"
@@ -370,7 +370,7 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-gray-100 mb-2">
                   Henüz önizleme oluşturulmadı
                 </h3>
                 <p className="text-gray-500">

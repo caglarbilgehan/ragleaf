@@ -65,11 +65,11 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-dark-800/60 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-gray-100">
               Toplu Döküman İşleme (Hybrid Vector Store)
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -78,7 +78,7 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-300 transition-colors"
             disabled={isUploading}
           >
             <X className="h-6 w-6" />
@@ -90,7 +90,7 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
           {/* File Selection */}
           {!uploadProgress && (
             <>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+              <div className="border-2 border-dashed border-white/[0.1] rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
                 <input
                   type="file"
                   accept=".pdf,.txt,.md,.docx"
@@ -102,7 +102,7 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
                 />
                 <label htmlFor="bulk-file-upload" className="cursor-pointer">
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-lg font-semibold text-gray-700 mb-1">
+                  <p className="text-lg font-semibold text-gray-300 mb-1">
                     Dosya Seçin veya Sürükleyin
                   </p>
                   <p className="text-sm text-gray-500">
@@ -118,7 +118,7 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
               {selectedFiles.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-gray-100">
                       Seçilen Dosyalar ({selectedFiles.length})
                     </h3>
                     <button
@@ -134,12 +134,12 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
                     {selectedFiles.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-dark-700/50 rounded-lg"
                       >
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
                           <FileText className="h-5 w-5 text-primary-600 flex-shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm font-medium text-gray-100 truncate">
                               {file.name}
                             </p>
                             <p className="text-xs text-gray-500">
@@ -172,20 +172,20 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-700">İşlenen Dosya:</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-gray-300">İşlenen Dosya:</span>
+                  <span className="font-semibold text-gray-100">
                     {uploadProgress.files_processed}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-700">Oluşturulan Chunk:</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-gray-300">Oluşturulan Chunk:</span>
+                  <span className="font-semibold text-gray-100">
                     {uploadProgress.chunks_created}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-700">PgVector Toplam:</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-gray-300">PgVector Toplam:</span>
+                  <span className="font-semibold text-gray-100">
                     {uploadProgress.pgvector_total_docs || 0}
                   </span>
                 </div>
@@ -193,9 +193,9 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
 
               {uploadProgress.file_stats && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-gray-700">Dosya Detayları:</h4>
+                  <h4 className="text-sm font-semibold text-gray-300">Dosya Detayları:</h4>
                   {uploadProgress.file_stats.map((stat: any, idx: number) => (
-                    <div key={idx} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div key={idx} className="text-xs text-gray-600 bg-dark-700/50 p-2 rounded">
                       📄 {stat.file}: {stat.chunks} chunks, {stat.characters} karakter
                     </div>
                   ))}
@@ -207,7 +207,7 @@ export default function BulkIngestModal({ isOpen, onClose }: BulkIngestModalProp
 
         {/* Footer */}
         {!uploadProgress && (
-          <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end space-x-3 p-6 border-t border-white/[0.06] bg-dark-700/50">
             <button
               onClick={onClose}
               disabled={isUploading}

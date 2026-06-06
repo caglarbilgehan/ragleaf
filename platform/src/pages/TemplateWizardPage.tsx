@@ -109,12 +109,12 @@ export default function TemplateWizardPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/agents')}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="p-2 hover:bg-dark-600 rounded-lg"
         >
           <ArrowLeftIcon className="h-5 w-5 text-gray-500" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Hazır Asistan Seç</h1>
+          <h1 className="text-2xl font-bold text-gray-100">Hazır Asistan Seç</h1>
           <p className="text-sm text-gray-500">
             Sektörünüze uygun şablonu seçin, bilgilerinizi girin, hemen kullanmaya başlayın
           </p>
@@ -130,15 +130,15 @@ export default function TemplateWizardPage() {
                 idx < stepIndex
                   ? 'bg-green-500 text-white'
                   : idx === stepIndex
-                  ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
-                  : 'bg-gray-200 text-gray-500'
+                  ? 'bg-primary-600 text-white ring-4 ring-primary-500/20'
+                  : 'bg-dark-500 text-gray-500'
               }`}
             >
               {idx < stepIndex ? '✓' : idx + 1}
             </div>
             <span
               className={`text-sm font-medium ${
-                idx === stepIndex ? 'text-indigo-600' : 'text-gray-500'
+                idx === stepIndex ? 'text-primary-400' : 'text-gray-500'
               }`}
             >
               {label}
@@ -146,7 +146,7 @@ export default function TemplateWizardPage() {
             {idx < 2 && (
               <div
                 className={`flex-1 h-0.5 ${
-                  idx < stepIndex ? 'bg-green-500' : 'bg-gray-200'
+                  idx < stepIndex ? 'bg-green-500' : 'bg-dark-500'
                 }`}
               />
             )}
@@ -155,18 +155,18 @@ export default function TemplateWizardPage() {
       </div>
 
       {/* Step Content */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 min-h-[400px]">
+      <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6 min-h-[400px]">
         {/* STEP 1: Template Selection */}
         {step === 'select' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Sektörünüzü Seçin</h3>
+            <h3 className="text-lg font-semibold text-gray-100">Sektörünüzü Seçin</h3>
             <p className="text-sm text-gray-500">
               İşletmenize uygun hazır AI asistan şablonunu seçin. Şablon, sektörünüze özel system prompt, hizmet listesi ve randevu sistemi içerir.
             </p>
 
             {isLoading ? (
               <div className="flex items-center justify-center h-48">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
               </div>
             ) : templates.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
@@ -181,38 +181,38 @@ export default function TemplateWizardPage() {
                     onClick={() => setSelectedTemplate(tmpl)}
                     className={`relative text-left p-5 rounded-xl border-2 transition-all hover:shadow-md ${
                       selectedTemplate?.slug === tmpl.slug
-                        ? 'border-indigo-500 bg-indigo-50/50 ring-2 ring-indigo-200'
-                        : 'border-gray-200 hover:border-indigo-300'
+                        ? 'border-primary-500 bg-primary-500/10 ring-2 ring-primary-500/20'
+                        : 'border-white/[0.06] hover:border-primary-500/50 hover:bg-dark-700/30'
                     }`}
                   >
                     {tmpl.is_featured && (
-                      <span className="absolute top-3 right-3 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
+                      <span className="absolute top-3 right-3 px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full">
                         ⭐ Önerilen
                       </span>
                     )}
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-3xl">{tmpl.icon}</span>
                       <div>
-                        <h4 className="font-semibold text-gray-900">{tmpl.name}</h4>
+                        <h4 className="font-semibold text-gray-100">{tmpl.name}</h4>
                         <p className="text-xs text-gray-500">{tmpl.category}</p>
                       </div>
                     </div>
                     {tmpl.description && (
-                      <p className="text-sm text-gray-600 mb-3">{tmpl.description}</p>
+                      <p className="text-sm text-gray-400 mb-3">{tmpl.description}</p>
                     )}
                     {tmpl.preview_questions && tmpl.preview_questions.length > 0 && (
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-gray-400">Örnek sorular:</p>
                         {tmpl.preview_questions.slice(0, 3).map((q, i) => (
                           <p key={i} className="text-xs text-gray-500 flex items-start gap-1">
-                            <span className="text-indigo-400">💬</span> {q}
+                            <span className="text-primary-400">💬</span> {q}
                           </p>
                         ))}
                       </div>
                     )}
                     {selectedTemplate?.slug === tmpl.slug && (
                       <div className="absolute top-3 left-3">
-                        <CheckCircleIcon className="h-6 w-6 text-indigo-600" />
+                        <CheckCircleIcon className="h-6 w-6 text-primary-400" />
                       </div>
                     )}
                   </button>
@@ -228,14 +228,14 @@ export default function TemplateWizardPage() {
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl">{selectedTemplate.icon}</span>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{selectedTemplate.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-100">{selectedTemplate.name}</h3>
                 <p className="text-sm text-gray-500">İşletme bilgilerinizi girin</p>
               </div>
             </div>
 
             {/* Agent name override */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Agent Adı <span className="text-gray-400 font-normal">(opsiyonel)</span>
               </label>
               <input
@@ -243,7 +243,7 @@ export default function TemplateWizardPage() {
                 value={agentName}
                 onChange={(e) => setAgentName(e.target.value)}
                 placeholder={`Otomatik: ${configData.firma_adi || 'Firma'} Asistanı`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
 
@@ -264,12 +264,12 @@ export default function TemplateWizardPage() {
         {/* STEP 3: Preview */}
         {step === 'preview' && selectedTemplate && (
           <div className="space-y-5">
-            <h3 className="text-lg font-semibold text-gray-900">Önizleme & Onay</h3>
+            <h3 className="text-lg font-semibold text-gray-100">Önizleme & Onay</h3>
 
             {/* Summary card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border rounded-xl p-4 space-y-3">
-                <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                <h4 className="font-medium text-gray-100 flex items-center gap-2">
                   <span className="text-xl">{selectedTemplate.icon}</span>
                   {agentName || `${configData.firma_adi || ''} Asistanı`}
                 </h4>
@@ -279,7 +279,7 @@ export default function TemplateWizardPage() {
                     if (!val || (Array.isArray(val) && val.length === 0)) return null;
                     return (
                       <div key={field.key}>
-                        <span className="font-medium text-gray-700">{field.label}: </span>
+                        <span className="font-medium text-gray-300">{field.label}: </span>
                         {Array.isArray(val)
                           ? val.join(', ')
                           : typeof val === 'object'
@@ -294,9 +294,9 @@ export default function TemplateWizardPage() {
               </div>
 
               {/* Widget Preview */}
-              <div className="border rounded-xl p-4 bg-gray-50">
+              <div className="border rounded-xl p-4 bg-dark-700/50">
                 <p className="text-xs font-medium text-gray-500 mb-3">Widget Önizleme</p>
-                <div className="bg-white rounded-xl shadow-lg border p-4 max-w-[280px] mx-auto">
+                <div className="bg-dark-800/60 rounded-xl shadow-lg border p-4 max-w-[280px] mx-auto">
                   <div
                     className="rounded-lg p-3 mb-3 text-white text-sm"
                     style={{ backgroundColor: selectedTemplate.default_appearance?.primary_color || '#4F46E5' }}
@@ -317,7 +317,7 @@ export default function TemplateWizardPage() {
                   {selectedTemplate.preview_questions?.slice(0, 2).map((q, i) => (
                     <div
                       key={i}
-                      className="bg-gray-100 rounded-lg px-3 py-2 mb-2 text-xs text-gray-600"
+                      className="bg-dark-600 rounded-lg px-3 py-2 mb-2 text-xs text-gray-600"
                     >
                       {q}
                     </div>
@@ -339,7 +339,7 @@ export default function TemplateWizardPage() {
         <button
           onClick={handleBack}
           disabled={step === 'select'}
-          className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 text-gray-300 bg-dark-600 rounded-lg hover:bg-dark-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Geri
@@ -347,7 +347,7 @@ export default function TemplateWizardPage() {
         <button
           onClick={handleNext}
           disabled={!canProceed() || createMutation.isPending}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
         >
           {step === 'preview' ? (
             createMutation.isPending ? (
@@ -389,7 +389,7 @@ function DynamicField({
   const [tagInput, setTagInput] = useState('');
 
   const label = (
-    <label className="block text-sm font-medium text-gray-700 mb-1">
+    <label className="block text-sm font-medium text-gray-300 mb-1">
       {field.label}
       {field.required && <span className="text-red-500 ml-1">*</span>}
     </label>
@@ -406,7 +406,7 @@ function DynamicField({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       );
@@ -420,7 +420,7 @@ function DynamicField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       );
@@ -434,7 +434,7 @@ function DynamicField({
             value={value || ''}
             onChange={(e) => onChange(parseInt(e.target.value) || 0)}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       );
@@ -456,7 +456,7 @@ function DynamicField({
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-500/10 text-primary-400 border border-primary-500/20 rounded-full text-sm"
               >
                 {tag}
                 <button
@@ -481,12 +481,12 @@ function DynamicField({
                 }
               }}
               placeholder={field.placeholder || 'Yeni ekle...'}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="flex-1 px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
             <button
               onClick={() => addTag(tagInput)}
               disabled={!tagInput.trim()}
-              className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
             >
               <PlusIcon className="h-5 w-5" />
             </button>
@@ -503,7 +503,7 @@ function DynamicField({
                     <button
                       key={s}
                       onClick={() => addTag(s)}
-                      className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
+                      className="px-2 py-0.5 text-xs bg-dark-600 text-gray-400 border border-white/[0.06] rounded hover:bg-primary-500/10 hover:text-primary-400 hover:border-primary-500/20 transition-colors"
                     >
                       + {s}
                     </button>
@@ -524,13 +524,13 @@ function DynamicField({
           <div className="space-y-2 border rounded-lg p-3">
             {days.map((day) => (
               <div key={day} className="flex items-center gap-3">
-                <span className="text-sm text-gray-700 w-24 font-medium">{day}</span>
+                <span className="text-sm text-gray-300 w-24 font-medium">{day}</span>
                 <input
                   type="text"
                   value={schedule[day] || ''}
                   onChange={(e) => onChange({ ...schedule, [day]: e.target.value })}
                   placeholder="09:00 - 20:00 veya Kapalı"
-                  className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="flex-1 px-3 py-1.5 text-sm border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
             ))}
@@ -547,7 +547,7 @@ function DynamicField({
             type="text"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2 border border-white/[0.1] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       );

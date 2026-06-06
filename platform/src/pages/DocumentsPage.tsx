@@ -380,14 +380,14 @@ export default function DocumentsPage() {
   // Helper for Status Badge Color
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'indexed': return 'bg-green-100 text-green-800';
-      case 'enriched': return 'bg-blue-100 text-blue-800';
-      case 'processed': return 'bg-yellow-100 text-yellow-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'indexing': return 'bg-blue-100 text-blue-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      case 'uploaded': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'indexed': return 'bg-green-500/10 text-green-400 border border-green-500/20';
+      case 'enriched': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      case 'processed': return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
+      case 'processing': return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
+      case 'indexing': return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      case 'error': return 'bg-red-500/10 text-red-400 border border-red-500/20';
+      case 'uploaded': return 'bg-dark-600 text-gray-300 border border-white/[0.06]';
+      default: return 'bg-dark-600 text-gray-300 border border-white/[0.06]';
     }
   };
 
@@ -467,8 +467,8 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Döküman Yükle & Yönet</h1>
-          <p className="text-gray-600">Dökümanlarınızı kolayca yükleyip metadata (kategori, etiket) ekleyebilirsiniz.</p>
+          <h1 className="text-2xl font-bold text-gray-100">Döküman Yükle & Yönet</h1>
+          <p className="text-gray-400">Dökümanlarınızı kolayca yükleyip metadata (kategori, etiket) ekleyebilirsiniz.</p>
         </div>
         <button
           onClick={() => setShowUploadModal(true)}
@@ -480,7 +480,7 @@ export default function DocumentsPage() {
       </div>
 
       {/* Filters & Controls */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-4">
         <div className="flex flex-col gap-4">
 
           {/* Top Row: Search & Status */}
@@ -515,7 +515,7 @@ export default function DocumentsPage() {
           </div>
 
           {/* Bottom Row: Metadata Filter & Sorting */}
-          <div className="flex flex-col md:flex-row gap-4 pt-3 border-t border-gray-100">
+          <div className="flex flex-col md:flex-row gap-4 pt-3 border-t border-white/[0.06]">
             <div className="flex-1 flex gap-2">
               <input
                 type="text"
@@ -541,8 +541,8 @@ export default function DocumentsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-200">
-                <span className="text-xs font-medium text-gray-500 px-2">Sırala:</span>
+              <div className="flex items-center gap-1 bg-dark-700/50 rounded-lg p-1 border border-white/[0.06]">
+                <span className="text-xs font-medium text-gray-400 px-2">Sırala:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
@@ -553,10 +553,10 @@ export default function DocumentsPage() {
                 </select>
                 <button
                   onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                  className="p-1 hover:bg-white rounded shadow-sm transition-all"
+                  className="p-1 hover:bg-dark-800/60 rounded  transition-all"
                   title={sortOrder === 'asc' ? 'Artan' : 'Azalan'}
                 >
-                  <ArrowUpDown className={`h-4 w-4 text-gray-600 transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
+                  <ArrowUpDown className={`h-4 w-4 text-gray-400 transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
                 </button>
               </div>
             </div>
@@ -589,26 +589,26 @@ export default function DocumentsPage() {
       </div>
 
       {(isBulkProcessing || isBulkResetting) && (
-        <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm mb-4 border border-blue-200 flex items-center">
+        <div className="bg-blue-500/10 text-blue-400 p-3 rounded-md text-sm mb-4 border border-blue-500/20 flex items-center">
           <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
           {bulkProcessingStatus || bulkResetStatus}
         </div>
       )}
 
       {/* Document List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-white/[0.04]">
+            <thead className="bg-dark-700/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Döküman</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dil</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Döküman</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Dil</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Durum</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Tarih</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">İşlemler</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-dark-800/60 divide-y divide-white/[0.04]">
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
@@ -619,19 +619,19 @@ export default function DocumentsPage() {
                 </tr>
               ) : documentsData?.documents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                     Döküman bulunamadı. Yeni bir döküman yükleyin.
                   </td>
                 </tr>
               ) : (
                 documentsData?.documents.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={doc.id} className="hover:bg-dark-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 text-gray-400 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{doc.name}</div>
-                          <div className="text-xs text-gray-500">{doc.original_filename}</div>
+                          <div className="text-sm font-medium text-gray-100">{doc.name}</div>
+                          <div className="text-xs text-gray-400">{doc.original_filename}</div>
                         </div>
                       </div>
                     </td>
@@ -645,7 +645,7 @@ export default function DocumentsPage() {
                                 doc.language === 'fr' ? '🇫🇷' :
                                   doc.language === 'es' ? '🇪🇸' : '🌐'}
                         </span>
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-gray-300">
                           {doc.language === 'tr' ? 'Türkçe' :
                             doc.language === 'en' ? 'İngilizce' :
                               doc.language === 'de' ? 'Almanca' :
@@ -658,17 +658,17 @@ export default function DocumentsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {getStatusIcon(doc.status)}
-                        <span className="ml-2 text-sm text-gray-700">{getStatusText(doc.status)}</span>
+                        <span className="ml-2 text-sm text-gray-300">{getStatusText(doc.status)}</span>
                       </div>
                       {/* Processor Status Mini Badges */}
                       <div className="flex mt-1 space-x-1">
-                        <span className={`w-2 h-2 rounded-full ${doc.ocr_completed ? 'bg-green-500' : 'bg-gray-200'}`} title="OCR"></span>
-                        <span className={`w-2 h-2 rounded-full ${doc.chunking_completed ? 'bg-green-500' : 'bg-gray-200'}`} title="Chunking"></span>
-                        <span className={`w-2 h-2 rounded-full ${doc.embedding_completed ? 'bg-green-500' : 'bg-gray-200'}`} title="Embedding"></span>
-                        <span className={`w-2 h-2 rounded-full ${doc.vector_indexed ? 'bg-green-500' : 'bg-gray-200'}`} title="Vector DB"></span>
+                        <span className={`w-2 h-2 rounded-full ${doc.ocr_completed ? 'bg-green-500' : 'bg-dark-500'}`} title="OCR"></span>
+                        <span className={`w-2 h-2 rounded-full ${doc.chunking_completed ? 'bg-green-500' : 'bg-dark-500'}`} title="Chunking"></span>
+                        <span className={`w-2 h-2 rounded-full ${doc.embedding_completed ? 'bg-green-500' : 'bg-dark-500'}`} title="Embedding"></span>
+                        <span className={`w-2 h-2 rounded-full ${doc.vector_indexed ? 'bg-green-500' : 'bg-dark-500'}`} title="Vector DB"></span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {new Date(doc.created_at).toLocaleDateString('tr-TR')}
                       <div className="text-xs">{new Date(doc.created_at).toLocaleTimeString('tr-TR')}</div>
                     </td>
@@ -676,13 +676,13 @@ export default function DocumentsPage() {
                       <div className="flex justify-end space-x-2">
                         {/* Process button - for uploaded documents */}
                         {doc.status === 'uploaded' && (
-                          <button onClick={() => handleProcess(doc.id, doc.name)} className="text-primary-600 hover:text-primary-900" title="İşle">
+                          <button onClick={() => handleProcess(doc.id, doc.name)} className="text-primary-400 hover:text-primary-300" title="İşle">
                             <Play className="h-5 w-5" />
                           </button>
                         )}
                         {/* Progress/Details button - for processing/processed/error */}
                         {(doc.status === 'processing' || doc.status === 'processed' || doc.status === 'error') && (
-                          <button onClick={() => handleViewProgress(doc.id, doc.name)} className="text-blue-600 hover:text-blue-900" title="İlerleme Durumu / Detay">
+                          <button onClick={() => handleViewProgress(doc.id, doc.name)} className="text-blue-400 hover:text-blue-300 font-medium" title="İlerleme Durumu / Detay">
                             <Eye className="h-5 w-5" />
                           </button>
                         )}
@@ -690,7 +690,7 @@ export default function DocumentsPage() {
                         {(doc.status === 'processed' || doc.status === 'enriched') && (
                           <button 
                             onClick={() => handleIndex(doc.id, doc.name)} 
-                            className="text-green-600 hover:text-green-900" 
+                            className="text-green-400 hover:text-green-300 font-medium" 
                             title="İndeksle (Embedding Oluştur)"
                             disabled={indexMutation.isLoading}
                           >
@@ -701,7 +701,7 @@ export default function DocumentsPage() {
                         {doc.status === 'indexed' && (
                           <button 
                             onClick={() => handleReindex(doc.id, doc.name)} 
-                            className="text-purple-600 hover:text-purple-900" 
+                            className="text-purple-400 hover:text-purple-300" 
                             title="Yeniden İndeksle"
                             disabled={reindexMutation.isLoading}
                           >
@@ -710,7 +710,7 @@ export default function DocumentsPage() {
                         )}
                         {/* Reprocess button - for processed documents */}
                         {doc.status === 'processed' && (
-                          <button onClick={() => handleReprocess(doc.id, doc.name)} className="text-orange-600 hover:text-orange-900" title="Yeniden İşle">
+                          <button onClick={() => handleReprocess(doc.id, doc.name)} className="text-orange-400 hover:text-orange-300" title="Yeniden İşle">
                             <RefreshCw className="h-5 w-5" />
                           </button>
                         )}
@@ -719,19 +719,19 @@ export default function DocumentsPage() {
                             setSelectedDocumentForEdit(doc);
                             setShowEditModal(true);
                           }}
-                          className="text-primary-600 hover:text-primary-900"
+                          className="text-primary-400 hover:text-primary-300"
                           title="Düzenle"
                         >
                           <Edit2 className="h-5 w-5" />
                         </button>
                         <button 
                           onClick={() => handleReset(doc.id, doc.name)} 
-                          className="text-red-600 hover:text-red-900" 
+                          className="text-red-400 hover:text-red-300 font-medium" 
                           title="Sıfırla ve Yeniden İşle"
                         >
                           <RotateCcw className="h-5 w-5" />
                         </button>
-                        <button onClick={() => handleDelete(doc.id, doc.name)} className="text-red-600 hover:text-red-900" title="Sil">
+                        <button onClick={() => handleDelete(doc.id, doc.name)} className="text-red-400 hover:text-red-300 font-medium" title="Sil">
                           <Trash2 className="h-5 w-5" />
                         </button>
                       </div>

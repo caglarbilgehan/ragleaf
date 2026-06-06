@@ -58,10 +58,10 @@ const RagVisibilityIndicator: React.FC<RagVisibilityIndicatorProps> = ({
         return {
           icon: HelpCircle,
           text: 'Bilinmeyen Durum',
-          bgColor: 'bg-gray-100',
-          textColor: 'text-gray-800',
+          bgColor: 'bg-dark-600',
+          textColor: 'text-gray-200',
           iconColor: 'text-gray-600',
-          borderColor: 'border-gray-200'
+          borderColor: 'border-white/[0.06]'
         };
     }
   };

@@ -122,12 +122,12 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-300">
               {selectedDocuments.length} döküman seçildi
             </span>
             <button
               onClick={onClearSelection}
-              className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+              className="text-sm text-gray-600 hover:text-gray-200 flex items-center gap-1"
             >
               <X className="w-4 h-4" />
               Seçimi Temizle
@@ -156,7 +156,7 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
             <button
               onClick={() => handleActionClick('bulk-reset')}
               disabled={!isActionCompatible('bulk-reset') || isProcessing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-700 border border-red-300 rounded-md hover:bg-red-50 disabled:bg-dark-600 disabled:cursor-not-allowed"
               title="Keyboard shortcut: Shift+R"
             >
               <RotateCcw className="w-4 h-4" />
@@ -174,7 +174,7 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
                 {progress.completed} / {progress.total}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-dark-500 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(progress.completed / progress.total) * 100}%` }}
@@ -187,8 +187,8 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
       {/* Confirmation Dialog */}
       {showConfirm && pendingAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Emin misiniz?</h3>
+          <div className="bg-dark-800/60 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-medium text-gray-100 mb-2">Emin misiniz?</h3>
             <p className="text-sm text-gray-500 mb-4">
               {selectedDocuments.length} döküman için <strong>{getActionLabel(pendingAction)}</strong>{' '}
               işlemi yapılacak:
@@ -203,7 +203,7 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
             <div className="flex gap-2 justify-end">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-300 bg-dark-800/60 border border-white/[0.1] rounded-md hover:bg-dark-700/50"
               >
                 İptal
               </button>
@@ -221,8 +221,8 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
       {/* Summary Modal */}
       {showSummary && progress && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">İşlem Tamamlandı</h3>
+          <div className="bg-dark-800/60 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-medium text-gray-100 mb-4">İşlem Tamamlandı</h3>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Toplam:</span>
@@ -240,7 +240,7 @@ const BulkActionToolbar: React.FC<BulkActionToolbarProps> = ({
 
             {progress.errors.length > 0 && (
               <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Hatalar:</h4>
+                <h4 className="text-sm font-medium text-gray-100 mb-2">Hatalar:</h4>
                 <ul className="text-sm text-red-600 max-h-40 overflow-y-auto">
                   {progress.errors.map((err, idx) => (
                     <li key={idx} className="py-1">

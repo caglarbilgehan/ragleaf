@@ -2061,7 +2061,7 @@ async def get_system_stats(
         
         for provider in providers:
             tokens = provider.tokens or []
-            active_tokens = [t for t in tokens if t.is_active]
+            active_tokens = [t for t in tokens if t.is_active and t.is_available]
             
             ai_services_data["total"] += len(tokens)
             ai_services_data["active"] += len(active_tokens)
@@ -2082,6 +2082,82 @@ async def get_system_stats(
             })
     except Exception as e:
         logger.warning(f"Could not get AI services stats: {e}")
+    
+    # Tenant / Organization statistics
+    tenant_stats = {
+        "total": 0,
+        "active": 0,
+        "suspended": 0,
+        "by_plan": {}
+    }
+    agent_stats = {
+        "total": 0,
+        "active": 0
+    }
+    conversation_stats = {
+        "total": 0,
+        "total_messages": 0
+    }
+    appointment_stats = {
+        "total": 0,
+        "pending": 0,
+        "confirmed": 0,
+        "completed": 0,
+        "cancelled": 0
+    }
+
+    try:
+        from backend.database.models_platform import Organization, Agent, PublicConversation, PublicMessage, Appointment
+        from sqlalchemy import func
+        
+        # Organizations
+        total_orgs = db.query(Organization).count()
+        active_orgs = db.query(Organization).filter(Organization.is_active == True).count()
+        suspended_orgs = db.query(Organization).filter(Organization.is_active == False).count()
+        
+        # Plan distribution
+        plan_counts = db.query(Organization.plan, func.count(Organization.id)).group_by(Organization.plan).all()
+        by_plan = {plan or "free": count for plan, count in plan_counts}
+        
+        tenant_stats = {
+            "total": total_orgs,
+            "active": active_orgs,
+            "suspended": suspended_orgs,
+            "by_plan": by_plan
+        }
+        
+        # Agents
+        total_agents = db.query(Agent).count()
+        active_agents = db.query(Agent).filter(Agent.is_active == True).count()
+        agent_stats = {
+            "total": total_agents,
+            "active": active_agents
+        }
+        
+        # Conversations & Messages
+        total_convs = db.query(PublicConversation).count()
+        total_msgs = db.query(PublicMessage).count()
+        conversation_stats = {
+            "total": total_convs,
+            "total_messages": total_msgs
+        }
+        
+        # Appointments
+        total_apts = db.query(Appointment).count()
+        pending_apts = db.query(Appointment).filter(Appointment.status == "pending").count()
+        confirmed_apts = db.query(Appointment).filter(Appointment.status == "confirmed").count()
+        completed_apts = db.query(Appointment).filter(Appointment.status == "completed").count()
+        cancelled_apts = db.query(Appointment).filter(Appointment.status == "cancelled").count()
+        
+        appointment_stats = {
+            "total": total_apts,
+            "pending": pending_apts,
+            "confirmed": confirmed_apts,
+            "completed": completed_apts,
+            "cancelled": cancelled_apts
+        }
+    except Exception as e:
+        logger.warning(f"Could not get platform statistics in get_system_stats: {e}")
     
     return {
         "documents": {
@@ -2106,7 +2182,11 @@ async def get_system_stats(
             "total_bytes": total_storage,
             "total_mb": round(total_storage / (1024 * 1024), 2)
         },
-        "ai_services": ai_services_data
+        "ai_services": ai_services_data,
+        "tenants": tenant_stats,
+        "agents": agent_stats,
+        "conversations": conversation_stats,
+        "appointments": appointment_stats
     }
 
 # User Management Endpoints

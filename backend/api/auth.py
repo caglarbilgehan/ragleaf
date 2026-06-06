@@ -30,7 +30,7 @@ class UserCreate(BaseModel):
     company_name: Optional[str] = None
     website: Optional[str] = None
     sector: Optional[str] = None
-    plan: Optional[str] = "free"
+    plan: Optional[str] = "starter"
     # Template-based onboarding
     template_slug: Optional[str] = None
     brand_config: Optional[dict] = None
@@ -142,8 +142,28 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     user = result.fetchone()
     
     # Create organization
-    plan = user_data.plan or "free"
-    limits = PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
+    plan = user_data.plan or "starter"
+    if plan == "free":
+        plan = "starter" # "free" plan is deprecated and removed
+        
+    # Query database for the plan limits
+    from datetime import datetime, timedelta, timezone
+    plan_db = db.execute(text("SELECT max_agents, max_documents, max_queries_per_month, max_storage_mb FROM plans WHERE key = :key AND is_active = true"), {"key": plan}).fetchone()
+    if plan_db:
+        limits = {
+            "max_agents": plan_db.max_agents,
+            "max_documents": plan_db.max_documents,
+            "max_queries_per_month": plan_db.max_queries_per_month,
+            "max_storage_mb": plan_db.max_storage_mb
+        }
+    else:
+        # Fallback starter limits
+        limits = {"max_agents": 3, "max_documents": 100, "max_queries_per_month": 5000, "max_storage_mb": 500}
+        
+    trial_ends_at = None
+    if plan == "starter":
+        trial_ends_at = datetime.now(timezone.utc) + timedelta(days=7)
+        
     org_name = user_data.company_name or full_name or user_data.email.split("@")[0]
     org_slug = org_name.lower().replace(" ", "-").replace(".", "-")[:50]
     
@@ -151,14 +171,15 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     slug_check = db.execute(text("SELECT COUNT(*) as count FROM organizations WHERE slug = :slug"), {"slug": org_slug})
     if slug_check.fetchone().count > 0:
         org_slug = f"{org_slug}-{user.id}"
-    
+        
     db.execute(text("""
-        INSERT INTO organizations (name, slug, plan, max_agents, max_documents, max_queries_per_month, max_storage_mb, is_active, created_at, updated_at)
-        VALUES (:name, :slug, :plan, :max_agents, :max_documents, :max_queries_per_month, :max_storage_mb, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        INSERT INTO organizations (name, slug, plan, trial_ends_at, max_agents, max_documents, max_queries_per_month, max_storage_mb, is_active, created_at, updated_at)
+        VALUES (:name, :slug, :plan, :trial_ends_at, :max_agents, :max_documents, :max_queries_per_month, :max_storage_mb, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     """), {
         "name": org_name,
         "slug": org_slug,
         "plan": plan,
+        "trial_ends_at": trial_ends_at,
         **limits
     })
     db.flush()

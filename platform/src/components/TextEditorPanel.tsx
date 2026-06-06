@@ -95,10 +95,10 @@ export default function TextEditorPanel({
   const lineCount = text.split('\n').length;
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 flex flex-col h-full">
+    <div className="bg-dark-700/50 rounded-lg p-4 flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h4 className="font-medium text-gray-900">Metin Düzenle</h4>
+        <h4 className="font-medium text-gray-100">Metin Düzenle</h4>
         <div className="flex items-center gap-2">
           {saveStatus === 'saved' && (
             <span className="flex items-center text-sm text-green-600">
@@ -121,12 +121,12 @@ export default function TextEditorPanel({
       {/* Toolbar */}
       <div className="flex items-center gap-2 mb-3">
         <button onClick={handleUndo} disabled={historyIndex <= 0}
-          className="p-2 rounded bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+          className="p-2 rounded bg-dark-800/60 border border-white/[0.1] hover:bg-dark-700/50 disabled:opacity-50"
           title="Geri Al (Ctrl+Z)">
           <Undo2 className="h-4 w-4" />
         </button>
         <button onClick={handleRedo} disabled={historyIndex >= history.length - 1}
-          className="p-2 rounded bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+          className="p-2 rounded bg-dark-800/60 border border-white/[0.1] hover:bg-dark-700/50 disabled:opacity-50"
           title="Yinele (Ctrl+Y)">
           <Redo2 className="h-4 w-4" />
         </button>
@@ -138,7 +138,7 @@ export default function TextEditorPanel({
 
       {/* Textarea */}
       <textarea ref={textareaRef} value={text} onChange={(e) => onChange(e.target.value)}
-        className="flex-1 w-full p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="flex-1 w-full p-4 border border-white/[0.1] rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         placeholder="OCR metni buraya yazın..."
       />
 

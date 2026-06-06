@@ -160,10 +160,10 @@ const EmbeddingModelsPage: React.FC = () => {
   const totalDownloadedSize = downloadedModels.reduce((sum, m) => sum + (m.actual_size_gb || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-dark-700/50 p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Embedding Modelleri</h1>
+          <h1 className="text-3xl font-bold text-gray-100">Embedding Modelleri</h1>
           <p className="mt-2 text-gray-600">
             Embedding modellerini indirin, silin ve yapılandırın
           </p>
@@ -186,20 +186,20 @@ const EmbeddingModelsPage: React.FC = () => {
           <TabsContent value="cache" className="space-y-6">
             {/* Download Progress */}
             {downloadProgress && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-gray-100">
                       {downloadProgress.model_id} İndiriliyor
                     </h3>
-                    <p className="text-sm text-gray-600">{downloadProgress.status}</p>
+                    <p className="text-sm text-gray-400">{downloadProgress.status}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-blue-400">
                       {downloadProgress.progress.toFixed(0)}%
                     </div>
                     {downloadProgress.speed_mbps && (
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-400">
                         {downloadProgress.speed_mbps.toFixed(1)} MB/s
                       </div>
                     )}
@@ -207,16 +207,16 @@ const EmbeddingModelsPage: React.FC = () => {
                 </div>
                 
                 {/* Progress Bar */}
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-2">
+                <div className="w-full bg-dark-500 rounded-full h-3 overflow-hidden mb-2">
                   <div
-                    className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                    className="bg-primary-600 h-3 rounded-full transition-all duration-300"
                     style={{ width: `${downloadProgress.progress}%` }}
                   ></div>
                 </div>
                 
                 {/* Download Details */}
                 {downloadProgress.downloaded_mb && downloadProgress.total_mb && (
-                  <div className="text-sm text-gray-600 text-center">
+                  <div className="text-sm text-gray-400 text-center">
                     {downloadProgress.downloaded_mb.toFixed(1)} MB / {downloadProgress.total_mb.toFixed(1)} MB
                   </div>
                 )}
@@ -224,30 +224,30 @@ const EmbeddingModelsPage: React.FC = () => {
             )}
 
             {/* Disk Usage Overview */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-dark-800/60 rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Disk Kullanımı</h2>
 
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
           ) : diskUsage ? (
             <div>
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">
+                  <span className="text-gray-400">
                     {diskUsage.used_gb.toFixed(1)} GB / {diskUsage.total_gb.toFixed(1)} GB kullanıldı
                   </span>
                   <span className="font-medium">{diskUsagePercentage}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div className="w-full bg-dark-500 rounded-full h-4 overflow-hidden">
                   <div
                     className={`h-4 rounded-full transition-all ${
                       Number(diskUsagePercentage) > 80
                         ? 'bg-red-600'
                         : Number(diskUsagePercentage) > 60
                         ? 'bg-yellow-500'
-                        : 'bg-blue-600'
+                        : 'bg-primary-600'
                     }`}
                     style={{ width: `${diskUsagePercentage}%` }}
                   ></div>
@@ -255,21 +255,21 @@ const EmbeddingModelsPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-4 mt-6">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm text-blue-600 font-medium">Toplam Alan</p>
-                  <p className="text-2xl font-bold text-blue-900">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <p className="text-sm text-blue-400 font-medium">Toplam Alan</p>
+                  <p className="text-2xl font-bold text-blue-200">
                     {diskUsage.total_gb.toFixed(1)} GB
                   </p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-sm text-green-600 font-medium">Boş Alan</p>
-                  <p className="text-2xl font-bold text-green-900">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                  <p className="text-sm text-green-400 font-medium">Boş Alan</p>
+                  <p className="text-2xl font-bold text-green-200">
                     {diskUsage.free_gb.toFixed(1)} GB
                   </p>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <p className="text-sm text-purple-600 font-medium">Model Cache</p>
-                  <p className="text-2xl font-bold text-purple-900">
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                  <p className="text-sm text-purple-400 font-medium">Model Cache</p>
+                  <p className="text-2xl font-bold text-purple-200">
                     {totalDownloadedSize.toFixed(1)} GB
                   </p>
                 </div>
@@ -281,15 +281,15 @@ const EmbeddingModelsPage: React.FC = () => {
         </div>
 
         {/* Models List */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-dark-800/60 rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/[0.06]">
             <h2 className="text-xl font-semibold">Embedding Modelleri</h2>
           </div>
 
           {diskUsage && diskUsage.models.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-white/[0.04]">
+                <thead className="bg-dark-700/50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Model
@@ -308,20 +308,20 @@ const EmbeddingModelsPage: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-dark-800/60 divide-y divide-white/[0.04]">
                   {diskUsage.models.map((model) => (
-                    <tr key={model.id} className="hover:bg-gray-50">
+                    <tr key={model.id} className="hover:bg-dark-700/50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{model.display_name}</div>
+                        <div className="text-sm font-medium text-gray-100">{model.display_name}</div>
                         <div className="text-xs text-gray-500">{model.model_id}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {model.is_downloaded ? (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
                             ✓ İndirildi
                           </span>
                         ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-dark-600 text-gray-400 border border-white/[0.06]">
                             ○ İndirilmemiş
                           </span>
                         )}
@@ -392,7 +392,7 @@ const EmbeddingModelsPage: React.FC = () => {
               <button
                 onClick={fetchDiskUsage}
                 disabled={loading}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 <svg
                   className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`}

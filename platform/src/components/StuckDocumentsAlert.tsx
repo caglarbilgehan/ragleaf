@@ -105,18 +105,18 @@ export default function StuckDocumentsAlert({ onRefresh }: StuckDocumentsAlertPr
     }
 
     return (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm mb-4">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg  mb-4">
             {/* Header */}
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-yellow-100 rounded-full">
-                        <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <div className="p-2 bg-amber-500/20 rounded-full">
+                        <AlertTriangle className="h-5 w-5 text-amber-400" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-yellow-800">
+                        <h3 className="font-semibold text-amber-400">
                             {stuckDocs.length} Takılı Döküman Bulundu
                         </h3>
-                        <p className="text-sm text-yellow-600">
+                        <p className="text-sm text-gray-400">
                             Sistem yeniden başladığında yarıda kalan işlemler
                         </p>
                     </div>
@@ -124,25 +124,25 @@ export default function StuckDocumentsAlert({ onRefresh }: StuckDocumentsAlertPr
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setExpanded(!expanded)}
-                        className="p-1 hover:bg-yellow-100 rounded"
+                        className="p-1 hover:bg-amber-500/10 rounded"
                     >
-                        {expanded ? <ChevronUp className="h-5 w-5 text-yellow-600" /> : <ChevronDown className="h-5 w-5 text-yellow-600" />}
+                        {expanded ? <ChevronUp className="h-5 w-5 text-amber-400" /> : <ChevronDown className="h-5 w-5 text-amber-400" />}
                     </button>
                     <button
                         onClick={() => setDismissed(true)}
-                        className="p-1 hover:bg-yellow-100 rounded"
+                        className="p-1 hover:bg-amber-500/10 rounded"
                         title="Kapat"
                     >
-                        <X className="h-5 w-5 text-yellow-600" />
+                        <X className="h-5 w-5 text-amber-400" />
                     </button>
                 </div>
             </div>
 
             {/* Expanded Content */}
             {expanded && (
-                <div className="border-t border-yellow-200">
+                <div className="border-t border-amber-500/20">
                     {/* Bulk Actions */}
-                    <div className="flex gap-2 p-3 bg-yellow-100/50 border-b border-yellow-200">
+                    <div className="flex gap-2 p-3 bg-dark-700/50 border-b border-white/[0.06]">
                         <button
                             onClick={handleRestartAll}
                             className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
@@ -160,13 +160,13 @@ export default function StuckDocumentsAlert({ onRefresh }: StuckDocumentsAlertPr
                     </div>
 
                     {/* Document List */}
-                    <div className="divide-y divide-yellow-200">
+                    <div className="divide-y divide-white/[0.04]">
                         {stuckDocs.map((doc) => (
-                            <div key={doc.id} className="flex items-center justify-between p-3 hover:bg-yellow-100/30">
+                            <div key={doc.id} className="flex items-center justify-between p-3 hover:bg-dark-700/20">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium text-gray-900 truncate">{doc.name}</span>
-                                        <span className={`px-2 py-0.5 text-xs rounded-full ${doc.status === 'processing' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                                        <span className="font-medium text-gray-100 truncate">{doc.name}</span>
+                                        <span className={`px-2 py-0.5 text-xs rounded-full ${doc.status === 'processing' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
                                             }`}>
                                             {doc.status === 'processing' ? 'İşleme' : 'İndeksleme'}
                                         </span>

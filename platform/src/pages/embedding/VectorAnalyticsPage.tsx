@@ -62,11 +62,11 @@ const VectorAnalyticsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-dark-700/50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Vector Store Analytics</h1>
+            <h1 className="text-3xl font-bold text-gray-100">Vector Store Analytics</h1>
             <p className="mt-2 text-gray-600">
               Chroma ve FAISS vector store'larınızın detaylı analizi
             </p>
@@ -100,7 +100,7 @@ const VectorAnalyticsPage: React.FC = () => {
         ) : analytics ? (
           <>
             {/* Sync Status */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="bg-dark-800/60 rounded-lg shadow p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4">Senkronizasyon Durumu</h2>
 
               <div
@@ -133,7 +133,7 @@ const VectorAnalyticsPage: React.FC = () => {
             {/* Chroma and FAISS Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Chroma Analytics */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-dark-800/60 rounded-lg shadow p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg
@@ -159,7 +159,7 @@ const VectorAnalyticsPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center p-3 bg-dark-700/50 rounded-lg">
                       <span className="text-gray-600">Toplam Chunk</span>
                       <span className="text-2xl font-bold text-purple-600">
                         {analytics.chroma_stats.total_chunks?.toLocaleString() || 0}
@@ -189,7 +189,7 @@ const VectorAnalyticsPage: React.FC = () => {
               </div>
 
               {/* FAISS Analytics */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-dark-800/60 rounded-lg shadow p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg
@@ -215,7 +215,7 @@ const VectorAnalyticsPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center p-3 bg-dark-700/50 rounded-lg">
                       <span className="text-gray-600">Toplam Vector</span>
                       <span className="text-2xl font-bold text-blue-600">
                         {analytics.faiss_stats.total_vectors?.toLocaleString() || 0}
@@ -279,7 +279,7 @@ const VectorAnalyticsPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-dark-800/60 rounded-lg shadow p-12 text-center">
             <p className="text-gray-500">Analytics verisi yüklenemedi</p>
           </div>
         )}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 interface AgentSummary {
   id: number;
@@ -6,97 +6,328 @@ interface AgentSummary {
   public_id: string;
 }
 
+interface AgentDocument {
+  id: number;
+  name: string;
+  original_filename: string;
+  file_type: string;
+  file_size: number;
+  status: string;
+  processing_stage: string | null;
+  processing_progress: number;
+  total_chunks: number | null;
+  vector_indexed: boolean;
+  language: string;
+  created_at: string | null;
+  processed_at: string | null;
+  shared_agent_count: number;
+  is_shared: boolean;
+  linked_at: string | null;
+}
+
+interface DocumentDetailsResponse {
+  document_id: number;
+  name: string;
+  original_filename: string;
+  status: string;
+  file_type: string;
+  file_size: number;
+  total_chunks: number | null;
+  processing_stage: string | null;
+  processing_progress: number;
+  quality: {
+    score: number;
+    tier: string;
+    suggestions: string[];
+  };
+  logs: {
+    timestamp: string;
+    level: 'info' | 'warning' | 'error' | 'success';
+    stage: string;
+    progress: number;
+    message: string;
+  }[];
+  system_health: {
+    database: boolean;
+    ocr: boolean;
+    embedding: boolean;
+  };
+}
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
-async function fetchAPI<T>(path: string): Promise<T> {
+async function fetchAPI<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem('ragleaf_token');
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    ...init,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(init?.headers || {}),
+    },
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+    throw new Error(err.detail || `API error: ${res.status}`);
+  }
   return res.json();
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
+function getFileTypeIcon(fileType: string): string {
+  switch (fileType?.toLowerCase()) {
+    case 'pdf': return '📕';
+    case 'docx': return '📘';
+    case 'txt': return '📄';
+    case 'md': return '📝';
+    default: return '📄';
+  }
+}
+
+function getStatusConfig(status: string) {
+  switch (status) {
+    case 'indexed':
+      return { label: 'İndekslenmiş', color: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20', icon: '✅', animate: false };
+    case 'enriched':
+      return { label: 'Zenginleştirilmiş', color: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20', icon: '📘', animate: false };
+    case 'processed':
+      return { label: 'İşlenmiş', color: 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20', icon: '📄', animate: false };
+    case 'processing':
+      return { label: 'İşleniyor...', color: 'bg-yellow-500/10 text-yellow-400 ring-1 ring-yellow-500/20', icon: '⏳', animate: true };
+    case 'indexing':
+      return { label: 'İndeksleniyor...', color: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20', icon: '⏳', animate: true };
+    case 'error':
+      return { label: 'Hatalı', color: 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20', icon: '❌', animate: false };
+    case 'uploaded':
+      return { label: 'Yüklenmiş', color: 'bg-dark-600 text-gray-300 ring-1 ring-white/[0.06]', icon: '📤', animate: false };
+    default:
+      return { label: status, color: 'bg-dark-600 text-gray-400', icon: '📁', animate: false };
+  }
 }
 
 export default function TenantDocuments() {
   const [agents, setAgents] = useState<AgentSummary[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
+  const [documents, setDocuments] = useState<AgentDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Details Modal state
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
+  const [detailsData, setDetailsData] = useState<DocumentDetailsResponse | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const showNotification = (type: 'success' | 'error' | 'info', text: string) => {
+    setNotification({ type, text });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  const loadDetails = async (docId: number) => {
+    if (!selectedAgentId) return;
+    setSelectedDocId(docId);
+    setDetailsModalOpen(true);
+    setDetailsLoading(true);
+    setDetailsData(null);
+    try {
+      const data = await fetchAPI<DocumentDetailsResponse>(`/api/agents/${selectedAgentId}/documents/${docId}/details`);
+      setDetailsData(data);
+    } catch (err: any) {
+      showNotification('error', `❌ Detay yükleme hatası: ${err.message}`);
+      setDetailsModalOpen(false);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAPI<AgentSummary[]>('/api/org/agents')
-      .then((a) => {
-        setAgents(a);
-        if (a.length > 0) setSelectedAgentId(a[0].id);
+      .then((data) => {
+        setAgents(data);
+        if (data.length > 0) setSelectedAgentId(data[0].id);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedAgentId) return;
-
-    setUploading(true);
-    setUploadResult(null);
-
+  const loadDocuments = useCallback(async () => {
+    if (!selectedAgentId) return;
+    setRefreshing(true);
     try {
-      const token = localStorage.getItem('ragleaf_token');
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch(`${API_BASE}/api/agents/${selectedAgentId}/documents/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setUploadResult({ success: true, message: `✅ "${file.name}" başarıyla yüklendi. (ID: ${data.document_id})` });
-      } else {
-        setUploadResult({ success: false, message: `❌ Hata: ${data.detail || 'Bilinmeyen hata'}` });
-      }
+      const data = await fetchAPI<{ documents: AgentDocument[] }>(`/api/agents/${selectedAgentId}/documents`);
+      setDocuments(data.documents || []);
     } catch (err) {
-      setUploadResult({ success: false, message: '❌ Bağlantı hatası.' });
+      console.error('Failed to load documents:', err);
     } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setRefreshing(false);
+    }
+  }, [selectedAgentId]);
+
+  useEffect(() => {
+    loadDocuments();
+  }, [loadDocuments]);
+
+  useEffect(() => {
+    if (documents.some((doc) => doc.status === 'processing' || doc.status === 'indexing')) {
+      refreshIntervalRef.current = setInterval(loadDocuments, 3000);
+    } else {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    }
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [documents, loadDocuments]);
+
+  const handleUpload = async (files: FileList) => {
+    if (!selectedAgentId || files.length === 0) return;
+    setUploading(true);
+    let successCount = 0;
+    let failCount = 0;
+    for (const file of Array.from(files)) {
+      setUploadStatus(`Yükleniyor: ${file.name}...`);
+      try {
+        const token = localStorage.getItem('ragleaf_token');
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`${API_BASE}/api/agents/${selectedAgentId}/documents/upload`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (res.ok) {
+          successCount++;
+        } else {
+          const err = await res.json().catch(() => ({}));
+          console.error(`Upload failed for ${file.name}:`, err);
+          failCount++;
+        }
+      } catch (err) {
+        failCount++;
+      }
+    }
+    setUploading(false);
+    setUploadStatus('');
+    if (successCount > 0 && failCount === 0) {
+      showNotification('success', `✅ ${successCount} dosya başarıyla yüklendi ve işleme başlatıldı.`);
+    } else if (successCount > 0 && failCount > 0) {
+      showNotification('info', `⚠️ ${successCount} dosya yüklendi, ${failCount} dosya başarısız.`);
+    } else {
+      showNotification('error', '❌ Dosya yükleme başarısız oldu.');
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    loadDocuments();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) handleUpload(e.target.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files.length > 0) {
+      handleUpload(e.dataTransfer.files);
+    }
+  };
+
+  const handleDelete = async (docId: number, docName: string) => {
+    if (!selectedAgentId) return;
+    if (confirm(`"${docName}" dokümanını silmek istediğinizden emin misiniz?`)) {
+      try {
+        await fetchAPI(`/api/agents/${selectedAgentId}/documents/${docId}`, { method: 'DELETE' });
+        showNotification('success', `✅ "${docName}" başarıyla silindi.`);
+        loadDocuments();
+      } catch (err: any) {
+        showNotification('error', `❌ Silme hatası: ${err.message}`);
+      }
+    }
+  };
+
+  const handleProcess = async (docId: number, docName: string) => {
+    if (!selectedAgentId) return;
+    try {
+      await fetchAPI(`/api/agents/${selectedAgentId}/documents/${docId}/process`, {
+        method: 'POST',
+      });
+      showNotification('success', `⚙️ "${docName}" için işleme başlatıldı.`);
+      loadDocuments();
+    } catch (err: any) {
+      showNotification('error', `❌ İşleme hatası: ${err.message}`);
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Doküman Yükleme</h1>
-        <p className="text-gray-500 mt-1">Asistanlarınıza bilgi tabanı dokümanları yükleyin</p>
+        <h1 className="text-2xl font-bold text-gray-100">📁 Döküman Yönetimi</h1>
+        <p className="text-gray-400 mt-1">Asistanlarınıza bilgi tabanı dokümanları yükleyin ve yönetin</p>
       </div>
 
+      {notification && (
+        <div className={`rounded-xl p-4 border transition-all ${
+          notification.type === 'success'
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            : notification.type === 'error'
+            ? 'bg-red-500/10 border-red-500/20 text-red-400'
+            : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+        }`}>
+          <p className="font-medium text-sm">{notification.text}</p>
+        </div>
+      )}
+
       {agents.length === 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-700">Henüz asistan oluşturmadınız.</p>
-          <a href="/agents" className="text-indigo-600 hover:underline mt-2 inline-block">Asistan Oluştur →</a>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-8 text-center">
+          <p className="text-5xl mb-4">🤖</p>
+          <p className="text-amber-400 text-lg font-medium">Henüz asistan oluşturmadınız.</p>
+          <a href="/agents" className="text-primary-400 hover:underline mt-3 inline-block font-medium">
+            Asistan Oluştur →
+          </a>
         </div>
       ) : (
         <>
           {/* Agent Selector */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Hedef Asistan</label>
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-5">
+            <label className="block text-sm font-medium text-gray-300 mb-2">🤖 Hedef Asistan</label>
             <select
               value={selectedAgentId || ''}
               onChange={(e) => setSelectedAgentId(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full border border-white/[0.1] bg-dark-900 rounded-lg px-4 py-2.5 text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
             >
               {agents.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -105,56 +336,386 @@ export default function TenantDocuments() {
           </div>
 
           {/* Upload Area */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
+            <h2 className="text-lg font-semibold text-gray-200 mb-4">📤 Dosya Yükle</h2>
             <div
-              className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-indigo-400 transition cursor-pointer"
+              className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${
+                isDragging
+                  ? 'border-primary-500 bg-primary-500/10 scale-[1.01]'
+                  : 'border-white/[0.1] hover:border-primary-500/50 hover:bg-dark-700/50'
+              }`}
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
               {uploading ? (
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4" />
-                  <p className="text-gray-600">Yükleniyor...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500 mb-3" />
+                  <p className="text-gray-300 font-medium">{uploadStatus || 'Yükleniyor...'}</p>
                 </div>
               ) : (
                 <>
-                  <p className="text-5xl mb-4">📁</p>
-                  <p className="text-lg font-medium text-gray-700">Dosya yüklemek için tıklayın</p>
-                  <p className="text-sm text-gray-400 mt-2">Desteklenen formatlar: PDF, DOCX, TXT, MD (Maks. 50MB)</p>
+                  <p className="text-4xl mb-3">📁</p>
+                  <p className="text-base font-medium text-gray-300">
+                    Dosya yüklemek için tıklayın veya sürükleyip bırakın
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    PDF, DOCX, TXT, MD — Maks. 50MB — Çoklu dosya desteklenir
+                  </p>
                 </>
               )}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept=".pdf,.docx,.txt,.md"
-                onChange={handleUpload}
+                multiple
+                onChange={handleFileChange}
                 className="hidden"
               />
             </div>
           </div>
 
-          {/* Upload Result */}
-          {uploadResult && (
-            <div className={`rounded-xl p-4 border ${
-              uploadResult.success 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-              <p className="font-medium">{uploadResult.message}</p>
-              {uploadResult.success && (
-                <p className="text-sm mt-1 opacity-75">
-                  Dokümanın işlenmesi ve bilgi tabanına eklenmesi biraz zaman alabilir.
-                </p>
-              )}
+          {/* Document List */}
+          <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-200">
+                📚 Bilgi Tabanı Dökümanları
+                <span className="ml-2 text-sm font-normal text-gray-400">({documents.length} adet)</span>
+              </h2>
+              <button
+                onClick={loadDocuments}
+                className="text-sm text-primary-400 hover:text-primary-300 font-medium flex items-center gap-1"
+                disabled={refreshing}
+              >
+                <span className={refreshing ? 'animate-spin' : ''}>🔄</span>
+                Yenile
+              </button>
             </div>
-          )}
 
-          {/* Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <p className="text-blue-800 text-sm">
-              💡 Yüklenen dokümanlar seçili asistanın bilgi tabanına eklenir. Asistan, bu dokümanları kullanarak soruları yanıtlar.
-            </p>
+            {refreshing && documents.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="py-12 text-center text-gray-400">
+                <p className="text-4xl mb-3">📭</p>
+                <p>Bu asistana henüz döküman yüklenmedi.</p>
+                <p className="text-sm mt-1">Yukarıdaki alandan dosya yükleyerek başlayın.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/[0.04]">
+                  <thead className="bg-dark-700/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Döküman</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Boyut</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Durum</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Chunks</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Tarih</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-dark-800/60 divide-y divide-white/[0.04]">
+                    {documents.map((doc) => {
+                      const statusCfg = getStatusConfig(doc.status);
+                      return (
+                        <tr key={doc.id} className="hover:bg-dark-700/50 transition-colors">
+                          <td className="px-6 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{getFileTypeIcon(doc.file_type)}</span>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-gray-100 truncate max-w-[220px]" title={doc.name}>
+                                  {doc.name}
+                                </p>
+                                <p className="text-xs text-gray-400 truncate max-w-[220px]" title={doc.original_filename}>
+                                  {doc.original_filename}
+                                </p>
+                                {doc.is_shared && (
+                                  <span className="inline-flex items-center text-[10px] font-semibold text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/20 px-1.5 py-0.5 rounded mt-0.5">
+                                    🔗 {doc.shared_agent_count} asistan
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3.5 text-sm text-gray-400">{formatFileSize(doc.file_size)}</td>
+                          <td className="px-4 py-3.5">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${statusCfg.color}`}>
+                              <span className={statusCfg.animate ? 'animate-pulse' : ''}>{statusCfg.icon}</span>
+                              {statusCfg.label}
+                            </span>
+                            {(doc.status === 'processing' || doc.status === 'indexing') && doc.processing_progress > 0 && (
+                              <div className="mt-1.5 w-24 bg-dark-500 rounded-full h-1.5">
+                                <div
+                                  className="bg-primary-500 h-1.5 rounded-full transition-all"
+                                  style={{ width: `${doc.processing_progress}%` }}
+                                />
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3.5 text-sm text-gray-400">
+                            {doc.total_chunks != null ? doc.total_chunks : '—'}
+                          </td>
+                          <td className="px-4 py-3.5 text-sm text-gray-400">
+                            {doc.created_at
+                              ? new Date(doc.created_at).toLocaleDateString('tr-TR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                })
+                              : '—'}
+                          </td>
+                          <td className="px-4 py-3.5 text-right">
+                            <div className="flex justify-end gap-2">
+                              {(doc.status === 'uploaded' || doc.status === 'error') && (
+                                <button
+                                  onClick={() => handleProcess(doc.id, doc.name)}
+                                  className="text-xs font-medium text-primary-400 hover:text-primary-300 bg-primary-500/10 hover:bg-primary-500/20 px-2.5 py-1.5 rounded-lg border border-primary-500/20 transition"
+                                  title="İşle"
+                                >
+                                  ⚙️ İşle
+                                </button>
+                              )}
+                              <button
+                                onClick={() => loadDetails(doc.id)}
+                                className="text-xs font-medium text-primary-400 hover:text-primary-300 bg-primary-500/10 hover:bg-primary-500/20 px-2.5 py-1.5 rounded-lg border border-primary-500/20 transition"
+                                title="Detay & Log"
+                              >
+                                📊 Detay & Log
+                              </button>
+                              <button
+                                onClick={() => handleDelete(doc.id, doc.name)}
+                                className="text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1.5 rounded-lg border border-red-500/20 transition"
+                                title="Sil"
+                                disabled={doc.status === 'processing' || doc.status === 'indexing'}
+                              >
+                                🗑️ Sil
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Info Box */}
+          <div className="bg-gradient-to-r from-primary-500/10 to-dark-800/20 border border-primary-500/20 rounded-xl p-5">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">💡</span>
+              <div className="text-sm text-primary-200 space-y-1">
+                <p className="font-medium">Doküman İşleme Süreci</p>
+                <p>Yüklenen dokümanlar otomatik olarak işlenir: metin çıkarma → parçalama → embedding oluşturma → indeksleme.</p>
+                <p>İşlem tamamlandığında asistanınız bu dokümanları kullanarak soruları yanıtlamaya başlar.</p>
+              </div>
+            </div>
           </div>
         </>
+      )}
+
+      {/* Details Modal */}
+      {detailsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50">
+          <div className="bg-dark-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-white/[0.06]">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between bg-dark-700/50">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">
+                  {detailsData ? getFileTypeIcon(detailsData.file_type) : '📄'}
+                </span>
+                <div>
+                  <h3 className="font-bold text-gray-100 text-lg">
+                    {detailsData ? detailsData.name : 'Yükleniyor...'}
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    {detailsData ? detailsData.original_filename : ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-300 hover:bg-dark-600 p-2 rounded-lg transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {detailsLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 space-y-3">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500" />
+                  <p className="text-sm text-gray-400 font-medium">Detaylar ve günlükler yükleniyor...</p>
+                </div>
+              ) : detailsData ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column: Quality & Services */}
+                  <div className="space-y-6">
+                    {/* Quality Score Card */}
+                    <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-5">
+                      <h4 className="font-semibold text-gray-200 text-sm mb-4 flex items-center gap-1.5">
+                        📊 Doküman Kalite Skoru
+                      </h4>
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="relative w-28 h-28 flex items-center justify-center">
+                          <svg className="w-full h-full transform -rotate-90">
+                            {/* Track circle */}
+                            <circle
+                              cx="56"
+                              cy="56"
+                              r="44"
+                              className="stroke-white/[0.06]"
+                              strokeWidth="8"
+                              fill="transparent"
+                            />
+                            {/* Progress circle */}
+                            <circle
+                              cx="56"
+                              cy="56"
+                              r="44"
+                              className={`transition-all duration-500 ease-out ${
+                                detailsData.quality.score >= 85 ? 'stroke-emerald-500' :
+                                detailsData.quality.score >= 60 ? 'stroke-blue-500' :
+                                detailsData.quality.score >= 30 ? 'stroke-amber-500' :
+                                'stroke-rose-500'
+                              }`}
+                              strokeWidth="8"
+                              fill="transparent"
+                              strokeDasharray={276.4}
+                              strokeDashoffset={276.4 - (detailsData.quality.score / 100) * 276.4}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute text-center">
+                            <span className={`text-2xl font-bold ${
+                              detailsData.quality.score >= 85 ? 'text-emerald-400' :
+                              detailsData.quality.score >= 60 ? 'text-blue-400' :
+                              detailsData.quality.score >= 30 ? 'text-amber-400' :
+                              'text-rose-400'
+                            }`}>
+                              {detailsData.quality.score}
+                            </span>
+                            <p className="text-[10px] text-gray-400 font-semibold uppercase">
+                              {detailsData.quality.tier}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Suggestions list */}
+                      <div className="mt-5 space-y-2">
+                        <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">ÖNERİLER & UYARILAR</p>
+                        {detailsData.quality.suggestions.length > 0 ? (
+                          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                            {detailsData.quality.suggestions.map((sug, idx) => (
+                              <div key={idx} className="flex gap-2 text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-amber-300">
+                                <span className="flex-shrink-0">⚠️</span>
+                                <span>{sug}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 text-xs bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-emerald-300">
+                            <span className="flex-shrink-0">✨</span>
+                            <span>Doküman yapısı optimum düzeydedir. Yapısal bir sorun tespit edilmedi.</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* System Health Card */}
+                    <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-5">
+                      <h4 className="font-semibold text-gray-200 text-sm mb-3.5 flex items-center gap-1.5">
+                        ⚙️ Sistem Servisleri Durumu
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2.5">
+                        <div className={`flex flex-col items-center justify-center p-3 rounded-xl border border-white/[0.06] text-center transition-all ${
+                          detailsData.system_health.database
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                            : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        }`}>
+                          <span className="text-xl mb-1">{detailsData.system_health.database ? '🟢' : '🔴'}</span>
+                          <span className="text-xs font-semibold text-gray-300">Veritabanı</span>
+                          <span className="text-[10px] text-gray-400 mt-0.5">{detailsData.system_health.database ? 'Aktif' : 'Hata'}</span>
+                        </div>
+                        <div className={`flex flex-col items-center justify-center p-3 rounded-xl border border-white/[0.06] text-center transition-all ${
+                          detailsData.system_health.ocr
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                            : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        }`}>
+                          <span className="text-xl mb-1">{detailsData.system_health.ocr ? '🟢' : '🔴'}</span>
+                          <span className="text-xs font-semibold text-gray-300">OCR Servisi</span>
+                          <span className="text-[10px] text-gray-400 mt-0.5">{detailsData.system_health.ocr ? 'Aktif' : 'Pasif'}</span>
+                        </div>
+                        <div className={`flex flex-col items-center justify-center p-3 rounded-xl border border-white/[0.06] text-center transition-all ${
+                          detailsData.system_health.embedding
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                            : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        }`}>
+                          <span className="text-xl mb-1">{detailsData.system_health.embedding ? '🟢' : '🔴'}</span>
+                          <span className="text-xs font-semibold text-gray-300">Vektör Motoru</span>
+                          <span className="text-[10px] text-gray-400 mt-0.5">{detailsData.system_health.embedding ? 'Aktif' : 'Hata'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Processing Logs Timeline */}
+                  <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-5 flex flex-col">
+                    <h4 className="font-semibold text-gray-200 text-sm mb-4 flex items-center gap-1.5 flex-shrink-0">
+                      📜 İşlem Zaman Çizelgesi
+                    </h4>
+                    <div className="flex-1 overflow-y-auto max-h-[42vh] pr-1.5 space-y-4 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-dark-600">
+                      {detailsData.logs && detailsData.logs.length > 0 ? (
+                        detailsData.logs.map((log, idx) => {
+                          let dotColor = 'bg-blue-500 ring-blue-500/20';
+                          if (log.level === 'success') dotColor = 'bg-emerald-500 ring-emerald-500/20';
+                          if (log.level === 'warning') dotColor = 'bg-amber-500 ring-amber-500/20';
+                          if (log.level === 'error') dotColor = 'bg-rose-500 ring-rose-500/20';
+
+                          return (
+                            <div key={idx} className="flex gap-4 relative">
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${dotColor} ring-4 z-10 flex-shrink-0 text-white text-[10px] font-bold`}>
+                                {log.level === 'success' ? '✓' : log.level === 'error' ? '✗' : '!'}
+                              </div>
+                              <div className="flex-1 bg-dark-700/50 border border-white/[0.06] rounded-xl p-3">
+                                <div className="flex justify-between items-center gap-2 mb-1">
+                                  <span className="font-bold text-xs text-gray-200 uppercase tracking-wider">{log.stage}</span>
+                                  <span className="text-[10px] text-gray-400">
+                                    {log.timestamp ? new Date(log.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ''}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-300 leading-relaxed font-medium">{log.message}</p>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-xs text-gray-400 text-center py-8">İşlem günlüğü bulunmuyor.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-sm text-gray-400 py-12">Detaylar yüklenemedi.</p>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-dark-700/50 border-t border-white/[0.06] flex justify-end">
+              <button
+                onClick={() => setDetailsModalOpen(false)}
+                className="px-4 py-2 bg-dark-500 hover:bg-dark-400 text-gray-200 rounded-xl text-sm font-semibold transition"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

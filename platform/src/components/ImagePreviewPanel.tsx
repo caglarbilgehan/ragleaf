@@ -99,10 +99,10 @@ export default function ImagePreviewPanel({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 flex flex-col h-full">
+    <div className="bg-dark-700/50 rounded-lg p-4 flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h4 className="font-medium text-gray-900">Görsel Önizleme - Sayfa {pageNumber}</h4>
+        <h4 className="font-medium text-gray-100">Görsel Önizleme - Sayfa {pageNumber}</h4>
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getConfidenceColor(confidence)}`}>
           {getConfidenceLabel(confidence)} ({confidence.toFixed(0)}%)
         </span>
@@ -111,23 +111,23 @@ export default function ImagePreviewPanel({
       {/* Zoom Controls */}
       <div className="flex items-center gap-2 mb-3">
         <button onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}
-          className="p-2 rounded bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+          className="p-2 rounded bg-dark-800/60 border border-white/[0.1] hover:bg-dark-700/50 disabled:opacity-50">
           <ZoomOut className="h-4 w-4" />
         </button>
         <span className="text-sm text-gray-600 min-w-[60px] text-center">{Math.round(zoom * 100)}%</span>
         <button onClick={handleZoomIn} disabled={zoom >= MAX_ZOOM}
-          className="p-2 rounded bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+          className="p-2 rounded bg-dark-800/60 border border-white/[0.1] hover:bg-dark-700/50 disabled:opacity-50">
           <ZoomIn className="h-4 w-4" />
         </button>
         <button onClick={handleReset}
-          className="p-2 rounded bg-white border border-gray-300 hover:bg-gray-50 ml-2">
+          className="p-2 rounded bg-dark-800/60 border border-white/[0.1] hover:bg-dark-700/50 ml-2">
           <RotateCcw className="h-4 w-4" />
         </button>
       </div>
 
       {/* Image Container */}
       <div ref={containerRef}
-        className="flex-1 bg-white rounded border border-gray-200 overflow-hidden relative"
+        className="flex-1 bg-dark-800/60 rounded border border-white/[0.06] overflow-hidden relative"
         style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}>

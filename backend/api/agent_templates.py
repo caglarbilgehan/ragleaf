@@ -367,3 +367,27 @@ async def create_agent_from_template(
         message=f"✅ '{agent.name}' başarıyla oluşturuldu!"
     )
 
+
+@templates_router.get(
+    "/public/plans",
+    summary="Aktif planları ve fiyatlarını listele"
+)
+async def list_public_plans(db: Session = Depends(get_db)):
+    """Aktif paketleri ve fiyatlarını döndürür."""
+    from backend.database.models_platform import Plan
+    plans = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.price.asc()).all()
+    return [
+        {
+            "id": p.id,
+            "key": p.key,
+            "name": p.name,
+            "price": float(p.price),
+            "billing_cycle": p.billing_cycle,
+            "max_agents": p.max_agents,
+            "max_documents": p.max_documents,
+            "max_queries_per_month": p.max_queries_per_month,
+            "max_storage_mb": p.max_storage_mb
+        }
+        for p in plans
+    ]
+

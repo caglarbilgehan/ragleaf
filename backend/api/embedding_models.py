@@ -34,13 +34,13 @@ class EmbeddingModelResponse(BaseModel):
     size_mb: Optional[float]
     deployment_type: str
     api_endpoint: Optional[str]
-    requires_api_key: bool
-    api_key_env_var: Optional[str]
-    multilingual: bool
-    performance_tier: str
+    requires_api_key: Optional[bool] = False
+    api_key_env_var: Optional[str] = None
+    multilingual: Optional[bool] = False
+    performance_tier: Optional[str] = "balanced"
     is_active: bool
     is_default: bool
-    is_downloaded: bool
+    is_downloaded: Optional[bool] = False
     provider: str
     model_family: Optional[str]
     created_at: datetime

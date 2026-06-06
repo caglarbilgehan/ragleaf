@@ -118,7 +118,7 @@ export default function MultilingualSettingsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <h1 className="text-2xl font-bold text-gray-100 flex items-center">
                         <Globe className="h-7 w-7 mr-2 text-primary-600" />
                         Çoklu Dil Ayarları
                     </h1>
@@ -168,7 +168,7 @@ export default function MultilingualSettingsPage() {
                                 )}
                             </p>
                             <p className="text-xs mt-2 text-gray-600">
-                                Model: <code className="bg-gray-100 px-1 py-0.5 rounded">{activeModel.model_id}</code> | Boyut: {activeModel.dimension}D
+                                Model: <code className="bg-dark-600 px-1 py-0.5 rounded">{activeModel.model_id}</code> | Boyut: {activeModel.dimension}D
                             </p>
                         </div>
                     </div>
@@ -176,13 +176,13 @@ export default function MultilingualSettingsPage() {
             )}
 
             {/* Auto-Translate Toggle - Only show for non-multilingual models */}
-            <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${isMultilingual ? 'opacity-60' : ''}`}>
+            <div className={`bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6 ${isMultilingual ? 'opacity-60' : ''}`}>
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">Otomatik Çeviri</h3>
+                            <h3 className="text-lg font-semibold text-gray-100">Otomatik Çeviri</h3>
                             {isMultilingual && (
-                                <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                <span className="text-xs font-medium text-gray-500 bg-dark-600 px-2 py-1 rounded">
                                     Gerekli Değil
                                 </span>
                             )}
@@ -239,14 +239,14 @@ export default function MultilingualSettingsPage() {
                             disabled={isMultilingual}
                             className="sr-only peer"
                         />
-                        <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 ${isMultilingual ? 'opacity-50' : ''}`}></div>
+                        <div className={`w-11 h-6 bg-dark-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-dark-800/60 after:border-white/[0.1] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 ${isMultilingual ? 'opacity-50' : ''}`}></div>
                     </label>
                 </div>
             </div>
 
             {/* Languages Grid */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Aktif Embedding Dilleri</h3>
+            <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6">
+                <h3 className="text-lg font-semibold text-gray-100 mb-4">Aktif Embedding Dilleri</h3>
                 <p className="text-sm text-gray-600 mb-6">
                     Seçilen diller ChatUI'de kullanıcılara sunulacaktır.
                     <strong className="text-primary-700"> Türkçe daima aktiftir.</strong>
@@ -265,7 +265,7 @@ export default function MultilingualSettingsPage() {
                                     relative p-4 rounded-lg border-2 transition-all cursor-pointer
                                     ${isActive
                                         ? 'border-primary-500 bg-primary-50'
-                                        : 'border-gray-200 bg-white hover:border-gray-300'
+                                        : 'border-white/[0.06] bg-dark-800/60 hover:border-white/[0.1]'
                                     }
                                     ${isDefault ? 'opacity-100 cursor-not-allowed' : ''}
                                 `}
@@ -274,7 +274,7 @@ export default function MultilingualSettingsPage() {
                                     <div className="flex items-center gap-3">
                                         <span className="text-3xl">{lang.flag}</span>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900">{lang.name}</h4>
+                                            <h4 className="font-semibold text-gray-100">{lang.name}</h4>
                                             <p className="text-xs text-gray-500 uppercase">{lang.code}</p>
                                         </div>
                                     </div>
