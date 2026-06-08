@@ -200,6 +200,8 @@ const CSS = `
 .ragleaf-window.split {
   bottom: 0 !important;
   top: 0 !important;
+  width: 50vw !important;
+  max-width: 50vw !important;
   height: 100vh !important;
   max-height: 100vh !important;
   border-radius: 0 !important;
