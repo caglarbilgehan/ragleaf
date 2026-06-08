@@ -478,7 +478,6 @@ class RagleafWidget {
           }
           if (app.layout_mode) {
             this.config.layoutMode = app.layout_mode;
-            this.applyLayoutMode();
           }
           if (app.show_branding !== undefined && app.show_branding !== null) {
             const showBranding = app.show_branding === true || app.show_branding === 'true';
@@ -579,6 +578,7 @@ class RagleafWidget {
           }
 
           this.applyTheme();
+          this.applyLayoutMode();
         }
         // Read auto_open setting from agent appearance
         if (info.appearance) {
