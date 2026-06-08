@@ -197,31 +197,33 @@ const CSS = `
 .ragleaf-bubble.hidden {
   display: none !important;
 }
-.ragleaf-window.split {
-  bottom: 0 !important;
-  top: 0 !important;
-  width: 50vw !important;
-  max-width: 50vw !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-  border-radius: 0 !important;
-  box-shadow: -4px 0 24px rgba(0,0,0,0.1) !important;
-  opacity: 1 !important;
-  transform: none !important;
-  pointer-events: all !important;
-}
-.ragleaf-window.split.right {
-  right: 0 !important;
-  left: auto !important;
-  border-left: 1px solid #e5e7eb;
-}
-.ragleaf-window.split.left {
-  left: 0 !important;
-  right: auto !important;
-  border-right: 1px solid #e5e7eb;
-}
-.ragleaf-window.split .ragleaf-close {
-  display: none !important;
+@media (min-width: 769px) {
+  .ragleaf-window.split {
+    bottom: 0 !important;
+    top: 0 !important;
+    width: var(--widget-width, 380px) !important;
+    max-width: var(--widget-width, 380px) !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.1) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: all !important;
+  }
+  .ragleaf-window.split.right {
+    right: 0 !important;
+    left: auto !important;
+    border-left: 1px solid #e5e7eb;
+  }
+  .ragleaf-window.split.left {
+    left: 0 !important;
+    right: auto !important;
+    border-right: 1px solid #e5e7eb;
+  }
+  .ragleaf-window.split .ragleaf-close {
+    display: none !important;
+  }
 }
 
 .ragleaf-window.fullscreen {
@@ -549,9 +551,11 @@ class RagleafWidget {
           }
           this.applyOffsets();
           if (app.width) {
+            this.config.width = Number(app.width);
             this.windowEl.style.width = `${app.width}px`;
           }
           if (app.height) {
+            this.config.height = Number(app.height);
             this.windowEl.style.height = `${app.height}px`;
           }
           if (app.border_radius) {
@@ -666,6 +670,9 @@ class RagleafWidget {
 
 
     this.setupVisualViewport();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => this.adjustHostBody());
+    }
   }
 
   private getBubbleIcon(): string {
@@ -700,6 +707,7 @@ class RagleafWidget {
   private applyColors() {
     this.container.style.setProperty('--primary', this.config.primaryColor);
     this.container.style.setProperty('--secondary', this.config.secondaryColor || '#8b5cf6');
+    this.container.style.setProperty('--widget-width', `${this.config.width || 380}px`);
 
     const isDark = this.container.classList.contains('dark');
 
@@ -782,6 +790,32 @@ class RagleafWidget {
       this.isOpen = true;
       windowEl.classList.add('open');
     }
+
+    this.adjustHostBody();
+  }
+
+  private adjustHostBody() {
+    if (typeof document === 'undefined') return;
+
+    // Reset previous styles
+    document.body.style.removeProperty('margin-right');
+    document.body.style.removeProperty('margin-left');
+    document.body.style.removeProperty('transition');
+
+    if (this.config.layoutMode === 'split' && this.isOpen) {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) return; // Fullscreen on mobile, no body margin needed
+
+      const width = this.config.width || 380;
+      const position = (this.config.position === 'bottom-left' || (this.config.position as string) === 'left') ? 'left' : 'right';
+
+      document.body.style.setProperty('transition', 'margin 0.3s ease-in-out');
+      if (position === 'left') {
+        document.body.style.setProperty('margin-left', `${width}px`);
+      } else {
+        document.body.style.setProperty('margin-right', `${width}px`);
+      }
+    }
   }
 
   private updateHeader() {
@@ -819,6 +853,7 @@ class RagleafWidget {
   private toggle() {
     this.isOpen = !this.isOpen;
     this.windowEl.classList.toggle('open', this.isOpen);
+    this.adjustHostBody();
     if (this.isOpen) {
       this.inputEl.focus();
       this.scrollToBottom();
