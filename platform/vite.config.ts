@@ -13,9 +13,9 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
+    port: 1398,
     host: "0.0.0.0",
-    allowedHosts: ["app.ragleaf.com", "local.ragleaf.com", "ragleaf.com"],
+    allowedHosts: ["app.ragleaf.com", "local.ragleaf.com", "ragleaf.com", "cserver-2"],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

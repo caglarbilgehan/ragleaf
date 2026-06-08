@@ -160,8 +160,8 @@ const EmbeddingModelsPage: React.FC = () => {
   const totalDownloadedSize = downloadedModels.reduce((sum, m) => sum + (m.actual_size_gb || 0), 0);
 
   return (
-    <div className="min-h-screen bg-dark-700/50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-[calc(100vh-8rem)] bg-dark-700/50 p-6 rounded-xl border border-white/[0.06]">
+      <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-100">Embedding Modelleri</h1>
           <p className="mt-2 text-gray-600">

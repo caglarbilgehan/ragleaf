@@ -62,6 +62,7 @@ class AgentSummary(BaseModel):
     total_messages: int = 0
     document_count: int = 0
     api_key_count: int = 0
+    appearance: Optional[Dict[str, Any]] = None
     created_at: Optional[datetime] = None
 
 
@@ -214,6 +215,7 @@ async def get_agent_summaries(
             total_messages=agent.total_messages or 0,
             document_count=doc_count,
             api_key_count=key_count,
+            appearance=agent.appearance,
             created_at=agent.created_at
         ))
     
@@ -299,10 +301,30 @@ async def get_conversation_messages(
     if not agent_ids:
         raise HTTPException(status_code=404, detail="Konuşma bulunamadı")
     
-    conversation = db.query(PublicConversation).filter(
-        PublicConversation.session_id == session_id,
-        PublicConversation.agent_id.in_(agent_ids)
-    ).first()
+    import uuid
+    from sqlalchemy import or_
+    
+    is_uuid = False
+    uuid_obj = None
+    try:
+        uuid_obj = uuid.UUID(session_id)
+        is_uuid = True
+    except ValueError:
+        pass
+
+    if is_uuid:
+        conversation = db.query(PublicConversation).filter(
+            PublicConversation.agent_id.in_(agent_ids),
+            or_(
+                PublicConversation.session_id == session_id,
+                PublicConversation.id == uuid_obj
+            )
+        ).first()
+    else:
+        conversation = db.query(PublicConversation).filter(
+            PublicConversation.session_id == session_id,
+            PublicConversation.agent_id.in_(agent_ids)
+        ).first()
     
     if not conversation:
         raise HTTPException(status_code=404, detail="Konuşma bulunamadı")

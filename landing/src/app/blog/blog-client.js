@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLang } from '../../context/LangContext';
 import PageLayout from '../../components/PageLayout';
+import { getApiBaseUrl } from '../../utils/api';
 
 export default function BlogClient() {
   const { lang } = useLang();
@@ -13,11 +14,7 @@ export default function BlogClient() {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      // Determine backend base url
-      let apiBase = 'http://localhost:1306';
-      if (typeof window !== 'undefined' && window.location.origin.includes('ragleaf.com')) {
-        apiBase = 'https://api.ragleaf.com';
-      }
+      const apiBase = getApiBaseUrl();
 
       try {
         const response = await fetch(`${apiBase}/api/public/blog/ragleaf-platform?lang=${lang}`);
@@ -94,7 +91,7 @@ export default function BlogClient() {
         ) : (
           <div className="grid grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1 gap-10">
             {articles.map((article) => (
-              <Link key={article.public_id} href={`/blog/post?slug=${article.slug}`} className="group bg-white/[0.02] border border-border-custom rounded-3xl p-10 backdrop-blur-md transition-all duration-300 flex flex-col justify-between h-full hover:-translate-y-2 hover:border-accent/30 hover:bg-white/[0.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(16,185,129,0.05)] no-underline">
+              <a key={article.public_id} href={`/blog/${article.slug}`} className="group bg-white/[0.02] border border-border-custom rounded-3xl p-10 backdrop-blur-md transition-all duration-300 flex flex-col justify-between h-full hover:-translate-y-2 hover:border-accent/30 hover:bg-white/[0.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(16,185,129,0.05)] no-underline">
                 <div>
                   <div className="text-[13px] text-accent font-semibold uppercase tracking-wider mb-4 flex items-center gap-2">
                     <span>✨ {article.keywords && article.keywords[0] ? article.keywords[0] : 'RAG'}</span>
@@ -108,7 +105,7 @@ export default function BlogClient() {
                     {lang === 'tr' ? 'Devamını Oku' : 'Read More'} →
                   </span>
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
         )}

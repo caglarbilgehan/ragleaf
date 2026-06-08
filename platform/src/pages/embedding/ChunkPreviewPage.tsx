@@ -95,8 +95,8 @@ Sonuç olarak zayıf akım sistemleri, bir binanın görünmeyen sinir sistemi o
   };
 
   return (
-    <div className="min-h-screen bg-dark-700/50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="w-full">
+      <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-100">Chunk Önizleme ve Test</h1>
           <p className="mt-2 text-gray-600">

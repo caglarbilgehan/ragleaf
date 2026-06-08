@@ -2,10 +2,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLang } from './LangContext';
+import { getApiBaseUrl } from '../utils/api';
 
 const AssistantContext = createContext(null);
 
-const RAGLEAF_API_BASE = 'http://localhost:1306'; // Falls back to localhost in local dev, in prod we could use dynamic url, but we'll preserve the original logic.
+const RAGLEAF_API_BASE = getApiBaseUrl();
 
 export function AssistantProvider({ children }) {
   const { lang } = useLang();
@@ -19,9 +20,7 @@ export function AssistantProvider({ children }) {
   useEffect(() => {
     async function loadAgentInfo() {
       try {
-        const apiBase = window.location.hostname.includes('ragleaf.com') 
-          ? 'https://api.ragleaf.com' 
-          : 'http://localhost:1306';
+        const apiBase = getApiBaseUrl();
 
         const res = await fetch(`${apiBase}/v1/agents/ag_ragleaf_system01/info?lang=${lang}`, {
           headers: {
@@ -83,9 +82,7 @@ export function AssistantProvider({ children }) {
     setIsTyping(true);
 
     try {
-      const apiBase = window.location.hostname.includes('ragleaf.com') 
-        ? 'https://api.ragleaf.com' 
-        : 'http://localhost:1306';
+      const apiBase = getApiBaseUrl();
 
       // We slice last 10 messages in chronological order
       const history = [...messages, userMsg];

@@ -13,6 +13,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { adminApi } from '../services/api';
 import api from '../services/api';
 import type { ModelConfig, ModelConfigCreate, ModelConfigUpdate } from '@/types';
@@ -61,6 +62,7 @@ function ModelCard({
   isDeleting: boolean;
   isSettingDefault: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-dark-800/60 rounded-lg  border border-white/[0.06] p-6 w-full">
       <div className="flex items-center justify-between">
@@ -83,13 +85,13 @@ function ModelCard({
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">Model:</span>
+                <span className="text-gray-400">{t('admin.models.model_label')}</span>
                 <p className="font-medium text-gray-100">{model.model_name}</p>
               </div>
               
               {model.description && (
                 <div className="md:col-span-2">
-                  <span className="text-gray-600">Açıklama:</span>
+                  <span className="text-gray-400">{t('admin.models.desc_label')}</span>
                   <p className="text-gray-300">{model.description}</p>
                 </div>
               )}
@@ -103,12 +105,12 @@ function ModelCard({
             {model.is_active ? (
               <div className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-600">Aktif</span>
+                <span className="text-sm text-green-600">{t('admin.models.active_status')}</span>
               </div>
             ) : (
               <div className="flex items-center">
                 <AlertCircle className="h-4 w-4 text-gray-500 mr-1" />
-                <span className="text-sm text-gray-500">Pasif</span>
+                <span className="text-sm text-gray-500">{t('admin.models.passive_status')}</span>
               </div>
             )}
           </div>
@@ -121,7 +123,7 @@ function ModelCard({
                 className="px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
               >
                 <Star className="h-3 w-3 mr-1 inline" />
-                Varsayılan Yap
+                {t('admin.models.default_btn')}
               </button>
             )}
             <button 
@@ -129,7 +131,7 @@ function ModelCard({
               className="px-3 py-1.5 text-xs font-medium rounded-md bg-dark-600 text-gray-300 border border-white/[0.06] hover:bg-dark-500 hover:text-gray-100 transition-colors"
             >
               <Settings className="h-3 w-3 mr-1 inline" />
-              Düzenle
+              {t('admin.models.edit_btn')}
             </button>
             <button
               onClick={() => onDelete(model.id, model.name)}
@@ -147,6 +149,7 @@ function ModelCard({
 
 // Main ModelsPage Component
 export default function ModelsPage() {
+  const { t } = useTranslation();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [showHuggingFaceModal, setShowHuggingFaceModal] = useState(false);
@@ -183,7 +186,7 @@ export default function ModelsPage() {
     adminApi.getModels,
     {
       onError: (error: any) => {
-        toast.error(error.response?.data?.detail || 'Modeller yüklenirken hata oluştu');
+        toast.error(error.response?.data?.detail || t('admin.models.toast_load_error'));
       }
     }
   );
@@ -197,10 +200,10 @@ export default function ModelsPage() {
   const createModelMutation = useMutation(adminApi.createModel, {
     onSuccess: () => {
       queryClient.invalidateQueries('models');
-      toast.success('Model başarıyla eklendi!');
+      toast.success(t('admin.models.toast_add_success'));
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Model eklenirken hata oluştu');
+      toast.error(error.response?.data?.detail || t('admin.models.toast_add_error'));
     }
   });
 
@@ -208,10 +211,10 @@ export default function ModelsPage() {
   const deleteModelMutation = useMutation(adminApi.deleteModel, {
     onSuccess: () => {
       queryClient.invalidateQueries('models');
-      toast.success('Model başarıyla silindi!');
+      toast.success(t('admin.models.toast_delete_success'));
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Model silinirken hata oluştu');
+      toast.error(error.response?.data?.detail || t('admin.models.toast_delete_error'));
     }
   });
 
@@ -221,10 +224,10 @@ export default function ModelsPage() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries('models');
-        toast.success('Model başarıyla güncellendi!');
+        toast.success(t('admin.models.toast_update_success'));
       },
       onError: (error: any) => {
-        toast.error(error.response?.data?.detail || 'Model güncellenirken hata oluştu');
+        toast.error(error.response?.data?.detail || t('admin.models.toast_update_error'));
       }
     }
   );
@@ -235,10 +238,10 @@ export default function ModelsPage() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries('models');
-        toast.success('Varsayılan model değiştirildi!');
+        toast.success(t('admin.models.toast_default_success'));
       },
       onError: (error: any) => {
-        toast.error(error.response?.data?.detail || 'Varsayılan model değiştirilirken hata oluştu');
+        toast.error(error.response?.data?.detail || t('admin.models.toast_default_error'));
       }
     }
   );
@@ -248,13 +251,13 @@ export default function ModelsPage() {
   };
 
   const handleSetDefault = (id: number, name: string) => {
-    if (window.confirm(`"${name}" modelini varsayılan yapmak istediğinizden emin misiniz?`)) {
+    if (window.confirm(t('admin.models.default_confirm').replace('{name}', name))) {
       setDefaultMutation.mutate(id);
     }
   };
 
   const handleDeleteModel = (id: number, name: string) => {
-    if (window.confirm(`"${name}" modelini silmek istediğinizden emin misiniz?`)) {
+    if (window.confirm(t('admin.models.delete_confirm').replace('{name}', name))) {
       deleteModelMutation.mutate(id);
     }
   };
@@ -266,7 +269,7 @@ export default function ModelsPage() {
     if (selectedProvider.name === 'huggingface') {
       setShowHuggingFaceModal(true);
     } else {
-      toast.error(`${selectedProvider.display_name} için model ekleme henüz desteklenmiyor`);
+      toast.error(t('admin.models.unsupported_provider').replace('{name}', selectedProvider.display_name));
     }
   };
 
@@ -300,13 +303,13 @@ export default function ModelsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-dark-700/50">
+    <div className="flex min-h-[calc(100vh-8rem)] bg-dark-700/50 rounded-xl overflow-hidden border border-white/[0.06]">
       {/* Left Sidebar - Provider List */}
       <div className="w-72 bg-dark-800/60 shadow-lg border-r border-white/[0.06] flex flex-col">
         {/* Sidebar Header */}
         <div className="p-5 border-b border-white/[0.06]">
-          <h1 className="text-lg font-bold text-gray-100">LLM Modelleri</h1>
-          <p className="text-xs text-gray-500 mt-1">Provider seçerek modellerini görüntüleyin</p>
+          <h1 className="text-lg font-bold text-gray-100">{t('admin.models.title')}</h1>
+          <p className="text-xs text-gray-500 mt-1">{t('admin.models.subtitle')}</p>
         </div>
 
         {/* Provider List */}
@@ -328,7 +331,7 @@ export default function ModelsPage() {
             ) : providers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Bot className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">Provider bulunamadı</p>
+                <p className="text-sm">{t('admin.models.no_providers')}</p>
               </div>
             ) : (
               providers.map((provider) => (
@@ -364,10 +367,10 @@ export default function ModelsPage() {
                       {provider.has_tokens ? (
                         <>
                           <Key className="h-3 w-3" />
-                          <span>{provider.active_token_count} token</span>
+                          <span>{t('admin.models.token_count').replace('{count}', String(provider.active_token_count))}</span>
                         </>
                       ) : (
-                        <span className="text-gray-400">Token gerekli</span>
+                        <span className="text-gray-400">{t('admin.models.token_required')}</span>
                       )}
                     </div>
                   </div>
@@ -382,9 +385,7 @@ export default function ModelsPage() {
 
         {/* Info */}
         <div className="p-3 border-t border-white/[0.06] bg-amber-500/10 border border-amber-500/20 rounded-b-lg">
-          <p className="text-xs text-amber-400">
-            💡 Token eklemek için <strong>AI Sağlayıcıları</strong> sayfasını kullanın
-          </p>
+          <p className="text-xs text-amber-400" dangerouslySetInnerHTML={{ __html: t('admin.models.hf_hint') }} />
         </div>
       </div>
 
@@ -399,12 +400,12 @@ export default function ModelsPage() {
               )}
               <div>
                 <h2 className="text-lg font-semibold text-gray-100">
-                  {selectedProvider ? `${selectedProvider.display_name} Modelleri` : 'Modeller'}
+                  {selectedProvider ? `${selectedProvider.display_name} ${t('admin.llm_models')}` : t('admin.llm_models')}
                 </h2>
                 <p className="text-sm text-gray-500">
                   {selectedProvider 
-                    ? `${filteredModels.length} model kayıtlı`
-                    : 'Sol taraftan bir provider seçin'
+                    ? t('admin.models.registered_count').replace('{count}', String(filteredModels.length))
+                    : t('admin.models.select_provider_prompt')
                   }
                 </p>
               </div>
@@ -418,10 +419,10 @@ export default function ModelsPage() {
                   href="https://huggingface.co/inference/models"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-dark-600 rounded-lg hover:bg-dark-500 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 bg-dark-600 rounded-lg hover:bg-dark-500 transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  <span>Provider İstatistikleri</span>
+                  <span>{t('admin.models.stats_btn')}</span>
                 </a>
               )}
               
@@ -432,7 +433,7 @@ export default function ModelsPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
-                  Model Ekle
+                  {t('admin.models.add_btn')}
                 </button>
               )}
             </div>
@@ -445,8 +446,8 @@ export default function ModelsPage() {
             // No provider selected
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <Bot className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-lg font-medium">Provider Seçin</p>
-              <p className="text-sm">Sol taraftan bir provider seçerek modellerini görüntüleyin</p>
+              <p className="text-lg font-medium">{t('admin.models.select_provider_title')}</p>
+              <p className="text-sm">{t('admin.models.select_provider_prompt')}</p>
             </div>
           ) : isLoading ? (
             // Loading
@@ -467,14 +468,14 @@ export default function ModelsPage() {
             // No models for this provider
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <Bot className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-lg font-medium">Henüz model eklenmemiş</p>
-              <p className="text-sm mb-4">{selectedProvider.display_name} için model ekleyin</p>
+              <p className="text-lg font-medium">{t('admin.models.no_models')}</p>
+              <p className="text-sm mb-4">{t('admin.models.no_models_desc').replace('{name}', selectedProvider.display_name)}</p>
               <button
                 onClick={handleAddModelClick}
                 className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <Plus className="h-4 w-4" />
-                İlk Modeli Ekle
+                {t('admin.models.first_add_btn')}
               </button>
             </div>
           ) : (

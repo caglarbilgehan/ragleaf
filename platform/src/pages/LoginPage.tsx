@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/services/api';
 import { getLogoUrl } from '@/utils/assets';
 import type { User, LoginRequest } from '@/types';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
@@ -13,6 +14,7 @@ interface LoginPageProps {
 export default function LoginPage({ onLogin }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
   
   const {
     register,
@@ -24,10 +26,10 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const testConnection = async () => {
     try {
       const result = await authApi.testConnection();
-      toast.success('Backend bağlantısı başarılı!');
+      toast.success(t('login.toast_conn_success'));
       console.log('Connection test result:', result);
     } catch (error) {
-      toast.error('Backend bağlantısı başarısız!');
+      toast.error(t('login.toast_conn_error'));
       console.error('Connection test failed:', error);
     }
   };
@@ -42,7 +44,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       if (!user.is_admin && !user.is_superadmin && !user.default_org_id) {
         setError('email', { 
           type: 'manual', 
-          message: 'Bu hesap ile giriş yapılamıyor' 
+          message: t('login.err_cannot_login') 
         });
         return;
       }
@@ -50,12 +52,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       localStorage.setItem('ragleaf_token', response.access_token);
       localStorage.setItem('ragleaf_user', JSON.stringify(response.user));
       
-      toast.success('Başarıyla giriş yapıldı!');
+      toast.success(t('login.toast_login_success'));
       onLogin(response.user);
       
     } catch (error: any) {
       console.error('Login error:', error);
-      const message = error.response?.data?.detail || 'Giriş yapılırken bir hata oluştu';
+      const message = error.response?.data?.detail || t('login.err_unknown');
       toast.error(message);
       
       if (message.includes('e-posta') || message.includes('şifre')) {
@@ -75,10 +77,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <span className="text-4xl mr-2">🍃</span>
+            <img src={getLogoUrl('dark')} alt="Ragleaf" className="h-10 w-10 mr-2.5" />
             <h1 className="text-3xl font-bold text-gray-100">Ragleaf</h1>
           </div>
-          <p className="text-gray-500 mt-2">Yönetim Paneli</p>
         </div>
 
         {/* Login Form */}
@@ -87,7 +88,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="label mb-2 block">
-                E-posta Adresi
+                {t('login.email_label')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,12 +96,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 </div>
                 <input
                   {...register('email', { 
-                    required: 'E-posta adresi gereklidir',
-                    pattern: { value: /^\S+@\S+$/i, message: 'Geçerli bir e-posta adresi girin' }
+                    required: t('login.email_required'),
+                    pattern: { value: /^\S+@\S+$/i, message: t('login.email_invalid') }
                   })}
                   type="email"
                   className={`input pl-10 ${errors.email ? 'border-red-500/50 focus-visible:ring-red-500' : ''}`}
-                  placeholder="E-posta adresinizi girin"
+                  placeholder={t('login.email_placeholder')}
                   disabled={isLoading}
                 />
               </div>
@@ -115,7 +116,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="label mb-2 block">
-                Şifre
+                {t('login.password_label')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,12 +124,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 </div>
                 <input
                   {...register('password', { 
-                    required: 'Şifre gereklidir',
-                    minLength: { value: 4, message: 'En az 4 karakter olmalıdır' }
+                    required: t('login.password_required'),
+                    minLength: { value: 4, message: t('login.password_min_length') }
                   })}
                   type={showPassword ? 'text' : 'password'}
                   className={`input pl-10 pr-10 ${errors.password ? 'border-red-500/50 focus-visible:ring-red-500' : ''}`}
-                  placeholder="Şifrenizi girin"
+                  placeholder={t('login.password_placeholder')}
                   disabled={isLoading}
                 />
                 <button
@@ -161,24 +162,26 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Giriş Yapılıyor...
+                  {t('login.btn_logging_in')}
                 </div>
               ) : (
-                'Giriş Yap'
+                t('login.btn_login')
               )}
             </button>
           </form>
 
           {/* Test Connection Button */}
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={testConnection}
-              className="w-full px-4 py-2 text-sm bg-dark-700 hover:bg-dark-600 text-gray-400 rounded-lg transition-colors border border-white/[0.06]"
-            >
-              Backend Bağlantısını Test Et
-            </button>
-          </div>
+          {import.meta.env.DEV && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={testConnection}
+                className="w-full px-4 py-2 text-sm bg-dark-700 hover:bg-dark-600 text-gray-400 rounded-lg transition-colors border border-white/[0.06]"
+              >
+                {t('login.btn_test_conn')}
+              </button>
+            </div>
+          )}
 
         </div>
 

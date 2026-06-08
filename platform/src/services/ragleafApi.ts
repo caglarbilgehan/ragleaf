@@ -17,6 +17,9 @@ export interface Organization {
   max_documents: number;
   max_queries_per_month: number;
   is_active: boolean;
+  has_ai_assistant: boolean;
+  has_ai_writer: boolean;
+  has_ai_social: boolean;
   created_at: string;
   ragleaf_leaves: number;
   agent_count?: number;
@@ -272,6 +275,7 @@ export interface AgentTemplate {
   description: string | null;
   icon: string | null;
   is_featured: boolean;
+  is_active: boolean;
   sort_order?: number;
   preview_questions: string[] | null;
   config_schema: TemplateConfigField[];
@@ -303,6 +307,39 @@ export const templateApi = {
     const res = await api.post('/api/agents/from-template', data);
     return res.data;
   },
+
+  create: async (data: Partial<AgentTemplate>): Promise<AgentTemplate> => {
+    const res = await api.post('/api/admin/templates', data);
+    return res.data;
+  },
+
+  update: async (id: number, data: Partial<AgentTemplate>): Promise<AgentTemplate> => {
+    const res = await api.put(`/api/admin/templates/${id}`, data);
+    return res.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/admin/templates/${id}`);
+  },
+
+  listDocuments: async (templateId: number): Promise<{ template_id: number; documents: AgentDocument[]; total: number }> => {
+    const res = await api.get(`/api/admin/templates/${templateId}/documents`);
+    return res.data;
+  },
+
+  uploadDocument: async (templateId: number, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post(`/api/admin/templates/${templateId}/documents/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
+  deleteDocument: async (templateId: number, docId: number): Promise<any> => {
+    const res = await api.delete(`/api/admin/templates/${templateId}/documents/${docId}`);
+    return res.data;
+  },
 };
 
 // ============================================================================
@@ -326,8 +363,10 @@ export interface Appointment {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
   cancelled_reason: string | null;
   sync_status: string;
+  conversation_id: string | null;
   created_at: string;
   confirmed_at: string | null;
+  extra_data?: Record<string, any> | null;
 }
 
 export interface AppointmentStats {
@@ -559,11 +598,13 @@ export interface WriterArticle {
   outline: string[];
   status: 'draft' | 'pending_review' | 'approved' | 'published';
   mode: 'autonomous' | 'semi-autonomous';
-  publishing_platform: 'nextjs' | 'wordpress' | 'ghost';
+  publishing_platform: 'ragleaf' | 'wordpress' | 'ghost';
   scheduled_at: string | null;
   published_at: string | null;
   created_at: string;
   updated_at: string | null;
+  language: string;
+  translation_group_id: string | null;
   extra_data?: Record<string, any> | null;
 }
 
@@ -573,7 +614,7 @@ export interface ArticleCreateRequest {
   language: string;
   agent_id?: number | null;
   mode: 'autonomous' | 'semi-autonomous';
-  publishing_platform: 'nextjs' | 'wordpress' | 'ghost';
+  publishing_platform: 'ragleaf' | 'wordpress' | 'ghost';
 }
 
 export interface ArticleUpdateRequest {
@@ -585,7 +626,7 @@ export interface ArticleUpdateRequest {
   outline?: string[];
   status?: 'draft' | 'pending_review' | 'approved' | 'published';
   mode?: 'autonomous' | 'semi-autonomous';
-  publishing_platform?: 'nextjs' | 'wordpress' | 'ghost';
+  publishing_platform?: 'ragleaf' | 'wordpress' | 'ghost';
   scheduled_at?: string | null;
 }
 
@@ -617,6 +658,59 @@ export const writerApi = {
 
   delete: async (publicId: string): Promise<void> => {
     await api.delete(`/api/writer/articles/${publicId}`);
+  },
+};
+
+export interface WriterAutomation {
+  id: number;
+  organization_id: number;
+  agent_id: number | null;
+  title: string;
+  interval_days: number;
+  keywords: string[];
+  mode: 'autonomous' | 'semi-autonomous';
+  publishing_platform: 'ragleaf' | 'wordpress' | 'ghost';
+  is_active: boolean;
+  last_run_at: string | null;
+  next_run_at: string | null;
+  created_at: string;
+}
+
+export interface AutomationCreateRequest {
+  title: string;
+  interval_days: number;
+  keywords: string[];
+  mode: 'autonomous' | 'semi-autonomous';
+  publishing_platform: 'ragleaf' | 'wordpress' | 'ghost';
+  agent_id?: number | null;
+  is_active?: boolean;
+}
+
+export interface AutomationUpdateRequest {
+  title?: string;
+  interval_days?: number;
+  keywords?: string[];
+  mode?: 'autonomous' | 'semi-autonomous';
+  publishing_platform?: 'ragleaf' | 'wordpress' | 'ghost';
+  agent_id?: number | null;
+  is_active?: boolean;
+}
+
+export const writerAutomationApi = {
+  list: async (): Promise<WriterAutomation[]> => {
+    const res = await api.get('/api/writer/automations');
+    return res.data;
+  },
+  create: async (data: AutomationCreateRequest): Promise<WriterAutomation> => {
+    const res = await api.post('/api/writer/automations', data);
+    return res.data;
+  },
+  update: async (id: number, data: AutomationUpdateRequest): Promise<WriterAutomation> => {
+    const res = await api.put(`/api/writer/automations/${id}`, data);
+    return res.data;
+  },
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/writer/automations/${id}`);
   },
 };
 

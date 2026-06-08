@@ -104,7 +104,7 @@ export default function TemplateWizardPage() {
   const stepIndex = step === 'select' ? 0 : step === 'configure' ? 1 : 2;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button

@@ -9,16 +9,21 @@ import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, BackgroundTasks
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from pathlib import Path as FilePath
+import os
+import json
 
 from backend.database.connection import get_db
+from backend.database.models_v2 import Document
 from backend.database.models_platform import (
-    Organization, Agent, AgentAPIKey, AgentTemplate
+    Organization, Agent, AgentAPIKey, AgentTemplate, AgentTemplateDocument
 )
 from backend.auth.dependencies import get_current_active_user
 from backend.auth.org_dependencies import get_current_org
+from backend.api.agents import _auto_process_document
 
 logger = logging.getLogger(__name__)
 
@@ -390,4 +395,225 @@ async def list_public_plans(db: Session = Depends(get_db)):
         }
         for p in plans
     ]
+
+
+# ============================================================================
+# Admin CRUD & Document Management Endpoints (Hazır Asistan Düzenleme & Geliştirme)
+# ============================================================================
+
+class TemplateCreate(BaseModel):
+    slug: str
+    category: str
+    name: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    default_system_prompt: str
+    default_welcome_message: Optional[str] = None
+    default_personality: Optional[Dict[str, Any]] = None
+    default_appearance: Optional[Dict[str, Any]] = None
+    config_schema: List[Dict[str, Any]] = []
+    preview_questions: Optional[List[str]] = None
+    is_active: Optional[bool] = True
+    is_featured: Optional[bool] = False
+    sort_order: Optional[int] = 0
+
+class TemplateUpdate(BaseModel):
+    category: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    default_system_prompt: Optional[str] = None
+    default_welcome_message: Optional[str] = None
+    default_personality: Optional[Dict[str, Any]] = None
+    default_appearance: Optional[Dict[str, Any]] = None
+    config_schema: Optional[List[Dict[str, Any]]] = None
+    preview_questions: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    is_featured: Optional[bool] = None
+    sort_order: Optional[int] = None
+
+def verify_admin(current_user = Depends(get_current_active_user)):
+    if not (current_user.is_admin or current_user.is_superadmin):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bu işlem için yönetici yetkisi gerekiyor"
+        )
+    return current_user
+
+@templates_router.post("/admin/templates", response_model=TemplateDetail, summary="Yeni şablon oluştur")
+async def admin_create_template(
+    request: TemplateCreate,
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    existing = db.query(AgentTemplate).filter(AgentTemplate.slug == request.slug).first()
+    if existing:
+        raise HTTPException(status_code=400, detail=f"'{request.slug}' slug'ına sahip şablon zaten mevcut")
+        
+    template = AgentTemplate(**request.model_dump())
+    db.add(template)
+    db.commit()
+    db.refresh(template)
+    return template
+
+@templates_router.put("/admin/templates/{template_id}", response_model=TemplateDetail, summary="Şablon güncelle")
+async def admin_update_template(
+    template_id: int,
+    request: TemplateUpdate,
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    template = db.query(AgentTemplate).filter(AgentTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Şablon bulunamadı")
+        
+    for key, value in request.model_dump(exclude_unset=True).items():
+        setattr(template, key, value)
+        
+    db.commit()
+    db.refresh(template)
+    return template
+
+@templates_router.delete("/admin/templates/{template_id}", summary="Şablon sil")
+async def admin_delete_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    template = db.query(AgentTemplate).filter(AgentTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Şablon bulunamadı")
+        
+    db.delete(template)
+    db.commit()
+    return {"success": True, "message": "Şablon başarıyla silindi"}
+
+@templates_router.post("/admin/templates/{template_id}/documents/upload", summary="Şablona döküman yükle")
+async def admin_upload_template_document(
+    template_id: int,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    template = db.query(AgentTemplate).filter(AgentTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Şablon bulunamadı")
+        
+    system_org = db.query(Organization).filter(Organization.is_system == True).first()
+    system_org_id = system_org.id if system_org else None
+    system_org_slug = system_org.slug if system_org else "system"
+    
+    allowed_types = ['.pdf', '.docx', '.txt', '.md']
+    file_ext = FilePath(file.filename).suffix.lower()
+    if file_ext not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Desteklenmeyen dosya tipi: {file_ext}. İzin verilenler: {allowed_types}"
+        )
+        
+    content = await file.read()
+    max_size_mb = 50
+    if len(content) > max_size_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Dosya boyutu {max_size_mb}MB limitini aşıyor"
+        )
+        
+    doc = Document(
+        name=FilePath(file.filename).stem,
+        original_filename=file.filename,
+        folder_name=f"template_{template.id}_{file.filename}",
+        file_size=len(content),
+        file_type=file_ext[1:],
+        status="uploaded",
+        organization_id=system_org_id
+    )
+    db.add(doc)
+    db.flush()
+    
+    doc.folder_name = f"org_system_doc_{doc.id}"
+    
+    import os
+    from backend.services.storage_service import get_storage
+    _storage = get_storage()
+    upload_dir = str(_storage.get_upload_dir(system_org_slug, doc.folder_name))
+    
+    file_path = os.path.join(upload_dir, file.filename)
+    with open(file_path, "wb") as f:
+        f.write(content)
+        
+    link = AgentTemplateDocument(template_id=template.id, document_id=doc.id)
+    db.add(link)
+    db.commit()
+    db.refresh(doc)
+    
+    background_tasks.add_task(_auto_process_document, doc.id)
+    return {
+        "success": True,
+        "document_id": doc.id,
+        "filename": file.filename,
+        "template_id": template.id,
+        "status": "uploaded",
+        "auto_processing": True
+    }
+
+@templates_router.get("/admin/templates/{template_id}/documents", summary="Şablon dökümanlarını listele")
+async def admin_list_template_documents(
+    template_id: int,
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    template = db.query(AgentTemplate).filter(AgentTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Şablon bulunamadı")
+        
+    links = db.query(AgentTemplateDocument).filter(AgentTemplateDocument.template_id == template.id).all()
+    documents = []
+    for link in links:
+        doc = db.query(Document).filter(Document.id == link.document_id).first()
+        if doc:
+            documents.append({
+                "id": doc.id,
+                "name": doc.name,
+                "original_filename": doc.original_filename,
+                "file_type": doc.file_type,
+                "file_size": doc.file_size,
+                "status": doc.status,
+                "processing_stage": doc.processing_stage,
+                "processing_progress": doc.processing_progress or 0,
+                "total_chunks": doc.total_chunks,
+                "vector_indexed": doc.vector_indexed,
+                "created_at": doc.created_at.isoformat() if doc.created_at else None,
+            })
+    return {"template_id": template.id, "documents": documents, "total": len(documents)}
+
+@templates_router.delete("/admin/templates/{template_id}/documents/{document_id}", summary="Şablondan döküman ilişkisini kaldır")
+async def admin_delete_template_document(
+    template_id: int,
+    document_id: int,
+    db: Session = Depends(get_db),
+    admin = Depends(verify_admin)
+):
+    link = db.query(AgentTemplateDocument).filter(
+        AgentTemplateDocument.template_id == template_id,
+        AgentTemplateDocument.document_id == document_id
+    ).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Döküman bu şablona bağlı bulunamadı")
+        
+    db.delete(link)
+    
+    other_links = db.query(AgentTemplateDocument).filter(
+        AgentTemplateDocument.document_id == document_id
+    ).count()
+    
+    if other_links == 0:
+        doc = db.query(Document).filter(Document.id == document_id).first()
+        if doc:
+            db.delete(doc)
+            
+    db.commit()
+    return {"success": True, "message": "Döküman ilişkisi başarıyla kaldırıldı"}
+
 

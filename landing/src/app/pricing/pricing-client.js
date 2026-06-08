@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useLang } from '../../context/LangContext';
 import { useUI } from '../../context/UIContext';
 import PageLayout from '../../components/PageLayout';
+import { getApiBaseUrl } from '../../utils/api';
 
 export default function PricingClient() {
   const { lang, t } = useLang();
@@ -13,9 +14,7 @@ export default function PricingClient() {
 
   useEffect(() => {
     async function fetchPlans() {
-      const API_BASE = window.location.hostname.includes('ragleaf.com') 
-        ? 'https://api.ragleaf.com' 
-        : 'http://localhost:1306';
+      const API_BASE = getApiBaseUrl();
       try {
         const res = await fetch(`${API_BASE}/api/public/plans`);
         if (res.ok) {
@@ -32,9 +31,10 @@ export default function PricingClient() {
   const isEn = lang === 'en';
 
   // Fallbacks
-  const starter = plansData.find(p => p.key === 'starter') || { price: 15, max_agents: 3, max_documents: 100, max_queries_per_month: 5000, max_storage_mb: 500 };
-  const pro = plansData.find(p => p.key === 'pro') || { price: 47, max_agents: 10, max_documents: 500, max_queries_per_month: 25000, max_storage_mb: 2000 };
-  const ent = plansData.find(p => p.key === 'enterprise') || { price: 312, max_agents: 999, max_documents: 9999, max_queries_per_month: 999999, max_storage_mb: 50000 };
+  const starter = plansData.find(p => p.key === 'starter') || { price: 50, max_agents: 3, max_documents: 100, max_queries_per_month: 5000, max_storage_mb: 500 };
+  const pro = plansData.find(p => p.key === 'pro') || { price: 200, max_agents: 10, max_documents: 500, max_queries_per_month: 25000, max_storage_mb: 2000 };
+  const ultimate = plansData.find(p => p.key === 'ultimate') || { price: 350, max_agents: 50, max_documents: 2000, max_queries_per_month: 100000, max_storage_mb: 10000 };
+  const ent = plansData.find(p => p.key === 'ultra') || { price: 600, max_agents: 999, max_documents: 9999, max_queries_per_month: 999999, max_storage_mb: 50000 };
 
   const formatPrice = (basePrice) => {
     let finalPrice = basePrice;
@@ -51,6 +51,11 @@ export default function PricingClient() {
     return `${mb} MB`;
   };
 
+  const formatQueries = (num) => {
+    if (!num) return "0";
+    return num.toLocaleString(isEn ? 'en-US' : 'tr-TR');
+  };
+
   return (
     <PageLayout className="min-h-screen">
       {/* HERO */}
@@ -59,13 +64,13 @@ export default function PricingClient() {
         <div style={{ position: 'relative', zIndex: 1 }}>
           <span className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--accent)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
-            {lang === 'tr' ? 'Esnek Fiyatlandırma' : 'Flexible Pricing'}
+            {lang === 'tr' ? 'Esnek Planlar' : 'Flexible Plans'}
           </span>
           <h1 className="font-['Outfit'] text-[56px] max-md:text-[38px] font-black tracking-tight mb-6 leading-tight">
             {lang === 'tr' ? (
-              <>Size'unuza <span className="gradient-text">Uygun</span> Plan</>
+              <>İhtiyacınıza <span className="gradient-text">Uygun</span> Planlar</>
             ) : (
-              <>Plan That <span className="gradient-text">Fits</span> Your Size</>
+              <>Plans That <span className="gradient-text">Fit</span> Your Needs</>
             )}
           </h1>
           <p className="text-lg text-text-secondary leading-relaxed max-w-xl mx-auto">
@@ -104,7 +109,7 @@ export default function PricingClient() {
       </div>
 
       {/* PRICING GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[1200px] mx-auto px-5 pb-20 max-md:px-4 max-md:pb-16">
+      <div className="grid grid-cols-4 max-lg:grid-cols-2 max-md:grid-cols-1 gap-6 max-w-[1400px] mx-auto px-5 pb-20 max-md:px-4 max-md:pb-16">
         {/* Starter Card */}
         <div className="bg-[#0d0d15]/40 border border-white/5 rounded-3xl p-10 py-8 max-md:p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between relative hover:-translate-y-2 hover:border-accent/30 hover:shadow-[0_12px_40px_rgba(34,197,94,0.05)] max-w-[380px] w-full mx-auto">
           <div>
@@ -129,7 +134,7 @@ export default function PricingClient() {
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>{isEn ? `${starter.max_queries_per_month.toLocaleString()} Queries / Month` : `${starter.max_queries_per_month.toLocaleString()} Sorgu / Ay`}</span>
+                <span>{isEn ? `${formatQueries(starter.max_queries_per_month)} Queries / Month` : `${formatQueries(starter.max_queries_per_month)} Sorgu / Ay`}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -171,7 +176,7 @@ export default function PricingClient() {
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>{isEn ? `${pro.max_queries_per_month.toLocaleString()} Queries / Month` : `${pro.max_queries_per_month.toLocaleString()} Sorgu / Ay`}</span>
+                <span>{isEn ? `${formatQueries(pro.max_queries_per_month)} Queries / Month` : `${formatQueries(pro.max_queries_per_month)} Sorgu / Ay`}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -191,10 +196,53 @@ export default function PricingClient() {
           </button>
         </div>
 
-        {/* Enterprise Card */}
+        {/* Ultimate Card */}
         <div className="bg-[#0d0d15]/40 border border-white/5 rounded-3xl p-10 py-8 max-md:p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between relative hover:-translate-y-2 hover:border-accent/30 hover:shadow-[0_12px_40px_rgba(34,197,94,0.05)] max-w-[380px] w-full mx-auto">
           <div>
-            <div className="font-['Outfit'] text-2xl max-md:text-xl font-extrabold mb-2">Enterprise</div>
+            <div className="font-['Outfit'] text-2xl max-md:text-xl font-extrabold mb-2">Ultimate</div>
+            <p className="text-sm max-md:text-xs text-text-secondary leading-snug mb-6 min-h-[48px]">
+              {isEn ? "For multi-department setups and teams requiring high volumes." : "Çoklu departman yönetimi ve yüksek hacimli sorgu ihtiyacı olanlar için."}
+            </p>
+            <div className="mb-8 flex items-baseline gap-1.5">
+              <span className="text-[48px] max-md:text-[36px] font-black font-['Outfit'] tracking-tighter">{formatPrice(ultimate.price)}</span>
+              <span className="text-sm text-text-muted">
+                {isYearly 
+                  ? (isEn ? " / mo (billed annually)" : " / ay (yıllık faturalandırılır)") 
+                  : (isEn ? " / mo" : " / ay")}
+              </span>
+            </div>
+            <ul className="list-none p-0 mt-0 mx-0 mb-10 max-md:mb-6 flex flex-col gap-4 max-md:gap-3">
+              <li className="flex items-center gap-3 text-sm text-text-secondary">
+                <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>{isEn ? `${ultimate.max_agents} AI Assistants` : `${ultimate.max_agents} Yapay Zeka Asistanı`}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-text-secondary">
+                <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>{isEn ? `${ultimate.max_documents} Document Knowledge Base` : `${ultimate.max_documents} Doküman Bilgi Tabanı`}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-text-secondary">
+                <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>{isEn ? `${formatQueries(ultimate.max_queries_per_month)} Queries / Month` : `${formatQueries(ultimate.max_queries_per_month)} Sorgu / Ay`}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-text-secondary">
+                <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>{isEn ? `${formatStorage(ultimate.max_storage_mb)} File Storage` : `${formatStorage(ultimate.max_storage_mb)} Dosya Depolama`}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-text-secondary">
+                <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>{isEn ? "Advanced analytics & Whitelabel" : "Gelişmiş analitik & Markasız kullanım"}</span>
+              </li>
+            </ul>
+          </div>
+          <button onClick={() => openSignup('ultimate')} className="w-full text-center font-bold p-3.5 rounded-xl text-sm transition-all duration-200 cursor-pointer btn btn-primary">
+            {isEn ? "Get Started" : "Şimdi Başla"}
+          </button>
+        </div>
+
+        {/* Ultra Card */}
+        <div className="bg-[#0d0d15]/40 border border-white/5 rounded-3xl p-10 py-8 max-md:p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between relative hover:-translate-y-2 hover:border-accent/30 hover:shadow-[0_12px_40px_rgba(34,197,94,0.05)] max-w-[380px] w-full mx-auto">
+          <div>
+            <div className="font-['Outfit'] text-2xl max-md:text-xl font-extrabold mb-2">Ultra</div>
             <p className="text-sm max-md:text-xs text-text-secondary leading-snug mb-6 min-h-[48px]">{t('pricing_ent_desc')}</p>
             <div className="mb-8 flex items-baseline gap-1.5">
               <span className="text-[48px] max-md:text-[36px] font-black font-['Outfit'] tracking-tighter">{formatPrice(ent.price)}</span>
@@ -215,7 +263,7 @@ export default function PricingClient() {
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>{ent.max_queries_per_month >= 999999 ? (isEn ? "Millions of Queries / Month" : "Milyonlarca Sorgu / Ay") : (isEn ? `${ent.max_queries_per_month.toLocaleString()} Queries / Month` : `${ent.max_queries_per_month.toLocaleString()} Sorgu / Ay`)}</span>
+                <span>{ent.max_queries_per_month >= 999999 ? (isEn ? "Millions of Queries / Month" : "Milyonlarca Sorgu / Ay") : (isEn ? `${formatQueries(ent.max_queries_per_month)} Queries / Month` : `${formatQueries(ent.max_queries_per_month)} Sorgu / Ay`)}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <svg className="text-accent flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -228,7 +276,7 @@ export default function PricingClient() {
             </ul>
           </div>
           <a 
-            href="mailto:hello@ragleaf.com?subject=Enterprise%20Plan%20Requirements" 
+            href="mailto:hello@ragleaf.com?subject=Ultra%20Plan%20Requirements" 
             className="w-full text-center font-bold p-3.5 rounded-xl text-sm transition-all duration-200 cursor-pointer border border-white/10 bg-transparent hover:bg-white/5 text-text-primary block no-underline hover:border-white/30 hover:-translate-y-0.5"
           >
             {t('pricing_ent_btn')}
@@ -246,7 +294,8 @@ export default function PricingClient() {
                 <th>{t('pricing_comp_col_feature')}</th>
                 <th>Starter</th>
                 <th>Pro</th>
-                <th>Enterprise</th>
+                <th>Ultimate</th>
+                <th>Ultra</th>
               </tr>
             </thead>
             <tbody className="[&_td]:p-5 max-md:[&_td]:p-3 max-md:[&_td]:px-2.5 [&_td]:border-b [&_td]:border-white/[0.04] [&_td]:text-text-secondary [&_tr]:hover:bg-white/[0.01]">
@@ -254,29 +303,34 @@ export default function PricingClient() {
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_agents')}</td>
                 <td>{isEn ? `${starter.max_agents} Qty` : `${starter.max_agents} Adet`}</td>
                 <td>{isEn ? `${pro.max_agents} Qty` : `${pro.max_agents} Adet`}</td>
+                <td>{isEn ? `${ultimate.max_agents} Qty` : `${ultimate.max_agents} Adet`}</td>
                 <td>{ent.max_agents >= 999 ? (isEn ? "Unlimited" : "Sınırsız") : (isEn ? `${ent.max_agents} Qty` : `${ent.max_agents} Adet`)}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_docs')}</td>
                 <td>{isEn ? `${starter.max_documents} Qty` : `${starter.max_documents} Adet`}</td>
                 <td>{isEn ? `${pro.max_documents} Qty` : `${pro.max_documents} Adet`}</td>
+                <td>{isEn ? `${ultimate.max_documents} Qty` : `${ultimate.max_documents} Adet`}</td>
                 <td>{ent.max_documents >= 9999 ? (isEn ? "Unlimited" : "Sınırsız") : (isEn ? `${ent.max_documents} Qty` : `${ent.max_documents} Adet`)}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_queries')}</td>
-                <td>{isEn ? `${starter.max_queries_per_month.toLocaleString()} / Mo` : `${starter.max_queries_per_month.toLocaleString()} / Ay`}</td>
-                <td>{isEn ? `${pro.max_queries_per_month.toLocaleString()} / Mo` : `${pro.max_queries_per_month.toLocaleString()} / Ay`}</td>
-                <td>{ent.max_queries_per_month >= 999999 ? (isEn ? "Unlimited / Custom" : "Sınırsız / Özel") : (isEn ? `${ent.max_queries_per_month.toLocaleString()} / Mo` : `${ent.max_queries_per_month.toLocaleString()} / Ay`)}</td>
+                <td>{isEn ? `${formatQueries(starter.max_queries_per_month)} / Mo` : `${formatQueries(starter.max_queries_per_month)} / Ay`}</td>
+                <td>{isEn ? `${formatQueries(pro.max_queries_per_month)} / Mo` : `${formatQueries(pro.max_queries_per_month)} / Ay`}</td>
+                <td>{isEn ? `${formatQueries(ultimate.max_queries_per_month)} / Mo` : `${formatQueries(ultimate.max_queries_per_month)} / Ay`}</td>
+                <td>{ent.max_queries_per_month >= 999999 ? (isEn ? "Unlimited / Custom" : "Sınırsız / Özel") : (isEn ? `${formatQueries(ent.max_queries_per_month)} / Mo` : `${formatQueries(ent.max_queries_per_month)} / Ay`)}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_storage')}</td>
                 <td>{formatStorage(starter.max_storage_mb)}</td>
                 <td>{formatStorage(pro.max_storage_mb)}</td>
+                <td>{formatStorage(ultimate.max_storage_mb)}</td>
                 <td>{formatStorage(ent.max_storage_mb)}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_booking')}</td>
                 <td>{t('pricing_comp_val_formonly')}</td>
+                <td>{t('pricing_comp_val_dynamic')}</td>
                 <td>{t('pricing_comp_val_dynamic')}</td>
                 <td>{t('pricing_comp_val_customcrm')}</td>
               </tr>
@@ -284,11 +338,13 @@ export default function PricingClient() {
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_payment')}</td>
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_active_nocomm')}</td>
+                <td>{t('pricing_comp_val_active_nocomm')}</td>
                 <td>{t('pricing_comp_val_active_multi')}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_ocr')}</td>
                 <td>{t('pricing_comp_val_active_basic')}</td>
+                <td>{t('pricing_comp_val_active_adv')}</td>
                 <td>{t('pricing_comp_val_active_adv')}</td>
                 <td>{t('pricing_comp_val_active_fast')}</td>
               </tr>
@@ -297,9 +353,11 @@ export default function PricingClient() {
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_active_basic')}</td>
+                <td>{t('pricing_comp_val_active_basic')}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_finetune')}</td>
+                <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_active_basic')}</td>
@@ -309,10 +367,12 @@ export default function PricingClient() {
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_passive')}</td>
                 <td>{t('pricing_comp_val_active_basic')}</td>
+                <td>{t('pricing_comp_val_active_basic')}</td>
               </tr>
               <tr>
                 <td className="font-semibold text-text-secondary w-[40%] max-md:w-[35%] max-md:pl-2">{t('pricing_comp_row_support')}</td>
                 <td>{t('pricing_comp_val_email')}</td>
+                <td>{t('pricing_comp_val_priority')}</td>
                 <td>{t('pricing_comp_val_priority')}</td>
                 <td>{t('pricing_comp_val_dedicated')}</td>
               </tr>

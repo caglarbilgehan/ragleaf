@@ -19,7 +19,7 @@ export default function LegalClient() {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= 180) {
+          if (rect.top <= 200) {
             current = id;
           }
         }
@@ -36,38 +36,86 @@ export default function LegalClient() {
     e.preventDefault();
     const el = document.getElementById(targetId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const offset = 120; // accounting for sticky header
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = el.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
   const navLinkClass = (id) => {
-    const base = "text-text-secondary no-underline text-xs font-semibold transition-all duration-200 py-1.5 block hover:text-accent";
-    const active = activeSection === id ? "text-accent [text-shadow:0_0_8px_rgba(34,197,94,0.4)]" : "";
+    const base = "text-text-secondary no-underline text-[15px] font-semibold transition-all duration-200 py-3 px-4.5 block rounded-xl hover:text-accent hover:bg-white/[0.03] border-l-3 border-transparent";
+    const active = activeSection === id ? "text-accent bg-accent/8 !border-accent [text-shadow:0_0_12px_rgba(34,197,94,0.4)] font-bold bg-gradient-to-r from-accent/10 to-transparent" : "";
     return `${base} ${active}`;
   };
 
   return (
     <PageLayout>
-      {lang === 'tr' ? (
-        <>
-          <div className="text-center px-5 pb-10 pt-0 max-w-[800px] mx-auto">
-            <h1 className="font-['Outfit'] text-[48px] max-md:text-[32px] font-black tracking-tight mb-5 leading-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">Yasal Bilgiler & Sözleşmeler</h1>
-            <p className="text-lg text-text-secondary leading-relaxed">Ragleaf kullanım şartları, online ödeme güvenlik standartları, iptal/iade politikaları ve sözleşmelerimiz hakkında detaylı bilgilere buradan ulaşabilirsiniz.</p>
-          </div>
+      {/* Premium Hero Header Section */}
+      <div className="relative overflow-hidden py-32 max-md:py-20 border-b border-white/5 bg-gradient-to-b from-[#0d0d15]/50 to-[#07070a]/10">
+        {/* Background Glow Effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[350px] bg-accent/8 rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute -top-[10%] left-[10%] w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none" />
+        
+        <div className="text-center px-6 max-w-[950px] mx-auto relative z-10 space-y-6">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-accent bg-accent/8 border border-accent/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+            {lang === 'tr' ? 'RAGLEAF HUKUKİ ŞARTLAR' : 'RAGLEAF LEGAL TERMS'}
+          </span>
+          <h1 className="font-['Outfit'] text-[56px] max-md:text-[38px] font-black tracking-tight leading-tight bg-gradient-to-b from-white via-white to-white/60 bg-clip-text text-transparent">
+            {lang === 'tr' ? (
+              <>Yasal Bilgiler & <span className="text-accent bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">Sözleşmeler</span></>
+            ) : (
+              <>Legal Info & <span className="text-accent bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">Agreements</span></>
+            )}
+          </h1>
+          <p className="text-[19px] leading-relaxed text-text-secondary max-w-[750px] mx-auto font-medium">
+            {lang === 'tr'
+              ? 'Kullanım şartlarımız, online ödeme güvenlik standartlarımız, iptal/iade politikalarımız ve yasal sözleşmelerimize dair detaylar.'
+              : 'Details regarding our terms of use, online payment security standards, cancellation/refund policies, and legal agreements.'}
+          </p>
+        </div>
+      </div>
 
-          <div className="max-w-[1200px] mx-auto px-6 pb-20 max-md:pb-10 grid grid-cols-[280px_1fr] max-md:grid-cols-1 gap-16 max-md:gap-8">
-            <div className="sticky top-[100px] h-fit max-md:hidden">
-              <div className="flex flex-col gap-2 border-l border-border-custom pl-5">
+      {/* Expanded Fluid Layout Grid */}
+      <div className="max-w-[1650px] w-full mx-auto px-10 py-24 max-md:py-12 max-md:px-4 grid grid-cols-[320px_1fr] max-md:grid-cols-1 gap-20">
+        
+        {/* Sidebar Menu */}
+        <div className="sticky top-[130px] h-fit max-md:hidden space-y-4">
+          <div className="flex flex-col gap-2 pl-1 bg-white/[0.01] border border-white/5 rounded-2xl p-4 backdrop-blur-md">
+            {lang === 'tr' ? (
+              <>
                 <a href="#gizlilik" onClick={(e) => handleNavClick(e, 'gizlilik')} className={navLinkClass('gizlilik')}>1. Gizlilik Politikası</a>
                 <a href="#kosullar" onClick={(e) => handleNavClick(e, 'kosullar')} className={navLinkClass('kosullar')}>2. Kullanım Koşulları</a>
                 <a href="#kvkk" onClick={(e) => handleNavClick(e, 'kvkk')} className={navLinkClass('kvkk')}>3. KVKK Aydınlatma Metni</a>
                 <a href="#mesafeli-satis" onClick={(e) => handleNavClick(e, 'mesafeli-satis')} className={navLinkClass('mesafeli-satis')}>4. Mesafeli Satış Sözleşmesi</a>
                 <a href="#on-bilgilendirme" onClick={(e) => handleNavClick(e, 'on-bilgilendirme')} className={navLinkClass('on-bilgilendirme')}>5. Ön Bilgilendirme Formu</a>
                 <a href="#iptal-iade" onClick={(e) => handleNavClick(e, 'iptal-iade')} className={navLinkClass('iptal-iade')}>6. İptal ve İade Koşulları</a>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <a href="#privacy" onClick={(e) => handleNavClick(e, 'privacy')} className={navLinkClass('privacy')}>1. Privacy Policy</a>
+                <a href="#terms" onClick={(e) => handleNavClick(e, 'terms')} className={navLinkClass('terms')}>2. Terms of Use</a>
+                <a href="#kvkk-en" onClick={(e) => handleNavClick(e, 'kvkk-en')} className={navLinkClass('kvkk-en')}>3. KVKK Disclosure Text</a>
+                <a href="#distance-sales" onClick={(e) => handleNavClick(e, 'distance-sales')} className={navLinkClass('distance-sales')}>4. Distance Sales Agreement</a>
+                <a href="#pre-info" onClick={(e) => handleNavClick(e, 'pre-info')} className={navLinkClass('pre-info')}>5. Pre-Information Form</a>
+                <a href="#refund" onClick={(e) => handleNavClick(e, 'refund')} className={navLinkClass('refund')}>6. Cancellation & Refund Policy</a>
+              </>
+            )}
+          </div>
+        </div>
 
-            <div className="text-text-secondary text-[15px] leading-[1.8] [&_section]:mb-16 [&_section]:bg-white/[0.01] [&_section]:border [&_section]:border-border-custom [&_section]:rounded-2xl [&_section]:p-10 max-md:[&_section]:p-6 [&_section]:backdrop-blur-md [&_section]:shadow-2xl [&_section]:scroll-mt-[100px] [&_h2]:font-['Outfit'] [&_h2]:text-[28px] max-md:[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-text-primary [&_h2]:mt-0 [&_h2]:mb-6 [&_h2]:border-b [&_h2]:border-border-custom [&_h2]:pb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-7 [&_h3]:mb-3 [&_p]:mb-4 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-2">
+        {/* Content Details */}
+        <div className="text-text-secondary text-[17px] leading-[1.85] font-normal [&_section]:mb-16 [&_section]:bg-[#0d0d15]/40 [&_section]:border [&_section]:border-white/5 [&_section]:rounded-3xl [&_section]:p-14 max-md:[&_section]:p-6 [&_section]:backdrop-blur-md [&_section]:shadow-[0_12px_50px_rgba(0,0,0,0.3)] [&_h2]:font-['Outfit'] [&_h2]:text-[34px] max-md:[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-text-primary [&_h2]:mt-0 [&_h2]:mb-8 [&_h2]:border-b [&_h2]:border-white/10 [&_h2]:pb-5 [&_h3]:font-['Outfit'] [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-text-primary [&_h3]:mt-10 [&_h3]:mb-4 [&_p]:mb-5 [&_ul]:mb-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mb-3 [&_strong]:text-text-primary [&_strong]:font-semibold">
+          {lang === 'tr' ? (
+
+            <>
               {/* Section 1: Gizlilik Politikası */}
               <section id="gizlilik">
                 <h2>1. Gizlilik Politikası</h2>
@@ -129,25 +177,25 @@ export default function LegalClient() {
                 
                 <h3>Madde 4.1. Taraflar</h3>
                 <p>İşbu Sözleşme, aşağıdaki taraflar arasında elektronik ortamda onaylandığı tarihte kurulmuştur:</p>
-                <table className="w-full border-collapse my-5 [&_th]:border [&_th]:border-border-custom [&_th]:p-3 [&_th]:text-left [&_td]:border [&_td]:border-border-custom [&_td]:p-3 [&_td]:text-left [&_th]:bg-white/[0.03] [&_th]:text-text-primary [&_th]:font-semibold [&_th]:w-[30%]">
-                  <tbody>
-                    <tr>
-                      <th>SATICI (Sağlayıcı):</th>
-                      <td>
-                        <strong>Ragleaf Bilişim ve Yapay Zeka Teknolojileri A.Ş.</strong><br />
-                        Adres: Maslak, Büyükdere Cd. No:243, 34485 Sarıyer/İstanbul<br />
-                        Telefon: +90 212 999 8877<br />
-                        E-posta: hello@ragleaf.com<br />
-                        Mersis No: 0735099887700001<br />
-                        Vergi Dairesi / No: Maslak V.D. / 7350998877
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>ALICI (Müşteri):</th>
-                      <td>Ragleaf platformuna üye olan ve ödeme yapan/hizmet alan gerçek veya tüzel kişi.</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto my-6 rounded-xl border border-border-custom bg-white/[0.02]">
+                  <table className="w-full border-collapse [&_th]:p-4 [&_th]:text-left [&_td]:p-4 [&_td]:text-left [&_th]:bg-white/[0.03] [&_th]:text-text-primary [&_th]:font-semibold [&_th]:w-[30%] [&_td]:leading-relaxed border-none">
+                    <tbody>
+                      <tr className="border-b border-border-custom">
+                        <th>SATICI (Sağlayıcı):</th>
+                        <td>
+                          <strong>Ercüment Çağlar Bilgehan</strong><br />
+                          Adres: Kemalöz Mh. 1.Hilalkent No:5 64200 Merkez/Uşak<br />
+                          Telefon: +90 551 702 84 21<br />
+                          E-posta: hello@ragleaf.com
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>ALICI (Müşteri):</th>
+                        <td className="text-text-secondary">Ragleaf platformuna üye olan ve ödeme yapan/hizmet alan gerçek veya tüzel kişi.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
                 <h3>Madde 4.2. Sözleşmenin Konusu</h3>
                 <p>İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait www.ragleaf.com web sitesinden elektronik ortamda siparişini yaptığı, aşağıda nitelikleri ve satış fiyatı belirtilen bulut tabanlı yapay zeka asistanı abonelik hizmetinin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.</p>
@@ -157,7 +205,7 @@ export default function LegalClient() {
 
                 <h3>Madde 4.4. Genel Hükümler</h3>
                 <ul>
-                  <li>ALICI, hizmetin temel nitelikleri, satış fiyatı ve ödeme şekli ile teslimata ilişkin ön bilgileri okuyup bilgi sahibi olduğunu ve elektronik ortamda gerekli teyidi verdiğini kabul eder.</li>
+                  <li>ALICI, hizmetin temel nitelikleri, satış fiyatı ve ödeme şekli ile teslimata ilişkin ön bilgileri okup bilgi sahibi olduğunu ve elektronik ortamda gerekli teyidi verdiğini kabul eder.</li>
                   <li>Sözleşme konusu SaaS hizmeti, ödemenin başarıyla tamamlanmasının ardından ALICI'nın üyelik paneline anında tanımlanarak ifa edilir.</li>
                   <li>SATICI, altyapı sağlayıcılarından (OpenAI, Anthropic vb.) kaynaklanan kesintilerden veya API erişim engellerinden sorumlu tutulamaz.</li>
                 </ul>
@@ -174,10 +222,9 @@ export default function LegalClient() {
                 <h2>5. Ön Bilgilendirme Formu</h2>
                 
                 <h3>5.1. Satıcı Bilgileri</h3>
-                <p><strong>Unvan:</strong> Ragleaf Bilişim ve Yapay Zeka Teknolojileri A.Ş.<br />
-                <strong>Mersis:</strong> 0735099887700001<br />
-                <strong>Adres:</strong> Maslak, Büyükdere Cd. No:243, 34485 Sarıyer/İstanbul<br />
-                <strong>İletişim:</strong> hello@ragleaf.com / +90 212 999 8877</p>
+                <p><strong>Unvan:</strong> Ercüment Çağlar Bilgehan<br />
+                <strong>Adres:</strong> Kemalöz Mh. 1.Hilalkent No:5 64200 Merkez/Uşak<br />
+                <strong>İletişim:</strong> hello@ragleaf.com / +90 551 702 84 21</p>
 
                 <h3>5.2. Sözleşme Konusu Hizmetin Nitelikleri</h3>
                 <p>Ragleaf, kullanıcıların kendi yüklediği dökümanlara göre eğitilen bulut tabanlı bir yapay zeka asistan barındırma ve entegrasyon hizmetidir. Hizmet özellikleri, API limitleri ve sorgu adetleri satın alınan pakete göre değişiklik gösterir.</p>
@@ -211,29 +258,9 @@ export default function LegalClient() {
                 <h3>6.4. Sadakat Yapraklarının Durumu</h3>
                 <p>Aboneliğin iptali veya iadesi durumunda, ilgili dönemde kazanılan Ragleaf Yaprağı (Sadakat Puanları) silinir. Birikmiş yaprakların nakit karşılığı iadesi kesinlikle talep edilemez.</p>
               </section>
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="text-center px-5 pb-10 pt-0 max-w-[800px] mx-auto">
-            <h1 className="font-['Outfit'] text-[48px] max-md:text-[32px] font-black tracking-tight mb-5 leading-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">Legal Information & Agreements</h1>
-            <p className="text-lg text-text-secondary leading-relaxed">You can access detailed information about Ragleaf's terms of use, online payment security standards, cancellation/refund policies, and our legal contracts here.</p>
-          </div>
-
-          <div className="max-w-[1200px] mx-auto px-6 pb-20 max-md:pb-10 grid grid-cols-[280px_1fr] max-md:grid-cols-1 gap-16 max-md:gap-8">
-            <div className="sticky top-[100px] h-fit max-md:hidden">
-              <div className="flex flex-col gap-2 border-l border-border-custom pl-5">
-                <a href="#privacy" onClick={(e) => handleNavClick(e, 'privacy')} className={navLinkClass('privacy')}>1. Privacy Policy</a>
-                <a href="#terms" onClick={(e) => handleNavClick(e, 'terms')} className={navLinkClass('terms')}>2. Terms of Use</a>
-                <a href="#kvkk-en" onClick={(e) => handleNavClick(e, 'kvkk-en')} className={navLinkClass('kvkk-en')}>3. KVKK Disclosure Text</a>
-                <a href="#distance-sales" onClick={(e) => handleNavClick(e, 'distance-sales')} className={navLinkClass('distance-sales')}>4. Distance Sales Agreement</a>
-                <a href="#pre-info" onClick={(e) => handleNavClick(e, 'pre-info')} className={navLinkClass('pre-info')}>5. Pre-Information Form</a>
-                <a href="#refund" onClick={(e) => handleNavClick(e, 'refund')} className={navLinkClass('refund')}>6. Cancellation & Refund Policy</a>
-              </div>
-            </div>
-
-            <div className="text-text-secondary text-[15px] leading-[1.8] [&_section]:mb-16 [&_section]:bg-white/[0.01] [&_section]:border [&_section]:border-border-custom [&_section]:rounded-2xl [&_section]:p-10 max-md:[&_section]:p-6 [&_section]:backdrop-blur-md [&_section]:shadow-2xl [&_section]:scroll-mt-[100px] [&_h2]:font-['Outfit'] [&_h2]:text-[28px] max-md:[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-text-primary [&_h2]:mt-0 [&_h2]:mb-6 [&_h2]:border-b [&_h2]:border-border-custom [&_h2]:pb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-7 [&_h3]:mb-3 [&_p]:mb-4 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-2">
+            </>
+          ) : (
+            <>
               {/* Section 1: Privacy Policy */}
               <section id="privacy">
                 <h2>1. Privacy Policy</h2>
@@ -295,25 +322,25 @@ export default function LegalClient() {
                 
                 <h3>Article 4.1. Parties</h3>
                 <p>This Agreement has been established electronically on the date of approval between the following parties:</p>
-                <table className="w-full border-collapse my-5 [&_th]:border [&_th]:border-border-custom [&_th]:p-3 [&_th]:text-left [&_td]:border [&_td]:border-border-custom [&_td]:p-3 [&_td]:text-left [&_th]:bg-white/[0.03] [&_th]:text-text-primary [&_th]:font-semibold [&_th]:w-[30%]">
-                  <tbody>
-                    <tr>
-                      <th>SELLER (Provider):</th>
-                      <td>
-                        <strong>Ragleaf Bilişim ve Yapay Zeka Teknolojileri A.Ş.</strong><br />
-                        Address: Maslak, Büyükdere Cd. No:243, 34485 Sarıyer/İstanbul<br />
-                        Phone: +90 212 999 8877<br />
-                        Email: hello@ragleaf.com<br />
-                        Mersis No: 0735099887700001<br />
-                        Tax Office / No: Maslak V.D. / 7350998877
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>BUYER (Customer):</th>
-                      <td>Any individual or legal entity subscribing to and receiving services from the Ragleaf platform.</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto my-6 rounded-xl border border-border-custom bg-white/[0.02]">
+                  <table className="w-full border-collapse [&_th]:p-4 [&_th]:text-left [&_td]:p-4 [&_td]:text-left [&_th]:bg-white/[0.03] [&_th]:text-text-primary [&_th]:font-semibold [&_th]:w-[30%] [&_td]:leading-relaxed border-none">
+                    <tbody>
+                      <tr className="border-b border-border-custom">
+                        <th>SELLER (Provider):</th>
+                        <td>
+                          <strong>Ercüment Çağlar Bilgehan</strong><br />
+                          Address: Kemalöz Mh. 1.Hilalkent No:5 64200 Merkez/Uşak<br />
+                          Phone: +90 551 702 84 21<br />
+                          Email: hello@ragleaf.com
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>BUYER (Customer):</th>
+                        <td className="text-text-secondary">Any individual or legal entity subscribing to and receiving services from the Ragleaf platform.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
                 <h3>Article 4.2. Subject of Agreement</h3>
                 <p>The subject of this Agreement is the sale and delivery of the cloud-based AI assistant subscription service purchased by the BUYER electronically on the www.ragleaf.com website, and the determination of the rights and obligations of the parties in accordance with the Law No. 6502 on the Protection of Consumers and the Distance Contracts Regulation.</p>
@@ -340,10 +367,9 @@ export default function LegalClient() {
                 <h2>5. Pre-Information Form</h2>
                 
                 <h3>5.1. Seller Details</h3>
-                <p><strong>Title:</strong> Ragleaf Bilişim ve Yapay Zeka Teknolojileri A.Ş.<br />
-                <strong>Mersis:</strong> 0735099887700001<br />
-                <strong>Address:</strong> Maslak, Büyükdere Cd. No:243, 34485 Sarıyer/İstanbul<br />
-                <strong>Contact:</strong> hello@ragleaf.com / +90 212 999 8877</p>
+                <p><strong>Title:</strong> Ercüment Çağlar Bilgehan<br />
+                <strong>Address:</strong> Kemalöz Mh. 1.Hilalkent No:5 64200 Merkez/Uşak<br />
+                <strong>Contact:</strong> hello@ragleaf.com / +90 551 702 84 21</p>
 
                 <h3>5.2. Characteristics of the Service</h3>
                 <p>Ragleaf is a cloud-based AI assistant hosting and integration service trained on documents uploaded by the user. Service features, API limits, and query quotas vary based on the subscription package purchased.</p>
@@ -377,10 +403,10 @@ export default function LegalClient() {
                 <h3>6.4. Status of Loyalty Leaves</h3>
                 <p>Upon cancellation or refund of a subscription, Ragleaf Leaves (loyalty points) earned during that billing period will be deleted. Accumulated leaves cannot be exchanged for cash.</p>
               </section>
-            </div>
-          </div>
-        </>
-      )}
+            </>
+          )}
+        </div>
+      </div>
     </PageLayout>
   );
 }

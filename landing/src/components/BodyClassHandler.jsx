@@ -20,8 +20,7 @@ export default function BodyClassHandler() {
         '/': 'Ragleaf — Dokümanlarınızı Yapay Zeka Gücüne Dönüştürün',
         '/pricing': 'Fiyatlandırma — Ragleaf',
         '/about': 'Hakkımızda — Ragleaf',
-        '/developers': 'Geliştiriciler — Ragleaf',
-        '/installation': 'Kurulum Rehberi — Ragleaf',
+        '/docs': 'Dökümantasyon — Ragleaf',
         '/contact': 'İletişim — Ragleaf',
         '/legal': 'Yasal Bilgiler & Sözleşmeler — Ragleaf',
         '/blog': 'Blog — Ragleaf',
@@ -31,8 +30,7 @@ export default function BodyClassHandler() {
         '/': 'Ragleaf — Transform Your Documents with AI',
         '/pricing': 'Pricing Plans — Ragleaf',
         '/about': 'About Us — Ragleaf',
-        '/developers': 'Developers — Ragleaf',
-        '/installation': 'Installation Guide — Ragleaf',
+        '/docs': 'Docs — Ragleaf',
         '/contact': 'Contact Us — Ragleaf',
         '/legal': 'Legal — Ragleaf',
         '/blog': 'Blog — Ragleaf',
@@ -45,8 +43,7 @@ export default function BodyClassHandler() {
         '/': 'Ragleaf ile dokümanlarınızdan özel AI ajanlar oluşturun. WordPress eklentisi, JavaScript widget veya API ile her yere entegre edin.',
         '/pricing': 'Ragleaf yapay zeka asistanı abonelik paketleri ve fiyat detayları.',
         '/about': 'Ragleaf\'in hikayesi, teknoloji vizyonu ve yapay zeka asistanı çözümleri.',
-        '/developers': 'Ragleaf Web SDK, REST API ve Webhook entegrasyonu ile yapay zeka asistanınızı sistemlerinize entegre edin.',
-        '/installation': 'Ragleaf yapay zeka asistanını web sitenize entegre etmenin 6 kolay adımı.',
+        '/docs': 'Ragleaf Web SDK, REST API, Webhooks ve entegrasyon dokümantasyonu.',
         '/contact': 'Ragleaf ile iletişime geçin. Soru, öneri ve destek taleplerinizi form üzerinden bize iletin.',
         '/legal': 'Ragleaf kullanım şartları, gizlilik politikası, KVKK ve mesafeli satış sözleşmeleri.',
         '/blog': 'Yapay zeka, Retrieval-Augmented Generation (RAG) teknolojileri ve akıllı asistanlar hakkında teknik yazılar.',
@@ -56,8 +53,7 @@ export default function BodyClassHandler() {
         '/': 'Create custom AI agents from your documents. Integrate everywhere with WordPress plugin, JavaScript widget or API.',
         '/pricing': 'Choose the right AI Assistant plan for your business. Start free or customize an enterprise package.',
         '/about': 'Learn about Ragleaf\'s story, vision, and AI assistant solutions.',
-        '/developers': 'Integrate your AI assistant using Ragleaf Web SDK, REST API, and Webhooks.',
-        '/installation': '6 easy steps to integrate Ragleaf AI assistant to your website.',
+        '/docs': 'Ragleaf Web SDK, REST API, Webhooks, and integration documentation.',
         '/contact': 'Get in touch with the Ragleaf team. Send your questions, feedback and support requests.',
         '/legal': 'Ragleaf terms of service, privacy policy and legal contracts.',
         '/blog': 'Technical articles and guides on AI and RAG technologies.',
@@ -120,12 +116,10 @@ export default function BodyClassHandler() {
     let className = 'sub-page';
     if (pathname === '/' || pathname === '') {
       className = 'index-page';
-    } else if (pathname.startsWith('/installation')) {
+    } else if (pathname.startsWith('/docs')) {
       className = 'installation-page';
     } else if (pathname.startsWith('/pricing')) {
       className = 'pricing-page';
-    } else if (pathname.startsWith('/developers')) {
-      className = 'developers-page';
     } else if (pathname.startsWith('/blog')) {
       className = 'blog-page';
     } else if (pathname.startsWith('/about')) {

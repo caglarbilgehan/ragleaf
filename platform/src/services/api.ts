@@ -21,12 +21,7 @@ export type { ContactRequest };
 
 // API Base Configuration
 export function getApiBaseUrl(): string {
-  // Check if we have environment variable first
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-
-  // Origin-based routing
+  // Origin-based routing first to protect production
   const origin = window.location.origin;
 
   // Production domains -> Production API
@@ -34,8 +29,20 @@ export function getApiBaseUrl(): string {
     return 'https://api.ragleaf.com';
   }
 
-  // Development fallback (localhost)
-  return 'http://localhost:1306';
+  // Development: dynamic host resolution for WSL / Tailscale / LAN IPs
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:1306`;
+  }
+
+  // Check if we have environment variable first for dev
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Development fallback (cserver-2)
+  return 'http://cserver-2:1306';
 }
 
 const API_BASE_URL = getApiBaseUrl();
@@ -110,6 +117,17 @@ export const authApi = {
     await api.post('/auth/logout');
     localStorage.removeItem('ragleaf_token');
     localStorage.removeItem('ragleaf_user');
+  },
+
+  updateProfile: async (profileData: {
+    name?: string;
+    surname?: string;
+    email?: string;
+    current_password?: string;
+    new_password?: string;
+  }): Promise<User> => {
+    const response: AxiosResponse<User> = await api.put('/auth/update-profile', profileData);
+    return response.data;
   },
 };
 

@@ -537,7 +537,7 @@ def create_app() -> FastAPI:
                 os.path.join(widget_dist_path, "widget.js"),
                 media_type="application/javascript",
                 headers={
-                    "Cache-Control": "public, max-age=3600",
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
                     # CORS handled by middleware — widget.js must be loadable from any site
                     "Access-Control-Allow-Origin": "*",
                 }

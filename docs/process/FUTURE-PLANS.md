@@ -1,6 +1,6 @@
 # Ragleaf Future Roadmap & Product Architecture
 
-This document outlines the migration strategy to Next.js (React) and the product definitions for **Ragleaf AI Assistant** and the newly planned autonomous content generation suite: **Ragleaf AI Writer**.
+This document outlines the migration strategy to Next.js (React) and the product definitions for **Ragleaf AI Assistant**, **Ragleaf AI Writer**, and the workflow orchestration suite: **Ragleaf AI Automation**.
 
 ---
 
@@ -10,6 +10,7 @@ This document outlines the migration strategy to Next.js (React) and the product
 graph TD
     R[Ragleaf Brand] --> A[Ragleaf AI Assistant]
     R --> W[Ragleaf AI Writer]
+    R --> AU[Ragleaf AI Automation]
     
     A --> A1[Web Chat Widget]
     A --> A2[Appointment Booking]
@@ -18,15 +19,23 @@ graph TD
     W --> W1[Autonomous Content Engine]
     W --> W2[Multi-State Review Pipeline]
     W --> W3[Scheduler & Publishing API]
+
+    AU --> AU1[Telegram triggers]
+    AU --> AU2[Visitor actions]
+    AU --> AU3[Webhook events]
 ```
 
 ### A. Ragleaf AI Assistant (Mevcut Ürün)
 *   **Açıklama:** Web sitelerine yerleştirilen, dokümanlarla eğitilen, 7/24 konuşabilen, randevu alabilen ve doğrudan sohbet içinde ödeme toplayabilen interaktif sohbet robotu.
 *   **Geliştirme Odağı:** Widget performans iyileştirmeleri, yeni sohbet kanalları (WhatsApp, Telegram) entegrasyonu, ödeme ağ geçitlerinin genişletilmesi.
 
-### B. Ragleaf AI Writer (Yeni Ürün)
-*   **Açıklama:** Sektör trendlerini takip eden, anahtar kelimelere göre SEO uyumlu blog yazıları yazan ve içerik takvimi yöneten yapay zeka yazar ürünü.
-*   **Geliştirme Odağı:** LLM entegrasyonlu makale üretici, insan-denetimli (Human-in-the-loop) onay iş akışı, WordPress/Next.js otomatik yayınlama API'leri.
+### B. Ragleaf AI Writer (Mevcut Ürün)
+*   **Açıklama:** Asistan kimliği ve ses tonuyla otonom içerik, blog, makale ve sosyal medya gönderileri üreten yapay zeka yazar modülü.
+*   **Geliştirme Odağı:** Çok dilli taslak üretimi, insan onaylı yayınlama akışı ve Next.js/WordPress entegrasyonları.
+
+### C. Ragleaf AI Automation (Yeni Ürün)
+*   **Açıklama:** Asistanları tetikleyicilerle (Telegram kanalları, web ziyaretçi eylemleri, zamanlama, API webhookları) entegre edip otonom senaryolar kurgulayan otomasyon modülü.
+*   **Geliştirme Odağı:** Tetikleyici-eylem eşleme arayüzü, senaryo test simülatörü ve harici entegrasyon kanalları.
 
 ---
 
@@ -81,10 +90,27 @@ sequenceDiagram
 
 ## 4. Bekleyen Görevler (Pending Tasks)
 
-## 4. Bekleyen Görevler (Pending Tasks)
+*   🟡 **Orta Öncelik:** Hazır Sektörler İçin Dosya Şablonları
+    *   **Açıklama:** Hazır sektörlere yönelik asistanlar için hazır dosya şablonlarının oluşturulması (ürünler/hizmetler, fiyat listesi, fiyatlandırma vb.).
 
-*   🔴 **Yüksek Öncelik:** RAG Yönetimi Sidebar ve Sayfası Entegrasyonu
-    *   **Açıklama:** Yönetim panelinde RAG ayarlarını ve LLM yapılandırmasını ayrıştırarak daha temiz bir mimari sunma. "Sistem" altındaki genel "AI Yapılandırma" menüsünü kaldırıp, "LLM Yönetimi" altına "LLM Yapılandırması" (/admin/llm-config) ve ayrı bir "RAG Yönetimi" sidebar başlığı oluşturarak "RAG Ayarları" (/admin/rag-config) sayfasını ekleme.
 *   🟢 **Düşük Öncelik:** Blog Otomasyonu & AI Writer Modülü Geliştirmeleri
     *   **Açıklama:** AI Writer taslak içerik üretimi onay mekanizması ve Next.js revalidation yapısının panel tarafındaki admin kontrollerine entegrasyonu.
+
+---
+
+## 5. Arşivlenen / Tamamlanan Görevler (Archived Tasks)
+
+- **Mobil Widget ve Header Buton Tasarımı (2026-06-07):**
+  - Mobilde yapay zeka asistan widget açıldığında tüm ekranı kaplaması sağlandı, mobil media query eşiği 768px yapıldı. Sohbet penceresinin z-index'i baloncuğun üstüne çıkarıldı.
+  - Masaüstünde header'daki mükerrer "Şimdi Başla" butonu kaldırıldı. "Giriş Yap" butonu ise `btn-primary` ile "Şimdi Başla" butonuyla tamamen aynı tasarım ve hover özelliklerine sahip yapıldı.
+
+- **AIwriter Rebranding & AIautomation (2026-06-06):**
+  - AIwriter amacı sadece seo amaçlı yazı blog yazısı yazmak değil; oluşturulmuş bir asistan tarafından her türlü yazı içerik üretilebilir (kimliğe sahip vb.). Her 6 saatte bir otomatik cron ibaresi kaldırıldı.
+  - AIautomation adında tetikleyici tabanlı (Telegram mesajı, ziyaretçi gelmesi, özel koşul vb.) yeni bir ürün eklendi. Landing sayfaları ve yönetim paneli (`AIautomation` yeşil vurgulu sidebar ve `Senaryolar` alt sayfası `/tenant/automations/scenarios`) entegre edildi.
+  - Affiliate sayfasında örnek referans linki (`ref=*************`) maskelendi ve kopyalama pasifleştirildi. Kazanç hesaplayıcıdan paket indirimi kaldırıldı.
+
+- **Plan Fiyatlandırmaları ve Ürün Yetkilendirmeleri (2026-06-06):**
+  - Plan fiyatları güncellendi (Starter: 50$, Pro: 200$, Ultimate: 350$, Ultra: 600$) ve özellik yetkilendirmeleri (AI Assistant/AIchat her planda; AI Writer Ultimate/Ultra planlarında; AI Automation/Senaryolar ise sadece Ultra planında) hem veritabanı plans/organizations tablolarında hem de arayüz yetkilendirme (gating) kontrollerinde yapılandırıldı.
+
+
 

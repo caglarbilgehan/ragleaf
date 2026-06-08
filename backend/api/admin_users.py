@@ -49,6 +49,14 @@ def hash_password(password: str) -> str:
     """Hash password using bcrypt"""
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
+def generate_unique_user_id(db: Session) -> int:
+    import random
+    while True:
+        user_id = random.randint(10000000, 99999999)
+        exists = db.execute(text("SELECT 1 FROM users WHERE id = :id"), {"id": user_id}).fetchone()
+        if not exists:
+            return user_id
+
 @admin_users_router.get("", response_model=List[UserResponse])
 async def get_users(
     skip: int = Query(0, ge=0),
@@ -173,11 +181,13 @@ async def create_user(
         # Create user
         import json
         departments_json = json.dumps(user_data.departments or [])
+        user_id = generate_unique_user_id(db)
         
         db.execute(text("""
-            INSERT INTO users (email, password_hash, name, surname, full_name, is_active, is_admin, departments, created_at, updated_at)
-            VALUES (:email, :password_hash, :name, :surname, :full_name, :is_active, :is_admin, CAST(:departments AS jsonb), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            INSERT INTO users (id, email, password_hash, name, surname, full_name, is_active, is_admin, departments, created_at, updated_at)
+            VALUES (:id, :email, :password_hash, :name, :surname, :full_name, :is_active, :is_admin, CAST(:departments AS jsonb), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         """), {
+            "id": user_id,
             "email": user_data.email,
             "password_hash": password_hash,
             "name": user_data.name,

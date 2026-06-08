@@ -2038,12 +2038,25 @@ async def get_system_stats(
     total_models = db.query(ModelConfig).count()
     active_models = db.query(ModelConfig).filter(ModelConfig.is_active == True).count()
     
-    # Storage statistics
+    # Storage statistics - calculate across all tenants
     total_storage = 0
-    if DOCUMENTS_DIR.exists():
-        for file_path in DOCUMENTS_DIR.rglob("*"):
-            if file_path.is_file():
-                total_storage += file_path.stat().st_size
+    try:
+        from backend.services.storage_service import get_storage
+        storage_service = get_storage()
+        tenant_slugs = storage_service.list_tenants()
+        
+        for tenant_slug in tenant_slugs:
+            tenant_size = storage_service.get_tenant_size(tenant_slug)
+            total_storage += tenant_size
+            
+        logger.info(f"📊 Storage calculated across {len(tenant_slugs)} tenants: {total_storage / (1024 * 1024):.2f} MB")
+    except Exception as e:
+        logger.warning(f"Could not calculate multi-tenant storage: {e}")
+        # Fallback to legacy single-tenant calculation
+        if DOCUMENTS_DIR.exists():
+            for file_path in DOCUMENTS_DIR.rglob("*"):
+                if file_path.is_file():
+                    total_storage += file_path.stat().st_size
     
     # AI Services statistics from ai_provider and ai_tokens tables
     ai_services_data = {
@@ -2220,9 +2233,178 @@ async def get_system_stats_detailed(
 ):
     """Get detailed system statistics"""
     import psutil
+    import os
+    import glob
+    
+    # Try to get CPU temperature
+    cpu_temp = None
+    temperatures = []
+    
+    # Read thermal zones on Linux sysfs first for more accurate labels
+    try:
+        zones = glob.glob("/sys/class/thermal/thermal_zone*")
+        for zone in zones:
+            type_path = os.path.join(zone, "type")
+            temp_path = os.path.join(zone, "temp")
+            if os.path.exists(type_path) and os.path.exists(temp_path):
+                with open(type_path, "r") as f:
+                    label = f.read().strip()
+                with open(temp_path, "r") as f:
+                    temp_val = float(f.read().strip()) / 1000.0
+                
+                # Make labels user-friendly
+                friendly_label = label
+                if label == "x86_pkg_temp":
+                    friendly_label = "CPU Paket (Core)"
+                    cpu_temp = temp_val
+                elif label == "pch_skylake":
+                    friendly_label = "Anakart PCH"
+                elif label == "acpitz":
+                    friendly_label = "ACPI Bölgesi"
+                
+                temperatures.append({
+                    "label": friendly_label,
+                    "value": round(temp_val, 1)
+                })
+    except Exception as e:
+        logger.warning(f"Error reading sysfs thermal zones: {e}")
+
+    # Fallback to psutil sensors_temperatures
+    try:
+        if hasattr(psutil, "sensors_temperatures"):
+            temps = psutil.sensors_temperatures()
+            for key, entries in temps.items():
+                for entry in entries:
+                    # Avoid duplicates
+                    if not any(t["label"] == (entry.label or key) for t in temperatures):
+                        temperatures.append({
+                            "label": entry.label or key,
+                            "value": round(entry.current, 1)
+                        })
+            
+            # Legacy cpu_temp fallback
+            if cpu_temp is None:
+                for key in ['coretemp', 'cpu_thermal', 'k10temp', 'acpitz']:
+                    if key in temps and temps[key]:
+                        cpu_temp = temps[key][0].current
+                        break
+    except Exception as e:
+        logger.warning(f"Error reading psutil temperatures: {e}")
+
+    # Final legacy fallback for cpu_temp
+    if cpu_temp is None and os.path.exists("/sys/class/thermal/thermal_zone0/temp"):
+        try:
+            with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+                cpu_temp = float(f.read().strip()) / 1000.0
+        except Exception:
+            pass
+
+    # Try to get GPU stats
+    gpu_stats = {"available": False}
+    try:
+        from backend.services.resource_manager import resource_manager
+        gpu_stats = resource_manager._get_gpu_stats()
+    except Exception as e:
+        pass
+
+    # Get hardware specifications
+    hardware_info = {}
+    try:
+        import platform
+        cpu_model = "Bilinmeyen İşlemci"
+        if os.path.exists("/proc/cpuinfo"):
+            with open("/proc/cpuinfo", "r") as f:
+                for line in f:
+                    if "model name" in line:
+                        cpu_model = line.split(":")[1].strip()
+                        break
+        else:
+            cpu_model = platform.processor()
+            
+        os_name = platform.system()
+        os_release = platform.release()
+        cpu_cores = psutil.cpu_count(logical=True)
+        physical_cores = psutil.cpu_count(logical=False)
+        total_memory = psutil.virtual_memory().total
+        
+        hardware_info = {
+            "cpu_model": cpu_model,
+            "cpu_cores": f"{physical_cores} Fiziksel / {cpu_cores} Mantıksal",
+            "total_ram": total_memory,
+            "os": f"{os_name} {os_release}",
+            "python_version": platform.python_version()
+        }
+    except Exception as e:
+        logger.warning(f"Error getting hardware info: {e}")
+
+    # Scan all disk partitions
+    disks = []
+    try:
+        # 1. ALWAYS add the root partition (representing the host/container root SSD)
+        try:
+            usage = psutil.disk_usage('/')
+            disks.append({
+                "device": "/dev/nvme0n1p2",
+                "mountpoint": "/",
+                "total": usage.total,
+                "used": usage.used,
+                "free": usage.free,
+                "percent": usage.percent,
+                "label": "Ana Disk (SSD)"
+            })
+        except Exception as e:
+            logger.warning(f"Error getting root disk usage: {e}")
+
+        # 2. Scan other mounted filesystems
+        seen_devices = {"/dev/nvme0n1p2"}
+        parts = psutil.disk_partitions(all=False)
+        for p in parts:
+            if p.device in seen_devices:
+                continue
+            if p.mountpoint == '/app/storage' or '/mnt/' in p.mountpoint or '/media/' in p.mountpoint:
+                try:
+                    usage = psutil.disk_usage(p.mountpoint)
+                    if p.device == '/dev/sda2' or 'sda2' in p.device or p.mountpoint == '/app/storage':
+                        label = "Yedek Disk (HDD)"
+                    else:
+                        label = f"Bağlı Disk ({p.mountpoint.split('/')[-1]})"
+                    disks.append({
+                        "device": p.device,
+                        "mountpoint": p.mountpoint,
+                        "total": usage.total,
+                        "used": usage.used,
+                        "free": usage.free,
+                        "percent": usage.percent,
+                        "label": label
+                    })
+                    seen_devices.add(p.device)
+                except Exception:
+                    pass
+        
+        # 3. Add unmounted sda2 if not already scanned
+        if "/dev/sda2" not in seen_devices and os.path.exists("/sys/block/sda/sda2/size"):
+            try:
+                with open("/sys/block/sda/sda2/size", "r") as f:
+                    sectors = int(f.read().strip())
+                total_bytes = sectors * 512
+                disks.append({
+                    "device": "/dev/sda2",
+                    "mountpoint": "Bağlanmamış (Boşta)",
+                    "total": total_bytes,
+                    "used": 0,
+                    "free": total_bytes,
+                    "percent": 0,
+                    "label": "Yedek Disk (HDD)"
+                })
+            except Exception:
+                pass
+    except Exception as e:
+        logger.warning(f"Error scanning disk partitions: {e}")
     
     return {
         "cpu_percent": psutil.cpu_percent(interval=1),
+        "cpu_temp": cpu_temp,
+        "temperatures": temperatures,
         "memory": {
             "total": psutil.virtual_memory().total,
             "available": psutil.virtual_memory().available,
@@ -2234,7 +2416,10 @@ async def get_system_stats_detailed(
             "used": psutil.disk_usage('/').used,
             "free": psutil.disk_usage('/').free,
             "percent": psutil.disk_usage('/').percent
-        }
+        },
+        "disks": disks,
+        "gpu": gpu_stats,
+        "hardware": hardware_info
     }
 
 @admin_router.get("/system/memory-status")

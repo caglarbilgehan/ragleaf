@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import type { ModelConfig, ModelConfigUpdate } from '@/types';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface EditModelModalProps {
   model: ModelConfig;
@@ -15,6 +16,7 @@ export default function EditModelModal({
   onSubmit,
   isLoading = false,
 }: EditModelModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<ModelConfigUpdate>({
     name: model.name,
     description: model.description || '',
@@ -43,7 +45,7 @@ export default function EditModelModal({
     is_default: model.is_default,
   });
 
-  const [activeTab, setActiveTab] = useState<'basic' | 'llm' | 'rag' | 'system'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'llm' | 'system'>('basic');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +58,10 @@ export default function EditModelModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800/60 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-dark-800 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-100">Model Düzenle</h2>
+          <h2 className="text-xl font-semibold text-gray-100">{t('admin.models.edit_modal_title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -73,10 +75,9 @@ export default function EditModelModal({
           <div className="border-b">
             <div className="flex space-x-1 p-2">
               {[
-                { id: 'basic', label: 'Temel Bilgiler' },
-                { id: 'llm', label: 'LLM Parametreleri' },
-                { id: 'rag', label: 'RAG Parametreleri' },
-                { id: 'system', label: 'Sistem' },
+                { id: 'basic', label: t('admin.models.tab_basic') },
+                { id: 'llm', label: t('admin.models.tab_llm') },
+                { id: 'system', label: t('admin.models.tab_system') },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -101,7 +102,7 @@ export default function EditModelModal({
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Model Adı
+                    {t('admin.models.label_name')}
                   </label>
                   <input
                     type="text"
@@ -111,13 +112,13 @@ export default function EditModelModal({
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Panelde görünecek açıklayıcı model adı
+                    {t('admin.models.name_hint')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Sağlayıcı
+                    {t('admin.models.label_provider')}
                   </label>
                   <input
                     type="text"
@@ -127,13 +128,13 @@ export default function EditModelModal({
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Model sağlayıcısı (huggingface, openai, anthropic, vb.)
+                    {t('admin.models.provider_hint')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Model İsmi
+                    {t('admin.models.label_model_name')}
                   </label>
                   <input
                     type="text"
@@ -143,22 +144,22 @@ export default function EditModelModal({
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    API'de kullanılacak gerçek model adı (örn: openai/gpt-oss-120b)
+                    {t('admin.models.model_name_hint')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Açıklama
+                    {t('admin.models.label_desc')}
                   </label>
                   <textarea
                     value={formData.description || ''}
                     onChange={(e) => handleChange('description', e.target.value)}
                     className="input min-h-[80px]"
-                    placeholder="Model hakkında kısa bir açıklama..."
+                    placeholder={t('admin.models.desc_placeholder')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Modelin kullanım amacı veya özellikleri hakkında açıklama
+                    {t('admin.models.desc_hint')}
                   </p>
                 </div>
 
@@ -170,7 +171,7 @@ export default function EditModelModal({
                       onChange={(e) => handleChange('is_active', e.target.checked)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-300">Aktif</span>
+                    <span className="text-sm text-gray-300">{t('admin.models.label_active')}</span>
                   </label>
 
                   <label className="flex items-center">
@@ -180,7 +181,7 @@ export default function EditModelModal({
                       onChange={(e) => handleChange('is_default', e.target.checked)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-300">Varsayılan Model</span>
+                    <span className="text-sm text-gray-300">{t('admin.models.label_default')}</span>
                   </label>
                 </div>
               </div>
@@ -192,7 +193,7 @@ export default function EditModelModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Context Window (num_ctx)
+                      {t('admin.models.label_num_ctx')}
                     </label>
                     <input
                       type="number"
@@ -202,14 +203,12 @@ export default function EditModelModal({
                       min="128"
                       max="1048576"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Model'in aynı anda işleyebileceği maksimum token sayısı. Modern LLM'ler 32K-128K context destekler. <strong>Önerilen: 32768</strong>
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.num_ctx_hint') }} />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Max Tokens (num_predict)
+                      {t('admin.models.label_num_predict')}
                     </label>
                     <input
                       type="number"
@@ -219,14 +218,12 @@ export default function EditModelModal({
                       min="1"
                       max="16384"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Tek bir yanıtta üretilecek maksimum token sayısı. RAG için <strong>4096 önerilir</strong> (detaylı teknik yanıtlar için).
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.num_predict_hint') }} />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Temperature
+                      {t('admin.models.label_temperature')}
                     </label>
                     <input
                       type="number"
@@ -237,14 +234,12 @@ export default function EditModelModal({
                       min="0"
                       max="2"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Yanıtların yaratıcılık seviyesi. <strong>0.3 = tutarlı teknik yanıtlar</strong>, 0.7 = dengeli, 1.0+ = yaratıcı.
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.temperature_hint') }} />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Top P
+                      {t('admin.models.label_top_p')}
                     </label>
                     <input
                       type="number"
@@ -255,14 +250,12 @@ export default function EditModelModal({
                       min="0"
                       max="1"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Nucleus sampling. Sadece en olası %90'lık token'ları dikkate alır. Düşük değerler daha odaklı yanıtlar üretir.
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.top_p_hint') }} />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Top K
+                      {t('admin.models.label_top_k')}
                     </label>
                     <input
                       type="number"
@@ -272,14 +265,12 @@ export default function EditModelModal({
                       min="1"
                       max="100"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Sadece en olası K adet token'ı dikkate alır. Düşük değerler (10-20) daha tutarlı, yüksek değerler (50-100) daha çeşitli yanıtlar üretir.
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.top_k_hint') }} />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Repeat Penalty
+                      {t('admin.models.label_repeat_penalty')}
                     </label>
                     <input
                       type="number"
@@ -290,84 +281,7 @@ export default function EditModelModal({
                       min="0"
                       max="2"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Tekrarlayan kelimeleri cezalandırır. 1.0 = ceza yok, 1.1 = hafif ceza, 1.5+ = güçlü ceza. Yüksek değerler daha çeşitli kelime kullanımı sağlar.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* RAG Parameters Tab */}
-            {activeTab === 'rag' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Max Context Chars
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.max_context_chars || 8000}
-                      onChange={(e) => handleChange('max_context_chars', parseInt(e.target.value))}
-                      className="input"
-                      min="100"
-                      max="20000"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      RAG sisteminden alınan toplam karakter sayısı. <strong>Önerilen: 8000</strong> (5 chunk × ~1600 char).
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      RAG Top K
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.rag_top_k || 5}
-                      onChange={(e) => handleChange('rag_top_k', parseInt(e.target.value))}
-                      className="input"
-                      min="1"
-                      max="20"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Getirilecek chunk sayısı. <strong>Önerilen: 5</strong> (detaylı teknik sorular için). 3 = hızlı, 5 = dengeli, 7+ = kapsamlı.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Chunk Size
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.chunk_size || 1000}
-                      onChange={(e) => handleChange('chunk_size', parseInt(e.target.value))}
-                      className="input"
-                      min="100"
-                      max="2000"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Her chunk'ın karakter boyutu. <strong>Önerilen: 1000</strong>. Büyük chunk'lar daha fazla bağlam içerir.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Chunk Overlap
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.chunk_overlap || 200}
-                      onChange={(e) => handleChange('chunk_overlap', parseInt(e.target.value))}
-                      className="input"
-                      min="0"
-                      max="500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Chunk'lar arası örtüşme. <strong>Önerilen: 200</strong> (bilgi kaybını önler). Chunk size'ın %20'si ideal.
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: t('admin.models.repeat_penalty_hint') }} />
                   </div>
                 </div>
               </div>
@@ -378,7 +292,7 @@ export default function EditModelModal({
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Timeout (saniye)
+                    {t('admin.models.label_timeout')}
                   </label>
                   <input
                     type="number"
@@ -389,7 +303,7 @@ export default function EditModelModal({
                     max="600"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Model'den yanıt beklenecek maksimum süre. Uzun süreli işlemler için daha yüksek değerler kullanın.
+                    {t('admin.models.timeout_hint')}
                   </p>
                 </div>
 
@@ -403,10 +317,10 @@ export default function EditModelModal({
                   />
                   <div>
                     <label htmlFor="stream_enabled" className="text-sm font-medium text-gray-300">
-                      Stream Yanıtları Etkinleştir
+                      {t('admin.models.label_stream')}
                     </label>
                     <p className="text-xs text-gray-500">
-                      Yanıtları kelime kelime gerçek zamanlı olarak gösterir. Devre dışı bırakılırsa yanıt tamamlandıktan sonra gösterilir.
+                      {t('admin.models.stream_hint')}
                     </p>
                   </div>
                 </div>
@@ -416,14 +330,14 @@ export default function EditModelModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end space-x-3 p-6 border-t bg-dark-700/50">
+          <div className="flex items-center justify-end space-x-3 p-6 border-t bg-dark-700">
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-gray-300 bg-dark-500 rounded-md hover:bg-dark-400 transition-colors font-medium"
               disabled={isLoading}
             >
-              İptal
+              {t('ui.cancel')}
             </button>
             <button
               type="submit"
@@ -431,7 +345,7 @@ export default function EditModelModal({
               disabled={isLoading}
             >
               <Save className="h-4 w-4 mr-2" />
-              {isLoading ? 'Kaydediliyor...' : 'Kaydet'}
+              {isLoading ? t('admin.models.saving') : t('ui.save')}
             </button>
           </div>
         </form>

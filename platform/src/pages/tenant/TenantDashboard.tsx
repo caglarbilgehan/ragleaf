@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { templateApi, organizationApi, AgentTemplate } from '@/services/ragleafApi';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface DashboardStats {
   agent_count: number;
@@ -29,9 +30,14 @@ interface AgentSummary {
 }
 
 function getApiBase(): string {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (window.location.origin.includes('ragleaf.com')) return 'https://api.ragleaf.com';
-  return 'http://localhost:1306';
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:1306`;
+  }
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  return 'http://cserver-2:1306';
 }
 const API_BASE = getApiBase();
 
@@ -45,6 +51,7 @@ async function fetchAPI<T>(path: string): Promise<T> {
 }
 
 export default function TenantDashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [agents, setAgents] = useState<AgentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +115,7 @@ export default function TenantDashboard() {
       setStats(s);
       setAgents(a);
     } catch (error: any) {
-      setOnboardingError(error.message || 'Onboarding sırasında bir hata oluştu.');
+      setOnboardingError(error.message || t('dashboard.onboarding.error_occurred'));
     } finally {
       setIsSubmitting(false);
     }
@@ -142,13 +149,13 @@ export default function TenantDashboard() {
     );
   }
 
-  if (!stats) return <div className="p-6 text-red-400">Dashboard verileri yüklenemedi.</div>;
+  if (!stats) return <div className="p-6 text-red-400">{t('dashboard.data_load_error')}</div>;
 
   const planColors: Record<string, string> = {
     free: 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20',
     starter: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20',
     pro: 'bg-primary-500/10 text-primary-400 ring-1 ring-primary-500/20',
-    enterprise: 'bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20',
+    ultra: 'bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20',
   };
 
   return (
@@ -156,15 +163,15 @@ export default function TenantDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Dashboard</h1>
-          <p className="text-gray-500 mt-1">Organizasyon genel durumu</p>
+          <h1 className="text-2xl font-bold text-gray-100">{t('nav.dashboard')}</h1>
+          <p className="text-gray-500 mt-1">{t('dashboard.org_status')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3.5 py-1.5 bg-green-500/10 text-green-400 ring-1 ring-green-500/20 rounded-full font-semibold text-sm shadow-[0_0_15px_rgba(34,197,94,0.1)]">
-            <span className="animate-pulse">🍃</span> {stats.ragleaf_leaves || 0} Yaprak
+            <span className="animate-pulse">🍃</span> {stats.ragleaf_leaves || 0} {t('dashboard.leaves')}
           </div>
           <span className={`px-3.5 py-1.5 rounded-full text-sm font-medium ${planColors[stats.plan] || planColors.free}`}>
-            {stats.plan.toUpperCase()} Plan
+            {stats.plan.toUpperCase()} {t('dashboard.plan')}
           </span>
         </div>
       </div>
@@ -172,36 +179,36 @@ export default function TenantDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
-          title="Asistanlar"
+          title={t('nav.asistanlarim')}
           value={stats.agent_count}
-          subtitle={`${stats.active_agent_count} aktif / ${stats.max_agents} limit`}
+          subtitle={`${stats.active_agent_count} ${t('dashboard.active_assistants')} / ${stats.max_agents} ${t('dashboard.limit')}`}
           icon="🤖"
           progress={(stats.agent_count / stats.max_agents) * 100}
         />
         <StatCard
-          title="Dokümanlar"
+          title={t('nav.dokumanlar')}
           value={stats.document_count}
-          subtitle={`/ ${stats.max_documents} limit`}
+          subtitle={`/ ${stats.max_documents} ${t('dashboard.limit')}`}
           icon="📄"
           progress={(stats.document_count / stats.max_documents) * 100}
         />
         <StatCard
-          title="Bu Ay Sorgu"
+          title={t('dashboard.stats_queries_month')}
           value={stats.total_queries_this_month}
-          subtitle={`/ ${stats.max_queries_per_month.toLocaleString()} limit`}
+          subtitle={`/ ${stats.max_queries_per_month.toLocaleString()} ${t('dashboard.limit')}`}
           icon="💬"
           progress={(stats.total_queries_this_month / stats.max_queries_per_month) * 100}
         />
         <StatCard
-          title="Toplam Konuşma"
+          title={t('dashboard.stats_total_conversations')}
           value={stats.total_conversations}
-          subtitle={`${stats.total_messages.toLocaleString()} mesaj`}
+          subtitle={`${stats.total_messages.toLocaleString()} ${t('dashboard.stats_messages')}`}
           icon="📊"
         />
         <StatCard
-          title="Ragleaf Yaprakları"
+          title={t('dashboard.stats_leaves')}
           value={stats.ragleaf_leaves || 0}
-          subtitle="İndirim kazanmak için 🍃"
+          subtitle={t('dashboard.stats_discount_hint')}
           icon="🍃"
         />
       </div>
@@ -211,40 +218,40 @@ export default function TenantDashboard() {
         <div className="flex items-center gap-4">
           <span className="text-3xl animate-bounce">🍃</span>
           <div>
-            <h3 className="font-semibold text-gray-100 text-base">Ragleaf Sadakat Programı</h3>
-            <p className="text-sm text-gray-400 mt-1">Asistanınıza gelen her sohbet mesajında 1 Ragleaf yaprağı kazanırsınız. Biriken yapraklarla indirimler kazanabilirsiniz.</p>
+            <h3 className="font-semibold text-gray-100 text-base">{t('dashboard.loyalty_program')}</h3>
+            <p className="text-sm text-gray-400 mt-1">{t('dashboard.loyalty_desc')}</p>
           </div>
         </div>
         <button 
-          onClick={() => alert("Yakında! Ragleaf Yapraklarınızı indirim kuponuna dönüştürme özelliği yakında aktif edilecektir.")}
+          onClick={() => alert(t('dashboard.convert_to_discount_alert'))}
           className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-sm font-semibold rounded-lg transition border border-green-500/30 whitespace-nowrap"
         >
-          İndirime Dönüştür (Yakında)
+          {t('dashboard.convert_to_discount')}
         </button>
       </div>
 
       {/* Agents Table */}
       <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm">
         <div className="px-6 py-4 border-b border-white/[0.06]">
-          <h2 className="text-lg font-semibold text-gray-100">Asistanlarınız</h2>
+          <h2 className="text-lg font-semibold text-gray-100">{t('dashboard.your_assistants')}</h2>
         </div>
         {agents.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p className="text-4xl mb-2">🤖</p>
-            <p>Henüz asistan oluşturmadınız.</p>
-            <a href="/agents" className="text-primary-400 hover:underline mt-2 inline-block">İlk asistanınızı oluşturun →</a>
+            <p>{t('dashboard.no_assistants_yet')}</p>
+            <a href="/agents" className="text-primary-400 hover:underline mt-2 inline-block">{t('dashboard.create_first_assistant')}</a>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-dark-700/50 text-xs text-gray-500 uppercase">
                 <tr>
-                  <th className="px-6 py-3 text-left">Asistan</th>
-                  <th className="px-6 py-3 text-center">Durum</th>
-                  <th className="px-6 py-3 text-center">Doküman</th>
-                  <th className="px-6 py-3 text-center">Konuşma</th>
-                  <th className="px-6 py-3 text-center">Mesaj</th>
-                  <th className="px-6 py-3 text-center">API Key</th>
+                  <th className="px-6 py-3 text-left">{t('dashboard.table_assistant')}</th>
+                  <th className="px-6 py-3 text-center">{t('dashboard.table_status')}</th>
+                  <th className="px-6 py-3 text-center">{t('dashboard.table_document')}</th>
+                  <th className="px-6 py-3 text-center">{t('dashboard.table_conversation')}</th>
+                  <th className="px-6 py-3 text-center">{t('dashboard.table_message')}</th>
+                  <th className="px-6 py-3 text-center">{t('dashboard.table_api_key')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
@@ -258,7 +265,7 @@ export default function TenantDashboard() {
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                         agent.is_active ? 'bg-green-500/10 text-green-400 ring-1 ring-green-500/20' : 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20'
                       }`}>
-                        {agent.is_active ? 'Aktif' : 'Pasif'}
+                        {agent.is_active ? t('dashboard.table_status_active') : t('dashboard.table_status_passive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center text-gray-300">{agent.document_count}</td>
@@ -266,7 +273,7 @@ export default function TenantDashboard() {
                     <td className="px-6 py-4 text-center text-gray-300">{agent.total_messages}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`text-xs ${agent.api_key_count > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {agent.api_key_count > 0 ? `${agent.api_key_count} key` : 'Yok'}
+                        {agent.api_key_count > 0 ? `${agent.api_key_count} key` : t('dashboard.table_key_none')}
                       </span>
                     </td>
                   </tr>
@@ -282,31 +289,32 @@ export default function TenantDashboard() {
           <div className="bg-dark-900 border border-white/[0.06] rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-6 my-8">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-100">🍃 Ragleaf Kurulum Sihirbazı</h3>
-                <p className="text-sm text-gray-500 mt-1">Hesabınızı dakikalar içinde aktif edin</p>
+                <h3 className="text-xl font-bold text-gray-100">{t('dashboard.onboarding.title')}</h3>
+                <p className="text-sm text-gray-500 mt-1">{t('dashboard.onboarding.subtitle')}</p>
               </div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400">
-                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 0 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>1. Plan</span>
+                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 0 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>{t('dashboard.onboarding.step_1')}</span>
                 <span className="text-gray-600">→</span>
-                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 1 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>2. Ödeme</span>
+                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 1 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>{t('dashboard.onboarding.step_2')}</span>
                 <span className="text-gray-600">→</span>
-                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 2 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>3. Asistan</span>
+                <span className={`px-2.5 py-1 rounded-full ${onboardingStep === 2 ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700'}`}>{t('dashboard.onboarding.step_3')}</span>
               </div>
             </div>
 
             {onboardingStep === 0 && (() => {
               const starterPlan = plans.find(p => p.key === 'starter') || { price: 490, max_agents: 3, max_documents: 100, max_queries_per_month: 5000 };
               const proPlan = plans.find(p => p.key === 'pro') || { price: 1490, max_agents: 10, max_documents: 500, max_queries_per_month: 25000 };
-              const enterprisePlan = plans.find(p => p.key === 'enterprise') || { price: 9990, max_agents: 999, max_documents: 9999, max_queries_per_month: 999999 };
+              const ultimatePlan = plans.find(p => p.key === 'ultimate') || { price: 4990, max_agents: 50, max_documents: 2000, max_queries_per_month: 100000 };
+              const ultraPlan = plans.find(p => p.key === 'ultra') || { price: 9990, max_agents: 999, max_documents: 9999, max_queries_per_month: 999999 };
 
               return (
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-200">1. Adım: Planınızı Seçin</h4>
-                    <p className="text-sm text-gray-400">Sektörel ihtiyaçlarınıza uygun bir plan ile başlayın. Ücretsiz deneme sonrasında dilediğiniz zaman iptal edebilirsiniz.</p>
+                    <h4 className="text-lg font-semibold text-gray-200">{t('dashboard.onboarding.step_1_title')}</h4>
+                    <p className="text-sm text-gray-400">{t('dashboard.onboarding.step_1_desc')}</p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Starter Trial Card */}
                     <div 
                       onClick={() => setSelectedPlan('starter_trial')}
@@ -317,17 +325,17 @@ export default function TenantDashboard() {
                       }`}
                     >
                       <div className="absolute top-3 right-3 bg-primary-500/10 text-primary-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
-                        Ücretsiz Deneme
+                        {t('dashboard.onboarding.free_trial')}
                       </div>
                       <div>
-                        <h5 className="font-bold text-gray-200 text-base">Starter Deneme</h5>
-                        <p className="text-xs text-gray-500 mt-1">Kredi kartı gerekmez</p>
-                        <div className="text-2xl font-black text-gray-100 mt-3">₺0 <span className="text-xs font-normal text-gray-500">/ 7 Gün</span></div>
+                        <h5 className="font-bold text-gray-200 text-base">{t('dashboard.onboarding.starter_trial')}</h5>
+                        <p className="text-xs text-gray-500 mt-1">{t('dashboard.onboarding.no_card')}</p>
+                        <div className="text-2xl font-black text-gray-100 mt-3">$0 <span className="text-xs font-normal text-gray-500">/ 7 {t('dashboard.onboarding.days')}</span></div>
                       </div>
                       <ul className="text-xs text-gray-400 space-y-1.5 mt-4 pt-3 border-t border-white/[0.04]">
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_agents} Yapay Zeka Asistanı</li>
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_documents} Doküman Yükleme</li>
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_queries_per_month.toLocaleString()} Sorgu / Ay</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_agents} {t('dashboard.table_assistant')}</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_documents} {t('dashboard.table_document')}</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_queries_per_month.toLocaleString()} {t('dashboard.table_conversation')} / {t('dashboard.onboarding.month')}</li>
                       </ul>
                     </div>
 
@@ -341,14 +349,14 @@ export default function TenantDashboard() {
                       }`}
                     >
                       <div>
-                        <h5 className="font-bold text-gray-200 text-base">Starter Plan</h5>
-                        <p className="text-xs text-gray-500 mt-1">Küçük ölçekli işletmeler için</p>
-                        <div className="text-2xl font-black text-gray-100 mt-3">₺{starterPlan.price} <span className="text-xs font-normal text-gray-500">/ ay</span></div>
+                        <h5 className="font-bold text-gray-200 text-base">{t('dashboard.onboarding.starter_plan')}</h5>
+                        <p className="text-xs text-gray-500 mt-1">{t('dashboard.onboarding.small_biz')}</p>
+                        <div className="text-2xl font-black text-gray-100 mt-3">${starterPlan.price} <span className="text-xs font-normal text-gray-500">/ {t('dashboard.onboarding.month')}</span></div>
                       </div>
                       <ul className="text-xs text-gray-400 space-y-1.5 mt-4 pt-3 border-t border-white/[0.04]">
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_agents} Yapay Zeka Asistanı</li>
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_documents} Doküman Yükleme</li>
-                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_queries_per_month.toLocaleString()} Sorgu / Ay</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_agents} {t('dashboard.table_assistant')}</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_documents} {t('dashboard.table_document')}</li>
+                        <li className="flex items-center gap-1.5">✓ {starterPlan.max_queries_per_month.toLocaleString()} {t('dashboard.table_conversation')} / {t('dashboard.onboarding.month')}</li>
                       </ul>
                     </div>
 
@@ -362,38 +370,59 @@ export default function TenantDashboard() {
                       }`}
                     >
                       <div className="absolute top-3 right-3 bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
-                        Popüler
+                        {t('dashboard.onboarding.popular')}
                       </div>
                       <div>
-                        <h5 className="font-bold text-gray-200 text-base">Pro Plan</h5>
-                        <p className="text-xs text-gray-500 mt-1">Büyüyen ekipler için</p>
-                        <div className="text-2xl font-black text-gray-100 mt-3">₺{proPlan.price} <span className="text-xs font-normal text-gray-500">/ ay</span></div>
+                        <h5 className="font-bold text-gray-200 text-base">{t('dashboard.onboarding.pro_plan')}</h5>
+                        <p className="text-xs text-gray-500 mt-1">{t('dashboard.onboarding.growing_teams')}</p>
+                        <div className="text-2xl font-black text-gray-100 mt-3">${proPlan.price} <span className="text-xs font-normal text-gray-500">/ {t('dashboard.onboarding.month')}</span></div>
                       </div>
                       <ul className="text-xs text-gray-400 space-y-1.5 mt-4 pt-3 border-t border-white/[0.04]">
-                        <li className="flex items-center gap-1.5">✓ {proPlan.max_agents} Yapay Zeka Asistanı</li>
-                        <li className="flex items-center gap-1.5">✓ {proPlan.max_documents} Doküman Yükleme</li>
-                        <li className="flex items-center gap-1.5">✓ {proPlan.max_queries_per_month.toLocaleString()} Sorgu / Ay</li>
+                        <li className="flex items-center gap-1.5">✓ {proPlan.max_agents} {t('dashboard.table_assistant')}</li>
+                        <li className="flex items-center gap-1.5">✓ {proPlan.max_documents} {t('dashboard.table_document')}</li>
+                        <li className="flex items-center gap-1.5">✓ {proPlan.max_queries_per_month.toLocaleString()} {t('dashboard.table_conversation')} / {t('dashboard.onboarding.month')}</li>
                       </ul>
                     </div>
 
-                    {/* Enterprise Card */}
+                    {/* Ultimate Card */}
                     <div 
-                      onClick={() => setSelectedPlan('enterprise')}
+                      onClick={() => setSelectedPlan('ultimate')}
                       className={`p-4 rounded-xl border cursor-pointer transition relative flex flex-col justify-between ${
-                        selectedPlan === 'enterprise' 
+                        selectedPlan === 'ultimate' 
                           ? 'border-primary-500 bg-primary-500/[0.03] shadow-[0_0_15px_rgba(34,197,94,0.15)]' 
                           : 'border-white/[0.06] bg-white/[0.01] hover:bg-white/[0.03]'
                       }`}
                     >
                       <div>
-                        <h5 className="font-bold text-gray-200 text-base">Enterprise</h5>
-                        <p className="text-xs text-gray-500 mt-1">Büyük organizasyonlar için</p>
-                        <div className="text-2xl font-black text-gray-100 mt-3">₺{enterprisePlan.price} <span className="text-xs font-normal text-gray-500">/ ay</span></div>
+                        <h5 className="font-bold text-gray-200 text-base">Ultimate</h5>
+                        <p className="text-xs text-gray-500 mt-1">{t('dashboard.onboarding.growing_teams')}</p>
+                        <div className="text-2xl font-black text-gray-100 mt-3">${ultimatePlan.price} <span className="text-xs font-normal text-gray-500">/ {t('dashboard.onboarding.month')}</span></div>
                       </div>
                       <ul className="text-xs text-gray-400 space-y-1.5 mt-4 pt-3 border-t border-white/[0.04]">
-                        <li className="flex items-center gap-1.5">✓ {enterprisePlan.max_agents === 999 ? 'Sınırsız' : `${enterprisePlan.max_agents}`} Asistan</li>
-                        <li className="flex items-center gap-1.5">✓ {enterprisePlan.max_documents === 9999 ? 'Sınırsız' : `${enterprisePlan.max_documents}`} Doküman</li>
-                        <li className="flex items-center gap-1.5">✓ Özel SLA & Desteği</li>
+                        <li className="flex items-center gap-1.5">✓ {ultimatePlan.max_agents} {t('dashboard.table_assistant')}</li>
+                        <li className="flex items-center gap-1.5">✓ {ultimatePlan.max_documents} {t('dashboard.table_document')}</li>
+                        <li className="flex items-center gap-1.5">✓ {ultimatePlan.max_queries_per_month.toLocaleString()} {t('dashboard.table_conversation')} / {t('dashboard.onboarding.month')}</li>
+                      </ul>
+                    </div>
+
+                    {/* Ultra Card */}
+                    <div 
+                      onClick={() => setSelectedPlan('ultra')}
+                      className={`p-4 rounded-xl border cursor-pointer transition relative flex flex-col justify-between ${
+                        selectedPlan === 'ultra' 
+                          ? 'border-primary-500 bg-primary-500/[0.03] shadow-[0_0_15px_rgba(34,197,94,0.15)]' 
+                          : 'border-white/[0.06] bg-white/[0.01] hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      <div>
+                        <h5 className="font-bold text-gray-200 text-base">{t('dashboard.onboarding.enterprise')}</h5>
+                        <p className="text-xs text-gray-500 mt-1">{t('dashboard.onboarding.big_org')}</p>
+                        <div className="text-2xl font-black text-gray-100 mt-3">${ultraPlan.price} <span className="text-xs font-normal text-gray-500">/ {t('dashboard.onboarding.month')}</span></div>
+                      </div>
+                      <ul className="text-xs text-gray-400 space-y-1.5 mt-4 pt-3 border-t border-white/[0.04]">
+                        <li className="flex items-center gap-1.5">✓ {ultraPlan.max_agents === 999 ? t('dashboard.onboarding.unlimited') : `${ultraPlan.max_agents}`} {t('dashboard.table_assistant')}</li>
+                        <li className="flex items-center gap-1.5">✓ {ultraPlan.max_documents === 9999 ? t('dashboard.onboarding.unlimited') : `${ultraPlan.max_documents}`} {t('dashboard.table_document')}</li>
+                        <li className="flex items-center gap-1.5">✓ {t('dashboard.onboarding.special_sla')}</li>
                       </ul>
                     </div>
                   </div>
@@ -403,7 +432,7 @@ export default function TenantDashboard() {
                       onClick={() => setOnboardingStep(1)}
                       className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-semibold transition text-sm flex items-center gap-2"
                     >
-                      Devam Et →
+                      {t('dashboard.onboarding.continue')}
                     </button>
                   </div>
                 </div>
@@ -413,23 +442,23 @@ export default function TenantDashboard() {
             {onboardingStep === 1 && (
               <div className="space-y-5">
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-200">2. Adım: Ödeme ve Fatura</h4>
-                  <p className="text-sm text-gray-400">Seçtiğiniz planın ödeme işlemlerini tamamlayın.</p>
+                  <h4 className="text-lg font-semibold text-gray-200">{t('dashboard.onboarding.step_2_title')}</h4>
+                  <p className="text-sm text-gray-400">{t('dashboard.onboarding.step_2_desc')}</p>
                 </div>
 
                 {selectedPlan === 'starter_trial' ? (
                   <div className="p-5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 space-y-3">
                     <div className="flex items-center gap-2.5 font-bold text-base">
-                      <span>✓</span> Kredi Kartı Gerekmiyor
+                      {t('dashboard.onboarding.no_card_required_title')}
                     </div>
                     <p className="text-sm leading-relaxed text-gray-300">
-                      7 günlük Starter deneme sürümünü seçtiniz. Deneme süresince hiçbir ücret ödemezsiniz ve kart bilgisi girmeden doğrudan kuruluma geçebilirsiniz.
+                      {t('dashboard.onboarding.no_card_required_desc')}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4 max-w-md">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-gray-400">Kart Sahibi Adı Soyadı *</label>
+                      <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.card_name')}</label>
                       <input 
                         type="text" 
                         value={cardName}
@@ -440,7 +469,7 @@ export default function TenantDashboard() {
                     </div>
                     
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-gray-400">Kart Numarası *</label>
+                      <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.card_number')}</label>
                       <input 
                         type="text" 
                         value={cardNumber}
@@ -452,7 +481,7 @@ export default function TenantDashboard() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-gray-400">Son Kullanma Tarihi *</label>
+                        <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.card_expiry')}</label>
                         <input 
                           type="text" 
                           value={cardExpiry}
@@ -463,7 +492,7 @@ export default function TenantDashboard() {
                       </div>
                       
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-gray-400">CVC *</label>
+                        <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.card_cvc')}</label>
                         <input 
                           type="password" 
                           value={cardCvc}
@@ -481,13 +510,13 @@ export default function TenantDashboard() {
                     onClick={() => setOnboardingStep(0)}
                     className="px-5 py-2.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.03] text-gray-300 font-semibold transition text-sm"
                   >
-                    ← Geri
+                    {t('dashboard.onboarding.back')}
                   </button>
                   <button 
                     onClick={() => {
                       if (selectedPlan !== 'starter_trial') {
                         if (!cardName || !cardNumber || !cardExpiry || !cardCvc) {
-                          alert('Lütfen tüm kart bilgilerini doldurun.');
+                          alert(t('dashboard.onboarding.fill_all'));
                           return;
                         }
                       }
@@ -495,7 +524,7 @@ export default function TenantDashboard() {
                     }}
                     className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-semibold transition text-sm"
                   >
-                    Devam Et →
+                    {t('dashboard.onboarding.continue')}
                   </button>
                 </div>
               </div>
@@ -504,19 +533,19 @@ export default function TenantDashboard() {
             {onboardingStep === 2 && (
               <div className="space-y-5">
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-200">3. Adım: AI Asistan Kurulumu</h4>
-                  <p className="text-sm text-gray-400">Sektörünüzü seçin ve asistan detaylarını girin.</p>
+                  <h4 className="text-lg font-semibold text-gray-200">{t('dashboard.onboarding.step_3_title')}</h4>
+                  <p className="text-sm text-gray-400">{t('dashboard.onboarding.step_3_desc')}</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-gray-400 block">Sektör Şablonu Seçin *</label>
+                    <label className="text-xs font-semibold text-gray-400 block">{t('dashboard.onboarding.select_template')}</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 max-h-48 overflow-y-auto pr-1">
                       {templates.map((tmpl) => (
                         <div
-                          key={tmpl.slug}
-                          onClick={() => setSelectedTemplate(tmpl.slug)}
-                          className={`p-3 rounded-lg border text-center cursor-pointer transition ${
+                           key={tmpl.slug}
+                           onClick={() => setSelectedTemplate(tmpl.slug)}
+                           className={`p-3 rounded-lg border text-center cursor-pointer transition ${
                             selectedTemplate === tmpl.slug
                               ? 'border-primary-500 bg-primary-500/10 text-primary-400'
                               : 'border-white/[0.06] bg-white/[0.01] text-gray-400 hover:bg-white/[0.03]'
@@ -530,7 +559,7 @@ export default function TenantDashboard() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-400">Asistan Adı *</label>
+                    <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.assistant_name')}</label>
                     <input 
                       type="text" 
                       value={agentName}
@@ -541,12 +570,12 @@ export default function TenantDashboard() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-400">Hoş Geldiniz Mesajı *</label>
+                    <label className="text-xs font-semibold text-gray-400">{t('dashboard.onboarding.welcome_msg')}</label>
                     <textarea 
                       value={welcomeMessage}
                       onChange={(e) => setWelcomeMessage(e.target.value)}
                       rows={3}
-                      placeholder="Müşterileri karşılayacak mesaj..."
+                      placeholder={t('dashboard.onboarding.welcome_placeholder')}
                       className="w-full bg-dark-800 border border-white/[0.08] focus:border-primary-500 rounded-lg px-3.5 py-2 text-sm text-gray-200 outline-none transition resize-none"
                     />
                   </div>
@@ -564,7 +593,7 @@ export default function TenantDashboard() {
                     disabled={isSubmitting}
                     className="px-5 py-2.5 rounded-lg border border-white/[0.08] hover:bg-white/[0.03] text-gray-300 font-semibold transition text-sm disabled:opacity-50"
                   >
-                    ← Geri
+                    {t('dashboard.onboarding.back')}
                   </button>
                   <button 
                     onClick={handleCompleteOnboarding}
@@ -574,9 +603,9 @@ export default function TenantDashboard() {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                        Kuruluyor...
+                        {t('dashboard.onboarding.setting_up')}
                       </>
-                    ) : 'Kurulumu Tamamla ✓'}
+                    ) : t('dashboard.onboarding.complete')}
                   </button>
                 </div>
               </div>

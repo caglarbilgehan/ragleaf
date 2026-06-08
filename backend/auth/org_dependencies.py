@@ -78,7 +78,14 @@ async def get_current_org(
             return org
         
         # Create a default organization for the platform
+        import random
+        while True:
+            new_id = random.randint(1000000000, 2147483647)
+            exists = db.query(Organization.id).filter(Organization.id == new_id).first()
+            if not exists:
+                break
         org = Organization(
+            id=new_id,
             name="Ragleaf Platform",
             slug="ragleaf-platform",
             is_active=True
@@ -252,10 +259,22 @@ async def get_agent_from_api_key(
         parsed = urlparse(check_url)
         request_domain = parsed.hostname or ""
     
-    if agent.allowed_domains:
+    # Check if a widget ID is provided to look up specific widget settings
+    widget_id = request.query_params.get("widget_id") or request.headers.get("x-widget-id") or request.headers.get("X-Widget-ID")
+    widget_domains = None
+    if widget_id and isinstance(agent.appearance, dict) and "widgets" in agent.appearance:
+        widgets = agent.appearance.get("widgets", [])
+        for w in widgets:
+            if w.get("id") == widget_id:
+                widget_domains = w.get("allowed_domains")
+                break
+                
+    allowed_domains = widget_domains if widget_domains is not None else agent.allowed_domains
+    
+    if allowed_domains:
         if request_domain:
             domain_allowed = False
-            for allowed in agent.allowed_domains:
+            for allowed in allowed_domains:
                 if allowed.startswith("*."):
                     if request_domain.endswith(allowed[2:]):
                         domain_allowed = True
@@ -265,17 +284,17 @@ async def get_agent_from_api_key(
                     break
             
             if not domain_allowed:
-                if request_domain not in ("localhost", "127.0.0.1"):
-                    logger.warning(f"🚫 Domain rejected: {request_domain} not in {agent.allowed_domains} (agent={agent.id})")
+                if request_domain not in ("localhost", "127.0.0.1", "cserver-2"):
+                    logger.warning(f"🚫 Domain rejected: {request_domain} not in {allowed_domains} (agent={agent.id}, widget={widget_id})")
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail=f"Bu domain için erişim yetkisi yok: {request_domain}"
                     )
     else:
         # No domain restrictions — log security warning for non-localhost origins
-        if request_domain and request_domain not in ("localhost", "127.0.0.1"):
+        if request_domain and request_domain not in ("localhost", "127.0.0.1", "cserver-2"):
             logger.warning(
-                f"⚠️ SECURITY: Agent {agent.id} ({agent.name}) has no domain restrictions! "
+                f"⚠️ SECURITY: Agent {agent.id} ({agent.name}) or widget {widget_id} has no domain restrictions! "
                 f"Request from: {request_domain} (org={org.slug})"
             )
     

@@ -37,6 +37,8 @@ class UserCreate(BaseModel):
     agent_name: Optional[str] = None
     welcome_message: Optional[str] = None
     agent_description: Optional[str] = None
+    ref: Optional[str] = None
+
 
 class UserResponse(BaseModel):
     id: int
@@ -89,8 +91,17 @@ PLAN_LIMITS = {
     "free": {"max_agents": 1, "max_documents": 10, "max_queries_per_month": 100, "max_storage_mb": 50},
     "starter": {"max_agents": 3, "max_documents": 100, "max_queries_per_month": 5000, "max_storage_mb": 500},
     "pro": {"max_agents": 10, "max_documents": 500, "max_queries_per_month": 25000, "max_storage_mb": 2000},
-    "enterprise": {"max_agents": 999, "max_documents": 9999, "max_queries_per_month": 999999, "max_storage_mb": 50000},
+    "ultimate": {"max_agents": 50, "max_documents": 2000, "max_queries_per_month": 100000, "max_storage_mb": 10000},
+    "ultra": {"max_agents": 999, "max_documents": 9999, "max_queries_per_month": 999999, "max_storage_mb": 50000},
 }
+
+def generate_unique_user_id(db: Session) -> int:
+    import random
+    while True:
+        user_id = random.randint(10000000, 99999999)
+        exists = db.execute(text("SELECT 1 FROM users WHERE id = :id"), {"id": user_id}).fetchone()
+        if not exists:
+            return user_id
 
 @auth_router.post("/register", response_model=Token)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
@@ -118,11 +129,13 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     
     # Create new user
     password_hash = get_password_hash(user_data.password)
+    user_id = generate_unique_user_id(db)
     
     db.execute(text("""
-        INSERT INTO users (email, password_hash, name, surname, full_name, phone, city, district, company_name, website, sector, is_active, is_admin, created_at, updated_at)
-        VALUES (:email, :password_hash, :name, :surname, :full_name, :phone, :city, :district, :company_name, :website, :sector, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        INSERT INTO users (id, email, password_hash, name, surname, full_name, phone, city, district, company_name, website, sector, is_active, is_admin, created_at, updated_at)
+        VALUES (:id, :email, :password_hash, :name, :surname, :full_name, :phone, :city, :district, :company_name, :website, :sector, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     """), {
+        "id": user_id,
         "email": user_data.email,
         "password_hash": password_hash,
         "name": user_data.name,
@@ -200,6 +213,27 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     
     db.commit()
     logger.info(f"✅ New user registered: {user_data.email}, org: {org_name}, plan: {plan}")
+
+    # Reward the referring organization with 50 leaves!
+    if user_data.ref:
+        try:
+            ref_org = None
+            try:
+                ref_org_id = int(user_data.ref)
+                ref_org = db.execute(text("SELECT id FROM organizations WHERE id = :id"), {"id": ref_org_id}).fetchone()
+            except ValueError:
+                ref_org = db.execute(text("SELECT id FROM organizations WHERE slug = :slug"), {"slug": user_data.ref}).fetchone()
+            
+            if ref_org:
+                db.execute(
+                    text("UPDATE organizations SET ragleaf_leaves = COALESCE(ragleaf_leaves, 0) + 50 WHERE id = :id"),
+                    {"id": ref_org.id}
+                )
+                db.commit()
+                logger.info(f"🎁 Referral reward applied: Org {ref_org.id} gained 50 leaves from registration of {user_data.email}")
+        except Exception as ref_err:
+            logger.warning(f"⚠️ Failed to apply referral reward: {ref_err}")
+
     
     # Auto-create agent from template if template_slug provided
     if user_data.template_slug:
@@ -362,6 +396,92 @@ async def get_current_user_info(current_user = Depends(get_current_user)):
         is_admin=bool(current_user.is_admin),
         is_superadmin=bool(getattr(current_user, 'is_superadmin', False)),
         default_org_id=getattr(current_user, 'default_org_id', None)
+    )
+
+class ProfileUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    email: Optional[EmailStr] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+
+@auth_router.put("/update-profile", response_model=UserResponse)
+async def update_profile(
+    update_data: ProfileUpdateRequest,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update user profile information (name, surname, email, password)"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    updates = {}
+    
+    if update_data.name is not None:
+        updates["name"] = update_data.name.strip()
+    if update_data.surname is not None:
+        updates["surname"] = update_data.surname.strip()
+        
+    if "name" in updates or "surname" in updates:
+        new_name = updates.get("name", current_user.name or "")
+        new_surname = updates.get("surname", current_user.surname or "")
+        updates["full_name"] = f"{new_name} {new_surname}".strip()
+
+    if update_data.email is not None and update_data.email != current_user.email:
+        email_check = db.execute(
+            text("SELECT id FROM users WHERE email = :email AND id != :user_id"),
+            {"email": update_data.email, "user_id": current_user.id}
+        ).fetchone()
+        if email_check:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor"
+            )
+        updates["email"] = update_data.email
+
+    if update_data.new_password:
+        if not update_data.current_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Şifre değiştirmek için mevcut şifrenizi girmeniz gerekir"
+            )
+        if not verify_password(update_data.current_password, current_user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mevcut şifreniz hatalı"
+            )
+        updates["password_hash"] = get_password_hash(update_data.new_password)
+
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Güncellenecek bilgi gönderilmedi"
+        )
+
+    set_clause = ", ".join([f"{k} = :{k}" for k in updates.keys()])
+    updates["user_id"] = current_user.id
+    
+    db.execute(
+        text(f"UPDATE users SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :user_id"),
+        updates
+    )
+    db.commit()
+    
+    updated_user = db.execute(
+        text("SELECT * FROM users WHERE id = :user_id"),
+        {"user_id": current_user.id}
+    ).fetchone()
+    
+    return UserResponse(
+        id=updated_user.id,
+        email=updated_user.email,
+        name=updated_user.name,
+        surname=updated_user.surname,
+        full_name=updated_user.full_name,
+        is_active=bool(updated_user.is_active),
+        is_admin=bool(updated_user.is_admin),
+        is_superadmin=bool(getattr(updated_user, 'is_superadmin', False)),
+        default_org_id=getattr(updated_user, 'default_org_id', None)
     )
 
 @auth_router.post("/logout")

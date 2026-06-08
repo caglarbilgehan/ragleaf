@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useLang } from '../../context/LangContext';
 import PageLayout from '../../components/PageLayout';
+import { getApiBaseUrl } from '../../utils/api';
 
 export default function ContactClient() {
   const { lang } = useLang();
@@ -20,11 +21,7 @@ export default function ContactClient() {
     setLoading(true);
     setStatus(null);
 
-    // Determine backend base url
-    let apiBase = 'http://localhost:1306';
-    if (typeof window !== 'undefined' && window.location.origin.includes('ragleaf.com')) {
-      apiBase = 'https://api.ragleaf.com';
-    }
+    const apiBase = getApiBaseUrl();
 
     try {
       const response = await fetch(`${apiBase}/v1/contact/submit`, {

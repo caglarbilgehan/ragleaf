@@ -51,28 +51,28 @@ export default function Footer() {
 
         {/* Mobile Footer Content */}
         <div className="footer-mobile-row mobile-only-flex" style={{ width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-          <button 
-            onClick={() => setHowItWorksOpen(true)}
-            className="btn btn-ghost btn-sm" 
-            style={{ fontSize: '13px', padding: '6px 14px' }}
+          <Link
+            href="/aichat"
+            className="btn btn-ghost btn-sm"
+            style={{ fontSize: '13px', padding: '6px 14px', textDecoration: 'none' }}
           >
             {t('hero_btn2')}
-          </button>
-          <button 
+          </Link>
+          <button
             onClick={() => toggleAssistant(true)}
-            className="mobile-footer-assistant-btn" 
-            style={{ 
-              textDecoration: 'none', 
-              color: 'var(--accent)', 
-              fontWeight: 600, 
-              fontSize: '13px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '6px', 
-              padding: '6px 12px', 
-              background: 'rgba(34, 197, 94, 0.08)', 
-              borderRadius: '12px', 
-              border: '1px solid rgba(34, 197, 94, 0.2)' 
+            className="mobile-footer-assistant-btn"
+            style={{
+              textDecoration: 'none',
+              color: 'var(--accent)',
+              fontWeight: 600,
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: 'rgba(34, 197, 94, 0.08)',
+              borderRadius: '12px',
+              border: '1px solid rgba(34, 197, 94, 0.2)'
             }}
           >
             <span>{t('footer_ask_ai')}</span> 🍃

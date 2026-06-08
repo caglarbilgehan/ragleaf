@@ -14,14 +14,14 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Depends, Request, Query, status
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.database.connection import get_db
 from backend.database.models_platform import (
     Agent, AgentKnowledgeBase, PublicConversation, PublicMessage, UsageLog,
-    Appointment
+    Appointment, AgentTemplate, AgentTemplateDocument, Organization
 )
 from backend.database.models_v2 import Document, DocumentChunk
 from backend.auth.org_dependencies import get_agent_from_api_key, AgentAuth
@@ -43,13 +43,13 @@ class ChatCompletionMessage(BaseModel):
 
 
 class ChatCompletionRequest(BaseModel):
-    messages: List[ChatCompletionMessage] = Field(
-        ..., min_length=1, 
-        description="Conversation messages"
-    )
+    model: Optional[str] = Field("default", description="Model name")
+    messages: List[ChatCompletionMessage] = Field(..., description="Messages list")
+    stream: Optional[bool] = Field(False, description="Stream response")
+    temperature: Optional[float] = Field(0.7, description="Temperature")
+    max_tokens: Optional[int] = Field(None, description="Max tokens")
     session_id: Optional[str] = Field(None, description="Session ID for conversation continuity")
     visitor_id: Optional[str] = Field(None, description="Persistent visitor ID")
-    stream: bool = Field(default=False, description="Enable streaming")
     metadata: Optional[Dict[str, Any]] = Field(None, description="Visitor metadata (page_url, etc.)")
 
 
@@ -91,11 +91,34 @@ class AgentInfoResponse(BaseModel):
 # Public Endpoints
 # ============================================================================
 
+@public_chat_router.get("/ref/click")
+async def handle_ref_click(ref: str, db: Session = Depends(get_db)):
+    """
+    Track click on branding/referral link.
+    Increments referrer organization's leaves by 1 and redirects to landing page.
+    """
+    # Try finding by ID first, then by slug
+    org = None
+    try:
+        org_id = int(ref)
+        org = db.query(Organization).filter(Organization.id == org_id).first()
+    except ValueError:
+        org = db.query(Organization).filter(Organization.slug == ref).first()
+        
+    if org:
+        org.ragleaf_leaves = (org.ragleaf_leaves or 0) + 1
+        db.add(org)
+        db.commit()
+        
+    return RedirectResponse(url="https://ragleaf.com")
+
+
 @public_chat_router.get("/agents/{agent_public_id}/info", response_model=AgentInfoResponse)
 async def get_agent_public_info(
     agent_public_id: str,
     req: Request,
     lang: Optional[str] = None,
+    widget_id: Optional[str] = None,
     auth: AgentAuth = Depends(get_agent_from_api_key),
     db: Session = Depends(get_db)
 ):
@@ -104,6 +127,7 @@ async def get_agent_public_info(
     Returns name, welcome message, and appearance settings.
     """
     agent = auth.agent
+    org = auth.organization
     
     # Verify the requested agent matches the API key's agent
     if agent.public_id != agent_public_id:
@@ -117,6 +141,61 @@ async def get_agent_public_info(
     name = agent.name
     description = agent.description
     welcome_message = agent.welcome_message
+    appearance = agent.appearance or {}
+    
+    # Override with widget-specific settings if widgets are defined in agent.appearance
+    if isinstance(agent.appearance, dict) and "widgets" in agent.appearance:
+        widgets = agent.appearance.get("widgets", [])
+        if widgets:
+            # Find matching widget or default to the first one
+            target_widget = None
+            if widget_id:
+                for w in widgets:
+                    if w.get("id") == widget_id:
+                        target_widget = w
+                        break
+            if not target_widget:
+                target_widget = widgets[0]
+                
+            if target_widget:
+                if target_widget.get("welcome_message"):
+                    welcome_message = target_widget.get("welcome_message")
+                # Exclude widgets list from response appearance
+                appearance = {
+                    "primary_color": target_widget.get("primary_color", "#4F46E5"),
+                    "secondary_color": target_widget.get("secondary_color", "#8B5CF6"),
+                    "text_color": target_widget.get("text_color", "#FFFFFF"),
+                    "position": target_widget.get("position", "bottom-right"),
+                    "width": target_widget.get("width", 380),
+                    "height": target_widget.get("height", 520),
+                    "border_radius": target_widget.get("border_radius", 16),
+                    "show_branding": target_widget.get("show_branding", True),
+                    "auto_open": target_widget.get("auto_open", True),
+                    "auto_open_desktop": target_widget.get("auto_open_desktop", target_widget.get("auto_open", True)),
+                    "auto_open_mobile": target_widget.get("auto_open_mobile", target_widget.get("auto_open", True)),
+                    "layout_mode": target_widget.get("layout_mode", "floating"),
+                    "auto_theme": target_widget.get("auto_theme", False),
+                    "theme": target_widget.get("theme", "auto"),
+                    "bg_color": target_widget.get("bg_color"),
+                    "border_color": target_widget.get("border_color"),
+                    "input_bg_color": target_widget.get("input_bg_color"),
+                    "input_text_color": target_widget.get("input_text_color"),
+                    "bg_color_dark": target_widget.get("bg_color_dark"),
+                    "text_color_dark": target_widget.get("text_color_dark"),
+                    "border_color_dark": target_widget.get("border_color_dark"),
+                    "input_bg_color_dark": target_widget.get("input_bg_color_dark"),
+                    "input_text_color_dark": target_widget.get("input_text_color_dark"),
+                    "theme_style": target_widget.get("theme_style", "classic"),
+                    "bubble_icon": target_widget.get("bubble_icon", "chat"),
+                    "custom_icon_svg": target_widget.get("custom_icon_svg"),
+                    "org_id": str(org.id),
+                    "bottom_offset": target_widget.get("bottom_offset"),
+                    "right_offset": target_widget.get("right_offset"),
+                    "left_offset": target_widget.get("left_offset"),
+                    "mobile_bottom_offset": target_widget.get("mobile_bottom_offset"),
+                    "mobile_right_offset": target_widget.get("mobile_right_offset"),
+                    "mobile_left_offset": target_widget.get("mobile_left_offset"),
+                }
     
     # Translate default agent info for Ragleaf System Agent if requested in English
     if requested_lang == "en":
@@ -130,12 +209,106 @@ async def get_agent_public_info(
         name=name,
         description=description,
         welcome_message=welcome_message,
-        appearance=agent.appearance,
+        appearance=appearance,
         personality={
+            **(agent.personality or {}),
             "tone": (agent.personality or {}).get("tone", "professional"),
             "language": requested_lang if requested_lang in ("tr", "en") else (agent.personality or {}).get("language", "tr")
         }
     )
+
+
+@public_chat_router.get("/agents/{agent_public_id}/available-slots")
+async def get_available_booking_slots(
+    agent_public_id: str,
+    auth: AgentAuth = Depends(get_agent_from_api_key),
+    db: Session = Depends(get_db)
+):
+    """
+    Get available 1-hour booking slots for the next 7 days based on agent personality.
+    Takes existing conflicting appointments into account.
+    """
+    agent = auth.agent
+    if agent.public_id != agent_public_id:
+        raise HTTPException(status_code=403, detail="API key is not valid for this agent")
+
+    personality = agent.personality or {}
+    working_days = personality.get("working_days", ["monday", "tuesday", "wednesday", "thursday", "friday"])
+    start_hour_str = personality.get("working_start_hour", "09:00")
+    end_hour_str = personality.get("working_end_hour", "18:00")
+    duration = int(personality.get("session_duration_minutes") or 60)
+
+    from datetime import datetime, timedelta, timezone as tz
+    
+    # Parse start and end working hour
+    try:
+        sh_parts = [int(p) for p in start_hour_str.split(":")]
+        eh_parts = [int(p) for p in end_hour_str.split(":")]
+    except Exception:
+        sh_parts = [9, 0]
+        eh_parts = [18, 0]
+
+    # Get conflicting appointments for the next 8 days (buffer)
+    now = datetime.now(tz(timedelta(hours=3)))
+    start_search = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_search = start_search + timedelta(days=8)
+
+    appointments = db.query(Appointment).filter(
+        Appointment.organization_id == agent.organization_id,
+        Appointment.status.in_(["pending", "confirmed"]),
+        Appointment.appointment_date >= start_search,
+        Appointment.appointment_date <= end_search
+    ).all()
+
+    # Create slot ranges representing conflicts
+    conflict_slots = []
+    for apt in appointments:
+        ad = apt.appointment_date
+        ae = apt.appointment_end or (ad + timedelta(minutes=(apt.duration_minutes or 60)))
+        conflict_slots.append((ad, ae))
+
+    # Day of week mapping
+    dow_map = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+
+    available_slots = []
+    
+    # Generate slots for next 7 days starting today
+    for day_offset in range(7):
+        target_day = now + timedelta(days=day_offset)
+        day_name = dow_map[target_day.weekday() + 1 if target_day.weekday() < 6 else 0] # align weekday index: python weekday is Mon=0, Sun=6. JS Sunday=0, Monday=1
+        # Correct align: python target_day.strftime('%A').lower()
+        py_day_name = target_day.strftime('%A').lower()
+        if py_day_name not in working_days:
+            continue
+
+        # Set slots boundaries
+        slot_time = target_day.replace(hour=sh_parts[0], minute=sh_parts[1], second=0, microsecond=0)
+        end_time_limit = target_day.replace(hour=eh_parts[0], minute=eh_parts[1], second=0, microsecond=0)
+
+        while slot_time + timedelta(minutes=duration) <= end_time_limit:
+            # Skip past slots today
+            if slot_time <= now:
+                slot_time += timedelta(minutes=duration)
+                continue
+
+            slot_end = slot_time + timedelta(minutes=duration)
+            
+            # Check conflict
+            has_conflict = False
+            for cs, ce in conflict_slots:
+                # overlaps: max(start1, start2) < min(end1, end2)
+                overlap_start = max(slot_time, cs)
+                overlap_end = min(slot_end, ce)
+                if overlap_start < overlap_end:
+                    has_conflict = True
+                    break
+
+            if not has_conflict:
+                available_slots.append(slot_time.strftime("%Y-%m-%dT%H:%M"))
+
+            slot_time += timedelta(minutes=duration)
+
+    return {"slots": available_slots}
 
 
 @public_chat_router.post("/chat/completions", response_model=ChatCompletionResponse)
@@ -292,6 +465,155 @@ async def chat_completion(
             response_time_ms=response_time_ms
         )
 
+    # --- Check for BOOKING_FORM_SUBMITTED form submission intercept ---
+    if user_message.content.strip().startswith("[BOOKING_FORM_SUBMITTED]"):
+        import json
+        payload_str = user_message.content.replace("[BOOKING_FORM_SUBMITTED]", "").strip()
+        response_text = "Randevu kaydınız başarıyla oluşturulmuştur. Teşekkür ederiz!"
+        is_turkish = (agent.personality or {}).get("language", "tr") == "tr"
+        if not is_turkish:
+            response_text = "Your appointment has been successfully created. Thank you!"
+
+        try:
+            apt_data = json.loads(payload_str)
+            
+            # Parse datetime-local string (typically YYYY-MM-DDTHH:MM)
+            apt_date_str = apt_data.get("appointment_date")
+            from datetime import timedelta
+            apt_date = None
+            for fmt in ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"]:
+                try:
+                    apt_date = datetime.strptime(apt_date_str, fmt)
+                    break
+                except Exception:
+                    continue
+            
+            if not apt_date:
+                raise ValueError("Tarih formatı geçersiz")
+            
+            # Turkey timezone offset
+            from datetime import timezone as tz
+            apt_date = apt_date.replace(tzinfo=tz(timedelta(hours=3)))
+            duration = int((agent.personality or {}).get("session_duration_minutes") or 60)
+            apt_end = apt_date + timedelta(minutes=duration)
+
+            # Check for conflicts if resource is specified
+            resource_management_enabled = (agent.personality or {}).get("res_resource_management_enabled", False)
+            selected_resource = apt_data.get("resource") if resource_management_enabled else None
+            
+            if selected_resource:
+                from sqlalchemy import cast, String
+                conflict_query = db.query(Appointment).filter(
+                    Appointment.organization_id == agent.organization_id,
+                    Appointment.status.in_(["pending", "confirmed"]),
+                    Appointment.appointment_date < apt_end,
+                    Appointment.appointment_end > apt_date
+                ).filter(
+                    cast(Appointment.extra_data['resource'].astext, String) == selected_resource
+                )
+                if conflict_query.count() > 0:
+                    if is_turkish:
+                        response_text = "⚠️ *Seçtiğiniz masa/alan bu saat diliminde doludur. Lütfen farklı bir saat veya masa seçin.*"
+                    else:
+                        response_text = "⚠️ *The selected table/area is booked for this timeframe. Please choose another slot or table.*"
+                    raise ValueError("Resource conflict detected")
+
+            apt_extra_data = {}
+            if apt_data.get("party_size"):
+                try:
+                    apt_extra_data["party_size"] = int(apt_data["party_size"])
+                except (ValueError, TypeError):
+                    pass
+            if selected_resource:
+                apt_extra_data["resource"] = selected_resource
+            if apt_data.get("guest_details"):
+                apt_extra_data["guest_details"] = apt_data["guest_details"]
+
+            is_res = (agent.personality or {}).get("reservation_module_enabled", False)
+            default_svc_tr = "Masa Rezervasyonu" if is_res else "Genel Randevu"
+            default_svc_en = "Table Reservation" if is_res else "General Appointment"
+
+            appointment = Appointment(
+                organization_id=agent.organization_id,
+                agent_id=agent.id,
+                conversation_id=conversation.id,
+                customer_name=apt_data.get("customer_name") or "Misafir",
+                customer_phone=apt_data.get("customer_phone"),
+                customer_email=apt_data.get("customer_email"),
+                customer_notes=apt_data.get("customer_notes"),
+                service_type=apt_data.get("service_type") or (default_svc_tr if is_turkish else default_svc_en),
+                service_details={"services": [apt_data.get("service_type") or (default_svc_tr if is_turkish else default_svc_en)]},
+                appointment_date=apt_date,
+                appointment_end=apt_end,
+                duration_minutes=duration,
+                status="pending",
+                extra_data=apt_extra_data
+            )
+            db.add(appointment)
+            db.flush()
+            
+            if is_turkish:
+                response_text = f"✅ *Rezervasyonunuz/Randevunuz başarıyla oluşturulmuştur!* (Referans: {appointment.public_id})"
+            else:
+                response_text = f"✅ *Your reservation/appointment has been successfully created!* (Ref: {appointment.public_id})"
+            
+            logger.info(f"📅 Intercepted booking form and created appointment {appointment.public_id} with extra_data={apt_extra_data}")
+        except Exception as ex:
+            logger.error(f"Error handling intercepted booking form submit: {ex}")
+            if is_turkish:
+                response_text = "⚠️ Randevu oluşturulurken teknik bir sorun yaşandı. Lütfen tekrar deneyin."
+            else:
+                response_text = "⚠️ A technical problem occurred while creating the appointment. Please try again."
+
+        response_time_ms = int((time.time() - start_time) * 1000)
+        assistant_msg = PublicMessage(
+            conversation_id=conversation.id,
+            role="assistant",
+            content=response_text,
+            tokens_used=0,
+            model_used="form_handler",
+            response_time_ms=response_time_ms
+        )
+        db.add(assistant_msg)
+        
+        conversation.message_count = (conversation.message_count or 0) + 2
+        conversation.last_message_at = datetime.now(timezone.utc)
+        if conversation.message_count == 2:
+            agent.total_conversations = (agent.total_conversations or 0) + 1
+        agent.total_messages = (agent.total_messages or 0) + 2
+
+        usage_log = UsageLog(
+            organization_id=org.id,
+            agent_id=agent.id,
+            event_type="chat_query",
+            tokens_used=0,
+            details={
+                "model": "form_handler",
+                "response_time_ms": response_time_ms,
+                "session_id": session_id
+            }
+        )
+        db.add(usage_log)
+        
+        # Increment Ragleaf leaves
+        org.ragleaf_leaves = (org.ragleaf_leaves or 0) + 1
+        db.add(org)
+        db.commit()
+
+        completion_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
+        return ChatCompletionResponse(
+            id=completion_id,
+            created=int(time.time()),
+            model="form_handler",
+            choices=[ChatCompletionChoice(
+                message=ChatCompletionMessage(role="assistant", content=response_text),
+                finish_reason="stop"
+            )],
+            usage=ChatCompletionUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+            agent_name=agent.name,
+            response_time_ms=response_time_ms
+        )
+
     # --- Build RAG Context ---
     context = ""
     sources = []
@@ -301,15 +623,17 @@ async def chat_completion(
     except Exception as e:
         logger.error(f"RAG context error for agent {agent.id}: {e}")
     
-    # Determine the requested language
+    # Determine widget_id and override module flags
+    widget_id = None
     requested_lang = None
     if request.metadata and isinstance(request.metadata, dict):
+        widget_id = request.metadata.get("widget_id")
         requested_lang = request.metadata.get("lang")
     if not requested_lang:
         requested_lang = req.headers.get("x-language") or req.headers.get("X-Language")
-        
+
     # --- Build System Prompt ---
-    system_prompt = _build_system_prompt(agent, context, requested_lang=requested_lang)
+    system_prompt = _build_system_prompt(agent, context, requested_lang=requested_lang, widget_id=widget_id)
     
     # --- Build Messages for LLM ---
     llm_messages = [{"role": "system", "content": system_prompt}]
@@ -343,7 +667,7 @@ async def chat_completion(
     
     # --- Post-process: Extract Appointment & Sponsorship Deals ---
     response_text = await _process_appointment_from_response(
-        response_text, agent, conversation, db
+        response_text, agent, conversation, db, widget_id=widget_id
     )
     response_text = await _process_sponsorship_from_response(
         response_text, agent, conversation, db
@@ -467,15 +791,29 @@ async def _build_rag_context(
     max_context_chars = rag_config.get("max_context_chars", 4000)
     similarity_threshold = rag_config.get("similarity_threshold", 0.3)
     
-    # Get agent's document IDs
+    doc_ids = []
+    
+    # 1. Custom agent documents
     kb_links = db.query(AgentKnowledgeBase).filter(
         AgentKnowledgeBase.agent_id == agent.id
     ).all()
-    
-    if not kb_links:
+    for link in kb_links:
+        doc_ids.append(link.document_id)
+        
+    # 2. Template documents
+    template_slug = (agent.personality or {}).get("template_slug")
+    if template_slug:
+        template = db.query(AgentTemplate).filter(AgentTemplate.slug == template_slug).first()
+        if template:
+            template_doc_links = db.query(AgentTemplateDocument).filter(
+                AgentTemplateDocument.template_id == template.id
+            ).all()
+            for t_link in template_doc_links:
+                if t_link.document_id not in doc_ids:
+                    doc_ids.append(t_link.document_id)
+                    
+    if not doc_ids:
         return "", []
-    
-    doc_ids = [link.document_id for link in kb_links]
     
     # Use the existing RAG service for vector search
     try:
@@ -554,9 +892,25 @@ async def _build_rag_context(
             return "", []
 
 
-def _build_system_prompt(agent: Agent, context: str, requested_lang: Optional[str] = None) -> str:
+def _build_system_prompt(agent: Agent, context: str, requested_lang: Optional[str] = None, widget_id: Optional[str] = None) -> str:
     """Build the full system prompt for the agent with RAG context."""
     personality = agent.personality or {}
+    
+    # Resolve widget-specific overrides for modules if widget_id is provided
+    appointment_module_enabled = personality.get("appointment_module_enabled", False)
+    reservation_module_enabled = personality.get("reservation_module_enabled", False)
+    order_module_enabled = personality.get("order_module_enabled", False)
+    lead_module_enabled = personality.get("lead_module_enabled", False)
+    
+    if widget_id and isinstance(agent.appearance, dict) and "widgets" in agent.appearance:
+        for w in agent.appearance.get("widgets", []):
+            if w.get("id") == widget_id:
+                appointment_module_enabled = w.get("appointment_module_enabled", appointment_module_enabled)
+                reservation_module_enabled = w.get("reservation_module_enabled", reservation_module_enabled)
+                order_module_enabled = w.get("order_module_enabled", order_module_enabled)
+                lead_module_enabled = w.get("lead_module_enabled", lead_module_enabled)
+                break
+
     tone = personality.get("tone", "professional")
     
     # Override language if requested_lang is provided and valid (e.g. "tr", "en")
@@ -613,48 +967,112 @@ def _build_system_prompt(agent: Agent, context: str, requested_lang: Optional[st
 {language_instructions.get(language, language_instructions["tr"])}
 """
     
-    # Add appointment instructions for template-based agents
+    # Add appointment instructions for template-based agents or when appointment/reservation module is enabled
     template_slug = personality.get("template_slug")
-    if template_slug:
+    if template_slug or appointment_module_enabled or reservation_module_enabled:
+        is_reservation = reservation_module_enabled and not appointment_module_enabled
+        
+        w_days = personality.get("res_working_days") or personality.get("working_days", ["monday", "tuesday", "wednesday", "thursday", "friday"])
+        w_start = personality.get("res_working_start_hour") or personality.get("working_start_hour", "09:00")
+        w_end = personality.get("res_working_end_hour") or personality.get("working_end_hour", "18:00")
+        
+        apt_type = personality.get("appointment_type", "face_to_face")
+        if is_reservation:
+            apt_type = "face_to_face"
+            
+        resource_enabled = personality.get("res_resource_management_enabled")
+        if resource_enabled is None:
+            resource_enabled = personality.get("resource_management_enabled", False)
+            
+        resources = personality.get("res_resources")
+        if resources is None:
+            resources = personality.get("resources", [])
+        
+        resource_names = []
+        resource_details_str_tr = []
+        resource_details_str_en = []
+        if resources:
+            for r in resources:
+                if isinstance(r, dict):
+                    name = r.get("name")
+                    min_cap = r.get("min_capacity", 1)
+                    max_cap = r.get("max_capacity", 10)
+                    if name:
+                        resource_names.append(name)
+                        resource_details_str_tr.append(f"{name} ({min_cap}-{max_cap} kişilik)")
+                        resource_details_str_en.append(f"{name} (for {min_cap}-{max_cap} people)")
+                elif isinstance(r, str):
+                    resource_names.append(r)
+                    resource_details_str_tr.append(r)
+                    resource_details_str_en.append(r)
+
+        resources_list_tr = ", ".join(resource_details_str_tr)
+        resources_list_en = ", ".join(resource_details_str_en)
+
+        days_map_tr = {"monday": "Pazartesi", "tuesday": "Salı", "wednesday": "Çarşamba", "thursday": "Perşembe", "friday": "Cuma", "saturday": "Cumartesi", "sunday": "Pazar"}
+        days_map_en = {"monday": "Monday", "tuesday": "Tuesday", "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday", "saturday": "Saturday", "sunday": "Sunday"}
+        active_days_tr = ", ".join([days_map_tr.get(d, d) for d in w_days])
+        active_days_en = ", ".join([days_map_en.get(d, d) for d in w_days])
+
+        capacity_mode = personality.get("res_capacity_mode") or personality.get("capacity_mode", "single")
+        max_capacity = personality.get("res_max_capacity") or personality.get("max_capacity_per_booking", 10)
+
+        # Build type instructions
+        type_inst_en = ""
+        type_inst_tr = ""
+        if apt_type == "online":
+            type_inst_en = "- All appointments are conducted ONLINE. Inform the customer."
+            type_inst_tr = "- Tüm randevular ONLINE (çevrimiçi) olarak gerçekleştirilecektir. Müşteriyi bu konuda bilgilendir."
+        elif apt_type == "face_to_face":
+            type_inst_en = "- All appointments/reservations are conducted IN-PERSON at our physical location."
+            type_inst_tr = "- Tüm randevu/rezervasyonlar YÜZ YÜZE (fiziksel olarak) iş yerimizde gerçekleştirilecektir."
+        elif apt_type == "visitor_choice":
+            type_inst_en = "- Ask the customer whether they prefer an Online or In-Person (face_to_face) meeting, and save the chosen value in 'meeting_type' field of the JSON."
+            type_inst_tr = "- Müşteriye randevuyu Online mı yoksa Yüz yüze mi istediklerini sor ve seçilen değeri JSON'daki 'meeting_type' alanına ('online' veya 'face_to_face' olarak) kaydet."
+
+        # Build resource instructions
+        res_inst_en = ""
+        res_inst_tr = ""
+        if resource_enabled and resource_names:
+            if is_reservation:
+                res_inst_en = f"- We have the following tables/areas available: {resources_list_en}. Ask the customer if they have a table/area preference or assign an available one automatically. Write the chosen table/area in the 'resource' field of the JSON."
+                res_inst_tr = f"- Kafe/Restoranımızda şu masalar/alanlar mevcuttur: {resources_list_tr}. Müşteriye bir masa/alan tercihi olup olmadığını sor veya boş olan bir masayı ata. Seçilen masayı/alanı JSON'daki 'resource' alanına yaz."
+            else:
+                res_inst_en = f"- We have the following resources/staff available: {resources_list_en}. Ask the customer if they have a preference or assign an available one automatically. Write the chosen resource/staff in the 'resource' field of the JSON."
+                res_inst_tr = f"- İşletmemizde şu kaynaklar/personeller mevcuttur: {resources_list_tr}. Müşteriye bir kaynak/personel tercihi olup olmadığını sor veya boş olanı ata. Seçilen kaynağı/personeli JSON'daki 'resource' alanına yaz."
+
+        # Reservation specific capacity/guest rules
+        res_rules_en = ""
+        res_rules_tr = ""
+        if is_reservation:
+            min_booking_size = int(personality.get("res_min_booking_size") or 1)
+            if min_booking_size >= 2:
+                res_rules_en += f"\n- Minimum party size for a reservation is {min_booking_size} people. Do NOT accept single-person bookings."
+                res_rules_tr += f"\n- Rezervasyonlar için minimum kişi sayısı {min_booking_size}'dir. Tek kişilik rezervasyonları kesinlikle kabul etme."
+            if personality.get("res_require_all_guest_details"):
+                res_rules_en += "\n- We require the name and contact details (phone or email) of ALL guests in the party. Ask for guest names/contacts."
+                res_rules_tr += "\n- Gruptaki TÜM misafirlerin isim ve iletişim (telefon veya e-posta) bilgilerinin girilmesi zorunludur. Tüm katılımcıların bilgilerini iste."
+
+        # Build capacity instructions
         if language == "en":
-            system += """
-## APPOINTMENT SYSTEM INSTRUCTIONS
-When a customer wants to make an appointment, collect the following information:
-1. Name
-2. Phone number
-3. Desired date and time
-4. Service type
+            system += f"""
+## {'RESERVATION' if is_reservation else 'APPOINTMENT'} SYSTEM INSTRUCTIONS
+If the customer expresses interest in {'booking a table or making a reservation' if is_reservation else 'booking an appointment or scheduling a session/visit'}, you MUST prompt them by ending your response with the exact tag: `[SHOW_BOOKING_FORM]`.
+Once this tag is appended to your message, the system will automatically display an interactive booking form to the customer.
 
-AFTER collecting ALL information, add the following JSON format at the END of your response to confirm the appointment:
-```APPOINTMENT_JSON
-{"customer_name": "...", "customer_phone": "...", "appointment_date": "YYYY-MM-DDTHH:MM:SS", "service_type": "...", "duration_minutes": 60}
-```
-
-IMPORTANT RULES:
-- Add the JSON ONLY when all information is collected
-- Write a friendly confirmation message to the customer BEFORE the JSON
-- If information is missing, don't add JSON, ask for the information
-- Clarify if date/time information is unclear
+RULES:
+- When they mention booking or scheduling, write a short inviting message and output `[SHOW_BOOKING_FORM]` at the end of the text.
+- Do NOT output any JSON code blocks.{res_rules_en}
 """
         else:
-            system += """
-## RANDEVU SİSTEMİ TALİMATI
-Müşteri randevu almak istediğinde şu bilgileri topla:
-1. İsim
-2. Telefon numarası
-3. İstenen tarih ve saat
-4. Hizmet türü
+            system += f"""
+## {'REZERVASYON' if is_reservation else 'RANDEVU'} SİSTEMİ TALİMATI
+Eğer müşteri {'masa rezervasyonu yapmak veya yer ayırtmak' if is_reservation else 'randevu almak, seans planlamak veya ziyaret kaydı oluşturmak'} istediğini belirtirse, yanıtınızın sonuna mutlaka şu etiketi eklemelisiniz: `[SHOW_BOOKING_FORM]`.
+Bu etiketi yanıtınızın sonuna eklediğinizde, sistem kullanıcıya otomatik olarak doldurabileceği interaktif bir randevu/rezervasyon formu sunacaktır.
 
-TÜM bilgileri aldıktan sonra, randevuyu onaylamak için aşağıdaki JSON formatını yanıtının SONUNA ekle:
-```APPOINTMENT_JSON
-{"customer_name": "...", "customer_phone": "...", "appointment_date": "YYYY-MM-DDTHH:MM:SS", "service_type": "...", "duration_minutes": 60}
-```
-
-ÖNEMLİ KURALLAR:
-- JSON'u SADECE tüm bilgiler toplandığında ekle
-- JSON'dan ÖNCE müşteriye nazik bir onay mesajı yaz
-- Eksik bilgi varsa JSON ekleme, bilgiyi iste
-- Tarih/saat bilgisi belirsizse netleştir
+KURALLAR:
+- Kullanıcı randevu veya rezervasyondan bahsettiği anda, kısa ve davetkar bir mesaj yazıp yanıtın sonuna `[SHOW_BOOKING_FORM]` ekleyin.
+- Kesinlikle herhangi bir JSON kod bloğu üretmeyin.{res_rules_tr}
 """
     
     # Add RAG context
@@ -781,16 +1199,26 @@ async def _process_appointment_from_response(
     response_text: str,
     agent: Agent,
     conversation: PublicConversation,
-    db: Session
+    db: Session,
+    widget_id: Optional[str] = None
 ) -> str:
     """
     Detect APPOINTMENT_JSON block in LLM response.
     If found, create a real Appointment in DB and remove the JSON block from response.
     Returns cleaned response text.
     """
-    # Check if this agent uses templates (has appointment capability)
+    # Check if this agent uses templates or has appointment module enabled
     personality = agent.personality or {}
-    if not personality.get("template_slug"):
+    
+    # Resolve widget override
+    appointment_module_enabled = personality.get("appointment_module_enabled", False)
+    if widget_id and isinstance(agent.appearance, dict) and "widgets" in agent.appearance:
+        for w in agent.appearance.get("widgets", []):
+            if w.get("id") == widget_id:
+                appointment_module_enabled = w.get("appointment_module_enabled", appointment_module_enabled)
+                break
+
+    if not personality.get("template_slug") and not appointment_module_enabled:
         return response_text
     
     # Look for APPOINTMENT_JSON block
@@ -858,22 +1286,72 @@ async def _process_appointment_from_response(
     duration = apt_data.get("duration_minutes", 60)
     apt_end = apt_date + timedelta(minutes=duration)
     
-    # Check for conflicts
-    conflicts = db.query(Appointment).filter(
+    is_reservation = personality.get("reservation_module_enabled", False)
+    resource_management_enabled = personality.get("res_resource_management_enabled")
+    if resource_management_enabled is None:
+        resource_management_enabled = personality.get("resource_management_enabled", False)
+        
+    selected_resource = apt_data.get("resource") if resource_management_enabled else None
+
+    # Check resource capacities
+    if selected_resource and is_reservation:
+        resources = personality.get("res_resources") or []
+        matched_res = None
+        for r in resources:
+            if isinstance(r, dict) and r.get("name") == selected_resource:
+                matched_res = r
+                break
+        if matched_res:
+            try:
+                party_size = int(apt_data.get("party_size") or 1)
+            except (ValueError, TypeError):
+                party_size = 1
+            min_cap = int(matched_res.get("min_capacity") or 1)
+            max_cap = int(matched_res.get("max_capacity") or 999)
+            if not (min_cap <= party_size <= max_cap):
+                logger.warning(f"Resource capacity mismatch for resource {selected_resource}: party_size={party_size}, capacity={min_cap}-{max_cap}")
+                cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
+                cleaned += f"\n\n⚠️ *Not: Seçilen masa/alan ({selected_resource}) {party_size} kişilik grup için uygun değildir. Bu masa {min_cap}-{max_cap} kişi kabul etmektedir.*"
+                return cleaned
+
+    # Base query for overlapping appointments
+    conflict_query = db.query(Appointment).filter(
         Appointment.organization_id == agent.organization_id,
         Appointment.status.in_(["pending", "confirmed"]),
         Appointment.appointment_date < apt_end,
         Appointment.appointment_end > apt_date
-    ).count()
+    )
+
+    if resource_management_enabled and selected_resource:
+        from sqlalchemy import cast, String
+        # Check conflicts only for the SAME resource
+        conflict_query = conflict_query.filter(
+            cast(Appointment.extra_data['resource'].astext, String) == selected_resource
+        )
+    
+    conflicts = conflict_query.count()
     
     if conflicts > 0:
-        logger.info(f"Appointment conflict detected for {apt_date}")
+        logger.info(f"Appointment conflict detected for {apt_date} (Resource: {selected_resource})")
         cleaned = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()
-        cleaned += "\n\n⚠️ *Not: Bu zaman diliminde başka bir randevu mevcut. Lütfen farklı bir saat deneyin.*"
+        cleaned += "\n\n⚠️ *Not: Bu zaman diliminde başka bir randevu/rezervasyon mevcut. Lütfen farklı bir saat deneyin.*"
         return cleaned
     
     # Create appointment
     try:
+        apt_extra_data = {}
+        if apt_data.get("meeting_type"):
+            apt_extra_data["meeting_type"] = apt_data["meeting_type"]
+        if selected_resource:
+            apt_extra_data["resource"] = selected_resource
+        if apt_data.get("party_size"):
+            try:
+                apt_extra_data["party_size"] = int(apt_data["party_size"])
+            except (ValueError, TypeError):
+                pass
+        if apt_data.get("guest_details"):
+            apt_extra_data["guest_details"] = apt_data["guest_details"]
+
         appointment = Appointment(
             organization_id=agent.organization_id,
             agent_id=agent.id,
@@ -887,7 +1365,8 @@ async def _process_appointment_from_response(
             appointment_date=apt_date,
             appointment_end=apt_end,
             duration_minutes=duration,
-            status="pending"
+            status="pending",
+            extra_data=apt_extra_data
         )
         db.add(appointment)
         db.flush()
@@ -895,7 +1374,7 @@ async def _process_appointment_from_response(
         logger.info(
             f"📅 Appointment created from chat: {appointment.public_id} "
             f"customer={apt_data['customer_name']} date={apt_date} "
-            f"service={apt_data['service_type']} agent={agent.name}"
+            f"service={apt_data['service_type']} agent={agent.name} extra={apt_extra_data}"
         )
         
         # Remove JSON block and add confirmation badge

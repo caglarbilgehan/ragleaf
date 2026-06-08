@@ -60,6 +60,7 @@ class ResourceManager:
             if gpus:
                 gpu = gpus[0]  # Use first GPU
                 return {
+                    "available": True,
                     "name": gpu.name,
                     "memory_used": gpu.memoryUsed,
                     "memory_total": gpu.memoryTotal,

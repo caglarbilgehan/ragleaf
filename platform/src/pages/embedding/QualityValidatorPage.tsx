@@ -68,8 +68,8 @@ const QualityValidatorPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 p-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="w-full">
+      <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-100">Embedding Kalite Validasyonu</h1>
           <p className="mt-2 text-gray-400">

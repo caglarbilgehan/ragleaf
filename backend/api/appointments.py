@@ -60,6 +60,7 @@ class AppointmentResponse(BaseModel):
     public_id: str
     organization_id: int
     agent_id: Optional[int] = None
+    conversation_id: Optional[Any] = None
     customer_name: str
     customer_phone: Optional[str] = None
     customer_email: Optional[str] = None
@@ -72,6 +73,7 @@ class AppointmentResponse(BaseModel):
     status: str = "pending"
     cancelled_reason: Optional[str] = None
     sync_status: str = "not_synced"
+    extra_data: Optional[Dict[str, Any]] = None
     created_at: datetime
     confirmed_at: Optional[datetime] = None
     

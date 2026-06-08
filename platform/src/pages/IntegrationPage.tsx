@@ -19,6 +19,7 @@ export default function IntegrationPage() {
   const id = Number(agentId);
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'widget' | 'api' | 'keys'>('widget');
+  const [widgetPlatform, setWidgetPlatform] = useState<'html' | 'react' | 'nextjs' | 'wordpress'>('html');
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyType, setNewKeyType] = useState<'public' | 'secret'>('public');
   const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -60,14 +61,68 @@ export default function IntegrationPage() {
 
   const baseUrl = window.location.origin;
   const firstPublicKey = apiKeys.find((k) => k.key_type === 'public' && k.is_active);
+  const agentPublicId = agent?.public_id || 'ag_...';
+  const apiKeyPrefix = firstPublicKey?.key_prefix || 'ak_...';
 
-  const widgetCode = `<script
+  const htmlCode = `<script
   src="${baseUrl}/widget.js"
-  data-agent-id="${agent?.public_id || 'ag_...'}"
-  data-api-key="${firstPublicKey?.key_prefix || 'ak_...'}"
+  data-agent-id="${agentPublicId}"
+  data-api-key="${apiKeyPrefix}"
   data-api-url="${baseUrl}"
   async
 ></script>`;
+
+  const reactCode = `import { useEffect } from 'react';
+
+export default function RagleafAssistant() {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '${baseUrl}/widget.js';
+    script.setAttribute('data-agent-id', '${agentPublicId}');
+    script.setAttribute('data-api-key', '${apiKeyPrefix}');
+    script.setAttribute('data-api-url', '${baseUrl}');
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+      const host = document.getElementById('ragleaf-widget-host');
+      if (host) host.remove();
+    };
+  }, []);
+
+  return null;
+}`;
+
+  const nextjsCode = `import Script from 'next/script';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="tr">
+      <body>
+        {children}
+        <Script
+          src="${baseUrl}/widget.js"
+          data-agent-id="${agentPublicId}"
+          data-api-key="${apiKeyPrefix}"
+          data-api-url="${baseUrl}"
+          strategy="lazyOnload"
+        />
+      </body>
+    </html>
+  );
+}`;
+
+  const wordpressCode = `// WordPress temanızın functions.php dosyasının en altına ekleyin:
+add_action('wp_footer', function() {
+  echo '<script
+    src="${baseUrl}/widget.js"
+    data-agent-id="${agentPublicId}"
+    data-api-key="${apiKeyPrefix}"
+    data-api-url="${baseUrl}"
+    async
+  ></script>';
+});`;
 
   const curlExample = `curl -X POST ${baseUrl}/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -83,10 +138,24 @@ export default function IntegrationPage() {
     { id: 'keys' as const, label: 'API Keys', icon: KeyIcon },
   ];
 
+  const getActiveCode = () => {
+    switch (widgetPlatform) {
+      case 'react':
+        return reactCode;
+      case 'nextjs':
+        return nextjsCode;
+      case 'wordpress':
+        return wordpressCode;
+      case 'html':
+      default:
+        return htmlCode;
+    }
+  };
+
   if (!agent) return null;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-100">
@@ -119,10 +188,36 @@ export default function IntegrationPage() {
       {activeTab === 'widget' && (
         <div className="space-y-6">
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6">
-            <h3 className="text-lg font-semibold mb-2">Widget Embed Kodu</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Bu kodu web sitenizin <code className="bg-dark-600 px-1 rounded">&lt;body&gt;</code> tag'ının sonuna ekleyin
-            </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Widget Kurulumu</h3>
+                <p className="text-sm text-gray-500">
+                  Web sitenizin altyapısına uygun olan kurulum yöntemini seçin
+                </p>
+              </div>
+
+              {/* Platform Sub-tabs */}
+              <div className="flex flex-wrap gap-1 bg-dark-700 p-1 rounded-lg">
+                {[
+                  { id: 'html' as const, label: 'HTML / JS' },
+                  { id: 'react' as const, label: 'React' },
+                  { id: 'nextjs' as const, label: 'Next.js' },
+                  { id: 'wordpress' as const, label: 'WordPress' },
+                ].map((plat) => (
+                  <button
+                    key={plat.id}
+                    onClick={() => setWidgetPlatform(plat.id)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      widgetPlatform === plat.id
+                        ? 'bg-dark-600 text-primary-400 border border-white/[0.04]'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    {plat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {!firstPublicKey && (
               <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg p-3 mb-4 text-sm">
@@ -131,16 +226,24 @@ export default function IntegrationPage() {
             )}
 
             <div className="relative">
-              <pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto font-mono">
-                {widgetCode}
+              <pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto font-mono max-h-[300px]">
+                {getActiveCode()}
               </pre>
               <button
-                onClick={() => copy(widgetCode)}
-                className="absolute top-2 right-2 p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md"
+                onClick={() => copy(getActiveCode())}
+                className="absolute top-2 right-2 p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md transition-colors"
+                title="Kodu Kopyala"
               >
                 <ClipboardDocumentIcon className="h-4 w-4" />
               </button>
             </div>
+            
+            <p className="text-xs text-gray-500 mt-3">
+              {widgetPlatform === 'html' && 'Bu kodu web sitenizin <body> tag\'ının sonuna (kapanış etiketinden hemen önce) ekleyin.'}
+              {widgetPlatform === 'react' && 'React uygulamanızda bu bileşeni (Component) en üst seviye layout veya ana sayfa bileşenine dahil edin.'}
+              {widgetPlatform === 'nextjs' && 'Next.js uygulamanızın RootLayout (layout.js/tsx) dosyasına ekleyin. next/script otomatik olarak optimize eder.'}
+              {widgetPlatform === 'wordpress' && 'WordPress sitenizin aktif temasındaki functions.php dosyasının en sonuna bu PHP kodunu yapıştırın.'}
+            </p>
           </div>
 
           {/* Customization */}

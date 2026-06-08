@@ -5,11 +5,19 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useLang } from '../../../context/LangContext';
 import PageLayout from '../../../components/PageLayout';
+import { getApiBaseUrl } from '../../../utils/api';
 
 function BlogPostContent() {
   const { lang } = useLang();
   const searchParams = useSearchParams();
-  const slug = searchParams.get('slug');
+  
+  let slug = searchParams.get('slug');
+  if (!slug && typeof window !== 'undefined') {
+    const parts = window.location.pathname.split('/');
+    if (parts.length >= 3 && parts[1] === 'blog' && parts[2] !== 'post') {
+      slug = parts[2];
+    }
+  }
 
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,12 +30,11 @@ function BlogPostContent() {
       return;
     }
 
+    setLoading(true);
+    setError(null);
+
     const fetchArticle = async () => {
-      // Determine backend base url
-      let apiBase = 'http://localhost:1306';
-      if (typeof window !== 'undefined' && window.location.origin.includes('ragleaf.com')) {
-        apiBase = 'https://api.ragleaf.com';
-      }
+      const apiBase = getApiBaseUrl();
 
       try {
         const response = await fetch(`${apiBase}/api/public/blog/ragleaf-platform?lang=${lang}`);
@@ -35,7 +42,18 @@ function BlogPostContent() {
           throw new Error('Failed to fetch article');
         }
         const data = await response.json();
-        const found = data.find(art => art.slug === slug);
+        let found = data.find(art => art.slug === slug);
+        
+        // Fallback: If not found in current language, check the other language
+        if (!found) {
+          const otherLang = lang === 'tr' ? 'en' : 'tr';
+          const otherResponse = await fetch(`${apiBase}/api/public/blog/ragleaf-platform?lang=${otherLang}`);
+          if (otherResponse.ok) {
+            const otherData = await otherResponse.json();
+            found = otherData.find(art => art.slug === slug);
+          }
+        }
+
         if (!found) {
           throw new Error('Article not found');
         }
@@ -64,64 +82,223 @@ function BlogPostContent() {
   const renderMarkdown = (content) => {
     if (!content) return '';
     
-    // Simple markdown helper
-    let html = content
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    // Normalize literal \n string representations to actual newlines
+    const normalizedContent = content.replace(/\\n/g, '\n');
+    
+    let html = normalizedContent
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
-      .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
-    // Parse list items
     const lines = html.split('\n');
     let inList = false;
-    const processedLines = lines.map(line => {
+    let inNumList = false;
+    let inTable = false;
+    let inCodeBlock = false;
+    let inBlockquote = false;
+
+    const htmlLines = lines.map(line => {
       const trimmed = line.trim();
-      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        const content = trimmed.substring(2);
+      
+      // 1. Fenced code block check
+      if (trimmed.startsWith('```')) {
         let prefix = '';
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+        if (inBlockquote) { inBlockquote = false; prefix += '</blockquote>'; }
+
+        if (!inCodeBlock) {
+          inCodeBlock = true;
+          const lang = trimmed.substring(3).trim();
+          return `${prefix}<pre class="bg-white/5 p-4 rounded-lg border border-white/5 overflow-x-auto font-mono text-sm my-6 text-emerald-400"><code class="${lang}">`;
+        } else {
+          inCodeBlock = false;
+          return '</code></pre>';
+        }
+      }
+
+      // If inside a code block, just output raw content encoded/escaped
+      if (inCodeBlock) {
+        return line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+      }
+
+      // 2. Horizontal rule check
+      if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+        let prefix = '';
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+        if (inBlockquote) { inBlockquote = false; prefix += '</blockquote>'; }
+        return `${prefix}<hr class="border-t border-white/10 my-6"/>`;
+      }
+
+      // 3. Header check
+      if (trimmed.startsWith('#')) {
+        let prefix = '';
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+        if (inBlockquote) { inBlockquote = false; prefix += '</blockquote>'; }
+        
+        const level = trimmed.match(/^#+/)?.[0].length || 1;
+        const title = trimmed.replace(/^#+\s*/, '');
+        if (level === 1) {
+          return `${prefix}<h1>${title}</h1>`;
+        } else if (level === 2) {
+          return `${prefix}<h2>${title}</h2>`;
+        } else {
+          return `${prefix}<h3>${title}</h3>`;
+        }
+      }
+
+      // 4. Table check
+      if (trimmed.startsWith('|')) {
+        let prefix = '';
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inBlockquote) { inBlockquote = false; prefix += '</blockquote>'; }
+
+        const isSeparator = /^[|:\s-]+$/.test(trimmed);
+        if (isSeparator) {
+          return ''; // skip separator lines
+        }
+
+        const cells = trimmed.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        
+        if (!inTable) {
+          inTable = true;
+          const headerCols = cells.map(c => `<th class="bg-white/5 border border-white/10 p-3 text-left font-bold text-white">${c}</th>`).join('');
+          return `${prefix}<div class="overflow-x-auto my-6"><table class="w-full border-collapse border border-white/10 text-sm"><thead><tr>${headerCols}</tr></thead><tbody>`;
+        } else {
+          const rowCols = cells.map(c => `<td class="border border-white/10 p-3 text-left text-text-secondary">${c}</td>`).join('');
+          return `<tr>${rowCols}</tr>`;
+        }
+      }
+
+      // 5. Blockquote check
+      if (trimmed.startsWith('>')) {
+        let prefix = '';
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+
+        const quoteContent = trimmed.replace(/^>\s*/, '');
+        if (!inBlockquote) {
+          inBlockquote = true;
+          return `${prefix}<blockquote>${quoteContent}`;
+        } else {
+          return `<br/>${quoteContent}`;
+        }
+      }
+
+      // Close any open blockquote if current line isn't one
+      let closingPrefix = '';
+      if (inBlockquote) {
+        inBlockquote = false;
+        closingPrefix = '</blockquote>';
+      }
+
+      // 6. Unordered list check
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        let prefix = closingPrefix;
+        if (inNumList) { inNumList = false; prefix += '</ol>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+
+        const contentStr = trimmed.substring(2);
         if (!inList) {
           inList = true;
-          prefix = '<ul>';
+          prefix += '<ul>';
         }
-        return `${prefix}<li>${content}</li>`;
-      } else {
-        let suffix = '';
-        if (inList) {
-          inList = false;
-          suffix = '</ul>';
-        }
-        return `${suffix}${line}`;
+        return `${prefix}<li>${contentStr}</li>`;
       }
-    });
-    
-    if (inList) {
-      processedLines.push('</ul>');
-    }
-    
-    html = processedLines.join('\n');
 
-    // Split into paragraphs
-    const paragraphs = html.split('\n\n');
-    const formatted = paragraphs.map(p => {
-      const trimmed = p.trim();
-      if (!trimmed) return '';
-      if (
+      // 7. Numbered list check
+      const numListMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (numListMatch) {
+        let prefix = closingPrefix;
+        if (inList) { inList = false; prefix += '</ul>'; }
+        if (inTable) { inTable = false; prefix += '</table></div>'; }
+
+        const contentStr = numListMatch[2];
+        if (!inNumList) {
+          inNumList = true;
+          prefix += '<ol>';
+        }
+        return `${prefix}<li>${contentStr}</li>`;
+      }
+
+      // Regular line formatting
+      let prefix = closingPrefix;
+      if (inList) { inList = false; prefix += '</ul>'; }
+      if (inNumList) { inNumList = false; prefix += '</ol>'; }
+      if (inTable) { inTable = false; prefix += '</table></div>'; }
+
+      return `${prefix}${line}`;
+    });
+
+    // Final cleanup for open tags
+    let completedLines = [...htmlLines];
+    let finalCleanup = '';
+    if (inCodeBlock) finalCleanup += '</code></pre>';
+    if (inTable) finalCleanup += '</table></div>';
+    if (inList) finalCleanup += '</ul>';
+    if (inNumList) finalCleanup += '</ol>';
+    if (inBlockquote) finalCleanup += '</blockquote>';
+    if (finalCleanup) {
+      completedLines.push(finalCleanup);
+    }
+
+    // Group adjacent plain text lines into paragraphs
+    let finalHtml = [];
+    let currentParagraph = [];
+    
+    completedLines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed === '') {
+        if (currentParagraph.length > 0) {
+          finalHtml.push(`<p>${currentParagraph.join('<br/>')}</p>`);
+          currentParagraph = [];
+        }
+        return;
+      }
+      
+      const isBlock = 
         trimmed.startsWith('<h') || 
         trimmed.startsWith('<ul') || 
-        trimmed.startsWith('<blockquote') || 
-        trimmed.startsWith('<ul>') ||
-        trimmed.startsWith('<li>')
-      ) {
-        return trimmed;
+        trimmed.startsWith('</ul') || 
+        trimmed.startsWith('<ol') || 
+        trimmed.startsWith('</ol') || 
+        trimmed.startsWith('<li') || 
+        trimmed.startsWith('<blockquote') ||
+        trimmed.startsWith('</blockquote') ||
+        trimmed.startsWith('<div') ||
+        trimmed.startsWith('</div') ||
+        trimmed.startsWith('<table') ||
+        trimmed.startsWith('</table') ||
+        trimmed.startsWith('<tr') ||
+        trimmed.startsWith('</tr') ||
+        trimmed.startsWith('<pre') ||
+        trimmed.startsWith('</pre') ||
+        trimmed.startsWith('<hr');
+
+      if (isBlock) {
+        if (currentParagraph.length > 0) {
+          finalHtml.push(`<p>${currentParagraph.join('<br/>')}</p>`);
+          currentParagraph = [];
+        }
+        finalHtml.push(line);
+      } else {
+        currentParagraph.push(line);
       }
-      return `<p>${trimmed.replace(/\n/g, '<br/>')}</p>`;
     });
 
-    return formatted.join('');
+    if (currentParagraph.length > 0) {
+      finalHtml.push(`<p>${currentParagraph.join('<br/>')}</p>`);
+    }
+
+    return finalHtml.join('\n');
   };
 
   return (

@@ -20,6 +20,15 @@ from ..auth.security import get_password_hash
 import logging
 logger = logging.getLogger(__name__)
 
+def generate_unique_user_id(db: Session) -> int:
+    import random
+    from sqlalchemy import text
+    while True:
+        user_id = random.randint(10000000, 99999999)
+        exists = db.execute(text("SELECT 1 FROM users WHERE id = :id"), {"id": user_id}).fetchone()
+        if not exists:
+            return user_id
+
 org_users_router = APIRouter(prefix="/api/org/users", tags=["Org Users"])
 
 
@@ -179,8 +188,10 @@ async def create_org_user(
     
     # Create new user
     full_name = f"{user_data.name or ''} {user_data.surname or ''}".strip() or user_data.email.split('@')[0]
+    user_id = generate_unique_user_id(db)
     
     new_user = User(
+        id=user_id,
         email=user_data.email,
         password_hash=get_password_hash(user_data.password),
         name=user_data.name,
@@ -193,7 +204,7 @@ async def create_org_user(
         updated_at=datetime.now(timezone.utc)
     )
     db.add(new_user)
-    db.flush()  # Get the user ID
+    db.flush()  # Set the user ID
     
     # Create membership
     new_membership = OrganizationMember(

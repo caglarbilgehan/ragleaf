@@ -191,6 +191,7 @@ services:
       - ./storage:/app/storage
       - ./logs:/app/logs
       - ./backend:/app/backend  # Hot-reload için backend kodunu mount et
+      - ./widget/dist:/app/widget/dist # Hot-reload compiled widget JS
     depends_on:
       postgres:
         condition: service_healthy

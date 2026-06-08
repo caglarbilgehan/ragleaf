@@ -60,8 +60,12 @@ class OrgResponse(BaseModel):
     max_documents: int
     max_queries_per_month: int
     is_active: bool
+    has_ai_assistant: bool = True
+    has_ai_writer: bool = False
+    has_ai_social: bool = False
     created_at: datetime
     ragleaf_leaves: int = 0
+    trial_ends_at: Optional[datetime] = None
     
     # Computed stats
     agent_count: Optional[int] = 0
@@ -130,7 +134,15 @@ async def create_organization(
         )
     
     # Create organization
+    import random
+    while True:
+        new_id = random.randint(1000000000, 2147483647)
+        exists = db.query(Organization.id).filter(Organization.id == new_id).first()
+        if not exists:
+            break
+
     org = Organization(
+        id=new_id,
         name=request.name,
         slug=slug,
         plan="free",
@@ -171,8 +183,12 @@ async def create_organization(
         max_documents=org.max_documents,
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
+        has_ai_assistant=org.has_ai_assistant,
+        has_ai_writer=org.has_ai_writer,
+        has_ai_social=org.has_ai_social,
         created_at=org.created_at,
         ragleaf_leaves=org.ragleaf_leaves,
+        trial_ends_at=org.trial_ends_at,
         agent_count=0,
         document_count=0,
         member_count=1
@@ -218,8 +234,12 @@ async def list_my_organizations(
             max_documents=org.max_documents,
             max_queries_per_month=org.max_queries_per_month,
             is_active=org.is_active,
+            has_ai_assistant=org.has_ai_assistant,
+            has_ai_writer=org.has_ai_writer,
+            has_ai_social=org.has_ai_social,
             created_at=org.created_at,
             ragleaf_leaves=org.ragleaf_leaves,
+            trial_ends_at=org.trial_ends_at,
             agent_count=agent_count,
             document_count=doc_count,
             member_count=member_count
@@ -251,8 +271,12 @@ async def get_current_organization(
         max_documents=org.max_documents,
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
+        has_ai_assistant=org.has_ai_assistant,
+        has_ai_writer=org.has_ai_writer,
+        has_ai_social=org.has_ai_social,
         created_at=org.created_at,
         ragleaf_leaves=org.ragleaf_leaves,
+        trial_ends_at=org.trial_ends_at,
         agent_count=agent_count,
         document_count=doc_count,
         member_count=member_count
@@ -319,8 +343,12 @@ async def update_current_organization(
         max_documents=org.max_documents,
         max_queries_per_month=org.max_queries_per_month,
         is_active=org.is_active,
+        has_ai_assistant=org.has_ai_assistant,
+        has_ai_writer=org.has_ai_writer,
+        has_ai_social=org.has_ai_social,
         created_at=org.created_at,
-        ragleaf_leaves=org.ragleaf_leaves
+        ragleaf_leaves=org.ragleaf_leaves,
+        trial_ends_at=org.trial_ends_at
     )
 
 

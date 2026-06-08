@@ -5,6 +5,7 @@ import { QueryClient as LegacyQueryClient, QueryClientProvider as LegacyQueryCli
 import { QueryClient as TanstackQueryClient, QueryClientProvider as TanstackQueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import App from './App.tsx'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 import './index.css'
 
 const defaultQueryOptions = {
@@ -21,24 +22,26 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <LegacyQueryClientProvider client={legacyQueryClient}>
       <TanstackQueryClientProvider client={tanstackQueryClient}>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}
-        >
-          <App />
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-              },
+        <LanguageProvider>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
             }}
-          />
-        </BrowserRouter>
+          >
+            <App />
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+          </BrowserRouter>
+        </LanguageProvider>
       </TanstackQueryClientProvider>
     </LegacyQueryClientProvider>
   </React.StrictMode>,

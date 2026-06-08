@@ -69,6 +69,21 @@ class AgentTemplate(Base):
         return f"<AgentTemplate {self.slug} name={self.name}>"
 
 
+class AgentTemplateDocument(Base):
+    """
+    Sektörel hazır AI asistan şablonlarına yüklenen/ilişkilendirilen dökümanlar.
+    """
+    __tablename__ = "agent_template_documents"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    template_id = Column(Integer, ForeignKey("agent_templates.id", ondelete="CASCADE"), nullable=False, index=True)
+    document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    template = relationship("AgentTemplate", backref="template_documents")
+    document = relationship("Document", backref="template_associations")
+
+
 # ============================================================================
 # Plans (Ücretlendirme & Limit Paketleri)
 # ============================================================================
@@ -90,6 +105,11 @@ class Plan(Base):
     max_queries_per_month = Column(Integer, default=1000)
     max_storage_mb = Column(Integer, default=500)
     is_active = Column(Boolean, default=True)
+    has_ai_assistant = Column(Boolean, default=True, nullable=False)
+    has_ai_writer = Column(Boolean, default=False, nullable=False)
+    has_ai_social = Column(Boolean, default=False, nullable=False)
+    ai_writer_price_addon = Column(Numeric(10, 2), default=0.00)
+    ai_social_price_addon = Column(Numeric(10, 2), default=0.00)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -121,6 +141,9 @@ class Organization(Base):
     max_queries_per_month = Column(Integer, default=1000)
     max_storage_mb = Column(Integer, default=500)
     ragleaf_leaves = Column(Integer, default=0, nullable=False)
+    has_ai_assistant = Column(Boolean, default=True, nullable=False)
+    has_ai_writer = Column(Boolean, default=False, nullable=False)
+    has_ai_social = Column(Boolean, default=False, nullable=False)
     
     # Organization-level settings
     settings = Column(JSONB, default={}, nullable=True)
@@ -771,8 +794,9 @@ class WriterArticle(Base):
     
     # Configuration
     mode = Column(String(30), default="semi-autonomous", nullable=False)  # autonomous, semi-autonomous
-    publishing_platform = Column(String(50), default="nextjs", nullable=False)  # nextjs, wordpress, ghost
+    publishing_platform = Column(String(50), default="ragleaf", nullable=False)  # ragleaf, wordpress, ghost
     language = Column(String(10), default="tr", nullable=False)
+    translation_group_id = Column(String(36), nullable=True, index=True)
     
     # Scheduled & Publishing dates
     scheduled_at = Column(DateTime(timezone=True), nullable=True)
@@ -799,4 +823,36 @@ class WriterArticle(Base):
     
     def __repr__(self):
         return f"<WriterArticle {self.public_id} title={self.title} status={self.status}>"
+
+
+class WriterAutomation(Base):
+    """
+    WriterAutomation (Zamanlanmış AI İçerik Üretim Otomasyonları).
+    """
+    __tablename__ = "writer_automations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"), nullable=True, index=True)
+    
+    title = Column(String(200), nullable=False) # Otomasyon başlığı veya üretilecek konu
+    interval_days = Column(Integer, default=7, nullable=False) # Kaç günde bir
+    keywords = Column(JSONB, default=[], nullable=True) # SEO Anahtar kelimeleri
+    mode = Column(String(30), default="autonomous", nullable=False) # autonomous, semi-autonomous
+    publishing_platform = Column(String(50), default="ragleaf", nullable=False) # ragleaf, wordpress, ghost
+    
+    is_active = Column(Boolean, default=True, nullable=False)
+    
+    last_run_at = Column(DateTime(timezone=True), nullable=True)
+    next_run_at = Column(DateTime(timezone=True), nullable=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    organization = relationship("Organization")
+    agent = relationship("Agent")
+    
+    def __repr__(self):
+        return f"<WriterAutomation {self.id} title={self.title} interval={self.interval_days}d>"
 

@@ -163,7 +163,7 @@ export default function StatisticsPage() {
           <select
             value={selectedDays}
             onChange={(e) => setSelectedDays(Number(e.target.value))}
-            className="px-3 py-2 border border-white/[0.1] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100"
           >
             <option value={1}>Son 1 Gün</option>
             <option value={7}>Son 7 Gün</option>
@@ -627,16 +627,16 @@ export default function StatisticsPage() {
               </div>
 
               {/* Info Box */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
                 <div className="flex items-start">
-                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5 mr-3" />
+                  <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="text-sm font-medium text-blue-800">İki Tür Sorun</h4>
-                    <ul className="text-sm text-blue-700 mt-1 space-y-1 list-disc list-inside">
+                    <h4 className="text-sm font-medium text-blue-300">İki Tür Sorun</h4>
+                    <ul className="text-sm text-gray-300 mt-1 space-y-1 list-disc list-inside">
                       <li><strong>Bilgi Bulunamadı (Unfound):</strong> Chunk bulundu ama LLM istenen bilgiyi çıkaramadı</li>
                       <li><strong>Gerçek Fallback:</strong> Benzerlik skoru çok düşük, chat moduna geçildi</li>
                     </ul>
-                    <p className="text-sm text-blue-700 mt-2">
+                    <p className="text-sm text-gray-400 mt-2">
                       Yüksek "Bulunamadı" oranı doküman kalitesini, yüksek "Fallback" oranı doküman eksikliğini gösterir.
                     </p>
                   </div>

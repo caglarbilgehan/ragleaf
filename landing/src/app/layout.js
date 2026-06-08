@@ -4,14 +4,10 @@ import { AssistantProvider } from "../context/AssistantContext";
 import { UIProvider } from "../context/UIContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import RightSidebar from "../components/RightSidebar";
 import RagleafAssistant from "../components/RagleafAssistant";
 import BodyClassHandler from "../components/BodyClassHandler";
 import LoginModal from "../components/LoginModal";
 import SignupModal from "../components/SignupModal";
-import dynamic from "next/dynamic";
-
-const HowItWorksModal = dynamic(() => import("../components/HowItWorksModal"));
 
 export const metadata = {
   title: {
@@ -42,8 +38,8 @@ export default function RootLayout({ children }) {
             <UIProvider>
               <BodyClassHandler />
               
-              {/* Floating Mobile Assistant Widget */}
-              <RagleafAssistant insideSidebar={false} />
+              {/* Floating Mobile/Desktop Assistant Widget */}
+              <RagleafAssistant />
               
               <Header />
               
@@ -51,14 +47,11 @@ export default function RootLayout({ children }) {
                 {children}
               </main>
               
-              <RightSidebar />
-              
               <Footer />
 
               {/* Global Modal Dialogs */}
               <LoginModal />
               <SignupModal />
-              <HowItWorksModal />
             </UIProvider>
           </AssistantProvider>
         </LangProvider>

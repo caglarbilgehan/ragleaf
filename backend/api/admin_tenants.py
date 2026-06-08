@@ -51,6 +51,9 @@ class TenantListItem(BaseModel):
     allow_admin_doc_access: bool
     max_agents: int
     max_documents: int
+    has_ai_assistant: bool = True
+    has_ai_writer: bool = False
+    has_ai_social: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
     ragleaf_leaves: int = 0
@@ -75,6 +78,9 @@ class TenantUpdateRequest(BaseModel):
     max_documents: Optional[int] = None
     max_queries_per_month: Optional[int] = None
     max_storage_mb: Optional[int] = None
+    has_ai_assistant: Optional[bool] = None
+    has_ai_writer: Optional[bool] = None
+    has_ai_social: Optional[bool] = None
 
 
 class KVKKToggleRequest(BaseModel):
@@ -92,6 +98,11 @@ class PlanResponse(BaseModel):
     max_queries_per_month: int
     max_storage_mb: int
     is_active: bool
+    has_ai_assistant: bool = True
+    has_ai_writer: bool = False
+    has_ai_social: bool = False
+    ai_writer_price_addon: float = 0.0
+    ai_social_price_addon: float = 0.0
 
     class Config:
         from_attributes = True
@@ -106,6 +117,11 @@ class PlanUpdate(BaseModel):
     max_queries_per_month: Optional[int] = None
     max_storage_mb: Optional[int] = None
     is_active: Optional[bool] = None
+    has_ai_assistant: Optional[bool] = None
+    has_ai_writer: Optional[bool] = None
+    has_ai_social: Optional[bool] = None
+    ai_writer_price_addon: Optional[float] = None
+    ai_social_price_addon: Optional[float] = None
 
 
 # ============================================================================

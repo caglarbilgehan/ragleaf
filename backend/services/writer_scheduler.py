@@ -15,7 +15,8 @@ from sqlalchemy.orm import Session
 from backend.database.connection import SessionLocal
 from backend.database.models_platform import WriterArticle, Organization
 from backend.services.llm_router import LLMRouter
-from backend.api.writer import slugify
+from backend.api.writer import slugify, translate_article_content
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +92,8 @@ async def run_autonomous_generation(db: Session):
     keywords = writer_config.get("keywords", [])
     language = writer_config.get("language", "tr")
     mode = writer_config.get("mode", "semi-autonomous")
-    platform = writer_config.get("publishing_platform", "nextjs")
+    platform = writer_config.get("publishing_platform", "ragleaf")
+    agent_id = writer_config.get("agent_id")
 
     if not topics:
       # General technology and RAG defaults
@@ -174,9 +176,12 @@ async def run_autonomous_generation(db: Session):
         slug = f"{base_slug}-{counter}"
         counter += 1
 
-      # Create new WriterArticle
+      group_id = str(uuid.uuid4())
+
+      # Create new WriterArticle (Primary)
       article = WriterArticle(
         organization_id=org.id,
+        agent_id=agent_id,
         title=title,
         slug=slug,
         summary=parsed_json.get("summary"),
@@ -187,6 +192,8 @@ async def run_autonomous_generation(db: Session):
         mode=mode,
         publishing_platform=platform,
         published_at=now if mode == "autonomous" else None,
+        language=language,
+        translation_group_id=group_id,
         extra_data={
           "model": model.model_name,
           "autonomous_generation": True,
@@ -195,6 +202,54 @@ async def run_autonomous_generation(db: Session):
       )
 
       db.add(article)
+
+      # Generate translation for the other language (tr <=> en)
+      target_lang = "en" if language == "tr" else "tr"
+      try:
+        translated_data = await translate_article_content(
+          db=db,
+          title=title,
+          summary=parsed_json.get("summary", ""),
+          content=parsed_json.get("content", ""),
+          outline=parsed_json.get("outline", []),
+          keywords=parsed_json.get("keywords", keywords),
+          target_lang=target_lang
+        )
+        if translated_data:
+          trans_title = translated_data.get("title", f"{title} ({target_lang})")
+          trans_slug = slugify(trans_title)
+          
+          base_trans_slug = trans_slug
+          counter = 1
+          while db.query(WriterArticle).filter(WriterArticle.organization_id == org.id, WriterArticle.slug == trans_slug).first():
+            trans_slug = f"{base_trans_slug}-{counter}"
+            counter += 1
+            
+          translated_article = WriterArticle(
+            organization_id=org.id,
+            agent_id=agent_id,
+            title=trans_title,
+            slug=trans_slug,
+            summary=translated_data.get("summary"),
+            content=translated_data.get("content"),
+            keywords=translated_data.get("keywords", []),
+            outline=translated_data.get("outline", []),
+            status=article.status,
+            mode=mode,
+            publishing_platform=platform,
+            language=target_lang,
+            translation_group_id=group_id,
+            published_at=article.published_at,
+            extra_data={
+              "model": model.model_name,
+              "note": f"Auto-translated from {language} to {target_lang}",
+              "autonomous_generation": True
+            }
+          )
+          db.add(translated_article)
+          logger.info(f"📰 AI Translated Article successfully generated for org {org.slug}: {translated_article.slug}")
+      except Exception as trans_err:
+        logger.error(f"Failed to auto-translate article during periodic gen: {trans_err}")
       
       # Update organization settings last run timestamp
       org_settings = dict(org.settings or {})

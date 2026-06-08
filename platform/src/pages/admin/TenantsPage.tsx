@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/contexts/LanguageContext';
 import { adminTenantApi, type TenantListItem, type TenantStats } from '@/services/ragleafApi';
 import {
   BuildingOffice2Icon,
@@ -16,17 +17,33 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
-const PLAN_BADGES: Record<string, { label: string; color: string }> = {
-  free: { label: 'Ücretsiz', color: 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20' },
-  starter: { label: 'Starter', color: 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' },
-  pro: { label: 'Pro', color: 'bg-primary-500/10 text-primary-400 ring-1 ring-primary-500/20' },
-  enterprise: { label: 'Enterprise', color: 'bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20' },
-};
-
 export default function TenantsPage() {
+  const { t, language } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState('');
+
+  const getPlanBadgeLabel = (plan: string) => {
+    switch (plan) {
+      case 'free': return t('admin.dash.plan_free').split(' (')[0];
+      case 'starter': return 'Starter';
+      case 'pro': return 'Pro';
+      case 'ultimate': return 'Ultimate';
+      case 'ultra': return 'Ultra';
+      default: return plan;
+    }
+  };
+
+  const getPlanBadgeColor = (plan: string) => {
+    switch (plan) {
+      case 'free': return 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20';
+      case 'starter': return 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20';
+      case 'pro': return 'bg-primary-500/10 text-primary-400 ring-1 ring-primary-500/20';
+      case 'ultimate': return 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20';
+      case 'ultra': return 'bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20';
+      default: return 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20';
+    }
+  };
 
   const { data: tenants = [], isLoading } = useQuery<TenantListItem[]>({
     queryKey: ['admin-tenants', search, planFilter],
@@ -45,9 +62,9 @@ export default function TenantsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-100">🏢 Tenant Yönetimi</h1>
+        <h1 className="text-2xl font-bold text-gray-100">🏢 {t('admin.tenants.title')}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Platformdaki tüm organizasyonları yönetin
+          {t('admin.tenants.subtitle')}
         </p>
       </div>
 
@@ -55,27 +72,27 @@ export default function TenantsPage() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-4">
-            <p className="text-xs text-gray-500">Toplam Tenant</p>
+            <p className="text-xs text-gray-500">{t('admin.tenants.stat_total')}</p>
             <p className="text-2xl font-bold text-gray-100">{stats.total_tenants}</p>
           </div>
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-4">
-            <p className="text-xs text-gray-500">Aktif</p>
+            <p className="text-xs text-gray-500">{t('admin.tenants.stat_active')}</p>
             <p className="text-2xl font-bold text-green-600">{stats.active_tenants}</p>
           </div>
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-4">
-            <p className="text-xs text-gray-500">Toplam Agent</p>
+            <p className="text-xs text-gray-500">{t('admin.tenants.stat_agents')}</p>
             <p className="text-2xl font-bold text-primary-400">{stats.total_agents}</p>
           </div>
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-4">
-            <p className="text-xs text-gray-500">Toplam Randevu</p>
+            <p className="text-xs text-gray-500">{t('admin.tenants.stat_appointments')}</p>
             <p className="text-2xl font-bold text-purple-600">{stats.total_appointments}</p>
           </div>
           <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-4">
-            <p className="text-xs text-gray-500">Plan Dağılımı</p>
+            <p className="text-xs text-gray-500">{t('admin.tenants.stat_plan_distribution')}</p>
             <div className="flex gap-1 mt-1 flex-wrap">
               {Object.entries(stats.plan_distribution).map(([plan, count]) => (
                 <span key={plan} className="text-xs bg-dark-600 px-1.5 py-0.5 rounded">
-                  {plan}: {count}
+                  {getPlanBadgeLabel(plan)}: {count}
                 </span>
               ))}
             </div>
@@ -91,7 +108,7 @@ export default function TenantsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tenant ara..."
+            placeholder={t('admin.tenants.search_placeholder')}
             className="w-full pl-10 pr-4 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 placeholder:text-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"
           />
         </div>
@@ -100,11 +117,12 @@ export default function TenantsPage() {
           onChange={(e) => setPlanFilter(e.target.value)}
           className="px-3 py-2 border border-white/[0.1] bg-dark-700/50 text-gray-100 rounded-lg text-sm focus:outline-none"
         >
-          <option value="">Tüm Planlar</option>
-          <option value="free">Ücretsiz</option>
-          <option value="starter">Starter</option>
-          <option value="pro">Pro</option>
-          <option value="enterprise">Enterprise</option>
+          <option value="">{t('admin.tenants.filter_plans')}</option>
+          <option value="free">{getPlanBadgeLabel('free')}</option>
+          <option value="starter">{getPlanBadgeLabel('starter')}</option>
+          <option value="pro">{getPlanBadgeLabel('pro')}</option>
+          <option value="ultimate">{getPlanBadgeLabel('ultimate')}</option>
+          <option value="ultra">{getPlanBadgeLabel('ultra')}</option>
         </select>
       </div>
 
@@ -116,16 +134,17 @@ export default function TenantsPage() {
       ) : tenants.length === 0 ? (
         <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-12 text-center">
           <BuildingOffice2Icon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-100">Tenant bulunamadı</h3>
+          <h3 className="text-lg font-medium text-gray-100">{t('admin.tenants.no_tenants')}</h3>
         </div>
       ) : (
         <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] divide-y divide-white/[0.06]">
-          {tenants.map((t) => {
-            const plan = PLAN_BADGES[t.plan] || PLAN_BADGES.free;
+          {tenants.map((tItem) => {
+            const label = getPlanBadgeLabel(tItem.plan);
+            const color = getPlanBadgeColor(tItem.plan);
             return (
               <div
-                key={t.id}
-                onClick={() => navigate(`/admin/tenants/${t.id}`)}
+                key={tItem.id}
+                onClick={() => navigate(`/admin/tenants/${tItem.id}`)}
                 className="flex items-center justify-between p-4 hover:bg-dark-700/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-4 flex-1">
@@ -134,42 +153,42 @@ export default function TenantsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-100">{t.name}</span>
-                      {t.is_system && (
+                      <span className="font-medium text-gray-100">{tItem.name}</span>
+                      {tItem.is_system && (
                         <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 font-semibold">
                           <ShieldCheckIcon className="h-3 w-3" />
-                          Sistem
+                          {t('admin.tenants.badge_system')}
                         </span>
                       )}
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${plan.color}`}>
-                        {plan.label}
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>
+                        {label}
                       </span>
-                      {!t.is_active && (
+                      {!tItem.is_active && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 ring-1 ring-red-500/20">
-                          Pasif
+                          {t('admin.tenants.badge_inactive')}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">{t.slug}</p>
+                    <p className="text-xs text-gray-500">{tItem.slug}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-6 text-sm text-gray-500">
-                  <span className="flex items-center gap-1" title="Kullanıcılar">
+                  <span className="flex items-center gap-1" title={language === 'tr' ? 'Kullanıcılar' : 'Users'}>
                     <UserGroupIcon className="h-4 w-4" />
-                    {t.user_count}
+                    {tItem.user_count}
                   </span>
-                  <span className="flex items-center gap-1" title="Asistanlar">
+                  <span className="flex items-center gap-1" title={language === 'tr' ? 'Asistanlar' : 'Assistants'}>
                     <CpuChipIcon className="h-4 w-4" />
-                    {t.agent_count}
+                    {tItem.agent_count}
                   </span>
-                  <span className="flex items-center gap-1" title="Dokümanlar">
+                  <span className="flex items-center gap-1" title={language === 'tr' ? 'Dokümanlar' : 'Documents'}>
                     <DocumentTextIcon className="h-4 w-4" />
-                    {t.document_count}
+                    {tItem.document_count}
                   </span>
-                  <span className="flex items-center gap-1" title="Randevular">
+                  <span className="flex items-center gap-1" title={language === 'tr' ? 'Randevular' : 'Appointments'}>
                     <CalendarDaysIcon className="h-4 w-4" />
-                    {t.appointment_count}
+                    {tItem.appointment_count}
                   </span>
                   <ChevronRightIcon className="h-5 w-5 text-gray-300" />
                 </div>

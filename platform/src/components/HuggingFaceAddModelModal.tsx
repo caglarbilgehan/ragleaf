@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Search, Download, Star, Users, Calendar, Database, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getApiBaseUrl } from '@/services/api';
+import { useTranslation } from '@/contexts/LanguageContext';
 
 interface HuggingFaceModel {
   id: string;
@@ -27,6 +28,7 @@ export default function HuggingFaceAddModelModal({
   onClose, 
   onModelAdd 
 }: HuggingFaceAddModelModalProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [models, setModels] = useState<HuggingFaceModel[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,7 +59,7 @@ export default function HuggingFaceAddModelModal({
       setModels(data);
     } catch (error) {
       console.error('Error fetching popular models:', error);
-      toast.error('Popüler modeller yüklenemedi');
+      toast.error(t('admin.models.toast_hf_popular_error'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ export default function HuggingFaceAddModelModal({
       setModels(data.models);
     } catch (error) {
       console.error('Error searching models:', error);
-      toast.error('Model arama başarısız');
+      toast.error(t('admin.models.toast_hf_search_error'));
     } finally {
       setLoading(false);
     }
@@ -98,7 +100,7 @@ export default function HuggingFaceAddModelModal({
 
   const handleAddModel = (modelId: string) => {
     onModelAdd(modelId);
-    toast.success(`Model eklendi: ${modelId}`);
+    toast.success(t('admin.models.toast_hf_add_success').replace('{name}', modelId));
     onClose();
   };
 
@@ -109,11 +111,11 @@ export default function HuggingFaceAddModelModal({
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Bilinmiyor';
+    if (!dateString) return t('admin.models.unknown');
     try {
       return new Date(dateString).toLocaleDateString('tr-TR');
     } catch {
-      return 'Bilinmiyor';
+      return t('admin.models.unknown');
     }
   };
 
@@ -125,9 +127,9 @@ export default function HuggingFaceAddModelModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-xl font-semibold text-gray-100">HuggingFace Model Ekle</h2>
+            <h2 className="text-xl font-semibold text-gray-100">{t('admin.models.hf_add_title')}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              HuggingFace Hub'dan model arayın ve projenize ekleyin
+              {t('admin.models.hf_add_desc')}
             </p>
           </div>
           <button
@@ -145,7 +147,7 @@ export default function HuggingFaceAddModelModal({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Model adı veya yazar ara... (örn: microsoft/DialoGPT, gpt2)"
+                placeholder={t('admin.models.hf_search_placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchModels()}
@@ -162,7 +164,7 @@ export default function HuggingFaceAddModelModal({
               ) : (
                 <Search className="h-4 w-4" />
               )}
-              <span>Ara</span>
+              <span>{t('admin.models.hf_search_btn')}</span>
             </button>
           </div>
         </div>
@@ -172,13 +174,13 @@ export default function HuggingFaceAddModelModal({
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <span className="ml-2 text-gray-600">Modeller yükleniyor...</span>
+              <span className="ml-2 text-gray-600">{t('admin.models.hf_loading')}</span>
             </div>
           ) : models.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <Database className="h-12 w-12 mb-4 text-gray-300" />
-              <p className="text-lg font-medium">Model bulunamadı</p>
-              <p className="text-sm">Farklı anahtar kelimeler deneyin</p>
+              <p className="text-lg font-medium">{t('admin.models.hf_not_found')}</p>
+              <p className="text-sm">{t('admin.models.hf_not_found_desc')}</p>
             </div>
           ) : (
             <div className="divide-y divide-white/[0.04]">
@@ -204,11 +206,11 @@ export default function HuggingFaceAddModelModal({
                         </div>
                         <div className="flex items-center space-x-1">
                           <Download className="h-4 w-4" />
-                          <span>{formatNumber(model.downloads)} indirme</span>
+                          <span>{formatNumber(model.downloads)} {t('admin.models.hf_downloads')}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4" />
-                          <span>{formatNumber(model.likes)} beğeni</span>
+                          <span>{formatNumber(model.likes)} {t('admin.models.hf_likes')}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
@@ -236,7 +238,7 @@ export default function HuggingFaceAddModelModal({
 
                       {model.library_name && (
                         <div className="text-sm text-gray-600">
-                          <strong>Kütüphane:</strong> {model.library_name}
+                          <strong>{t('admin.models.hf_library')}</strong> {model.library_name}
                         </div>
                       )}
                     </div>
@@ -246,7 +248,7 @@ export default function HuggingFaceAddModelModal({
                       className="ml-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2"
                     >
                       <Plus className="h-4 w-4" />
-                      <span>Ekle</span>
+                      <span>{t('ui.create')}</span>
                     </button>
                   </div>
                 </div>
@@ -258,14 +260,12 @@ export default function HuggingFaceAddModelModal({
         {/* Footer */}
         <div className="p-6 border-t border-white/[0.06] bg-dark-700/50">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              <strong>Not:</strong> Eklenen modeller otomatik olarak yapılandırılacak ve kullanıma hazır hale gelecektir.
-            </div>
+            <div className="text-sm text-gray-600" dangerouslySetInnerHTML={{ __html: t('admin.models.hf_footer_hint') }} />
             <button
               onClick={onClose}
               className="px-4 py-2 text-gray-300 bg-dark-500 rounded-md hover:bg-dark-400 transition-colors"
             >
-              Kapat
+              {t('ui.close')}
             </button>
           </div>
         </div>

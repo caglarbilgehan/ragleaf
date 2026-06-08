@@ -129,7 +129,8 @@ export default function SectorSimulator() {
             return;
           }
           if (charIndex < textToType.length) {
-            setTypingInput((prev) => prev + textToType[charIndex]);
+            const char = textToType[charIndex];
+            setTypingInput((prev) => prev + char);
             charIndex++;
           } else {
             clearInterval(typeInterval);

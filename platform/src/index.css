@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  * {
+  div, header, footer, nav, aside, section, main, table, tr, td, th, input, select, textarea, button {
     @apply border-white/[0.06];
   }
   
@@ -53,3 +53,30 @@
     @apply text-sm font-medium leading-none text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
   }
 }
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* Custom Select Option Styles */
+select option {
+  background-color: #1f2937; /* bg-dark-800 */
+  color: #f3f4f6; /* text-gray-100 */
+}
+
+

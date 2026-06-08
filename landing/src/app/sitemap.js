@@ -2,7 +2,7 @@ export const dynamic = 'force-static';
 
 export default function sitemap() {
   const baseUrl = 'https://ragleaf.com';
-  const routes = ['', '/about', '/installation', '/pricing', '/developers', '/blog', '/contact', '/legal'];
+  const routes = ['', '/about', '/docs', '/pricing', '/blog', '/contact', '/legal'];
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
