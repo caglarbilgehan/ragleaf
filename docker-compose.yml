@@ -144,7 +144,7 @@ services:
     ports:
       - "1305:8002"
     volumes:
-      - huggingface_cache:/root/.cache/huggingface
+      - /mnt/storage/ragleaf_huggingface_cache:/root/.cache/huggingface
     depends_on:
       redis:
         condition: service_healthy
@@ -246,7 +246,7 @@ services:
       - "1308:9000"  # S3 API
       - "1309:9001"  # MinIO Console
     volumes:
-      - minio_data:/data
+      - /mnt/storage/ragleaf_minio_data:/data
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
