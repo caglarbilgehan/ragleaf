@@ -59,7 +59,7 @@ export default function Header() {
 
           <div className="nav-brand-group">
             {/* Logo */}
-            <Link href="/" className="nav-logo" onClick={closeMenu}>
+            <a href="/" className="nav-logo" onClick={closeMenu}>
               <svg className="leaf" width="30" height="30" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.4))' }}>
                 <defs>
                   <linearGradient id="logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -85,7 +85,7 @@ export default function Header() {
                 <circle cx="44" cy="10" r="2.5" fill="#06b6d4" filter="url(#glow)" />
               </svg>
               <span className="nav-logo-text">Ragleaf</span>
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Action Buttons (visible only on mobile) */}
