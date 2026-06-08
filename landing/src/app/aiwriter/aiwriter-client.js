@@ -39,13 +39,13 @@ export default function AIWriterClient() {
         : 'Edit headers, rewrite sentences, or prompt the AI for adjustments with direct inline controls.'
     },
     {
-      title: lang === 'tr' ? '4. WordPress Otomatik Yayınlama' : '4. Automated WordPress Sync',
+      title: lang === 'tr' ? '4. Otomatik Yayınlama & CMS Entegrasyonu' : '4. Automated Sync & CMS Integration',
       desc: lang === 'tr' 
         ? 'Onaylanan yazılar belirlediğiniz içerik takvimine göre sitenizde otomatik yayınlanır.'
         : 'Approved articles publish automatically to your website via scheduled publishing calendars.',
       details: lang === 'tr'
-        ? 'WordPress REST API veya Next.js ISR (Incremental Static Regeneration) ile saniyeler içinde yayına girer.'
-        : 'Integrate directly using WordPress plugins or Next.js revalidation hooks to update blogs instantly.'
+        ? 'WordPress, Ghost, Next.js veya diğer popüler CMS altyapılarınızla entegre olarak içeriklerinizi saniyeler içinde yayına alır.'
+        : 'Integrate with WordPress, Ghost, Next.js, or other popular CMS systems to push your content live in seconds.'
     }
   ];
 
