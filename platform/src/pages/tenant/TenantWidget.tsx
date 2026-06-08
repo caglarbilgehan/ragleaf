@@ -260,7 +260,15 @@ export default function TenantWidget() {
   // Triggered when form fields are modified and saved
   const handleSaveForm = async () => {
     if (!widgetForm || !selectedWidgetId) return;
-    const updatedWidgets = widgets.map(w => w.id === selectedWidgetId ? widgetForm : w);
+    const isPlanActive = currentOrg?.plan !== 'starter';
+    const finalForm = {
+      ...widgetForm,
+      appointment_module_enabled: isPlanActive,
+      reservation_module_enabled: isPlanActive,
+      order_module_enabled: isPlanActive,
+      lead_module_enabled: isPlanActive,
+    };
+    const updatedWidgets = widgets.map(w => w.id === selectedWidgetId ? finalForm : w);
     await saveWidgetConfig(updatedWidgets);
   };
 
@@ -286,6 +294,7 @@ export default function TenantWidget() {
   const handleCreateWidget = async () => {
     if (!newWidgetName.trim() || !selectedAgent) return;
     
+    const isPlanActive = currentOrg?.plan !== 'starter';
     const newWidget: WidgetConfig = {
       id: generateWidgetId(),
       name: newWidgetName.trim(),
@@ -311,10 +320,10 @@ export default function TenantWidget() {
       border_color_dark: '#374151',
       input_bg_color_dark: '#111827',
       input_text_color_dark: '#F3F4F6',
-      appointment_module_enabled: false,
-      reservation_module_enabled: false,
-      order_module_enabled: false,
-      lead_module_enabled: false,
+      appointment_module_enabled: isPlanActive,
+      reservation_module_enabled: isPlanActive,
+      order_module_enabled: isPlanActive,
+      lead_module_enabled: isPlanActive,
     };
 
     const updatedList = [...widgets, newWidget];
@@ -995,54 +1004,70 @@ add_action('wp_footer', function() {
 
                     {/* Card 4.5: Aktif Modüller */}
                     <div className="bg-dark-800/60 rounded-xl border border-white/[0.06] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-4">
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/[0.06] pb-2">
-                        🧩 {language === 'tr' ? 'Aktif Modüller' : 'Active Modules'}
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/[0.06] pb-2 flex justify-between items-center">
+                        <span>🧩 {language === 'tr' ? 'Aktif Modüller' : 'Active Modules'}</span>
+                        <span className="text-[10px] text-gray-500 font-normal normal-case">
+                          {language === 'tr' ? 'Planınıza göre otomatik belirlenir' : 'Determined automatically by your plan'}
+                        </span>
                       </h4>
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={!!widgetForm.appointment_module_enabled}
-                            onChange={(e) => updateFormField('appointment_module_enabled', e.target.checked)}
-                            className="rounded border-white/[0.06] bg-dark-900 text-primary-600 focus:ring-0"
-                          />
-                          <span className="text-xs text-gray-300">
-                            {language === 'tr' ? 'Randevu (Görüşme & Seans)' : 'Appointments (Sessions)'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={!!widgetForm.reservation_module_enabled}
-                            onChange={(e) => updateFormField('reservation_module_enabled', e.target.checked)}
-                            className="rounded border-white/[0.06] bg-dark-900 text-primary-600 focus:ring-0"
-                          />
-                          <span className="text-xs text-gray-300">
-                            {language === 'tr' ? 'Rezervasyon (Masa & Yer)' : 'Reservations (Tables)'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={!!widgetForm.order_module_enabled}
-                            onChange={(e) => updateFormField('order_module_enabled', e.target.checked)}
-                            className="rounded border-white/[0.06] bg-dark-900 text-primary-600 focus:ring-0"
-                          />
-                          <span className="text-xs text-gray-300">
-                            {language === 'tr' ? 'Ürün Siparişi' : 'Product Ordering'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={!!widgetForm.lead_module_enabled}
-                            onChange={(e) => updateFormField('lead_module_enabled', e.target.checked)}
-                            className="rounded border-white/[0.06] bg-dark-900 text-primary-600 focus:ring-0"
-                          />
-                          <span className="text-xs text-gray-300">
-                            {language === 'tr' ? 'Müşteri Kayıt & Lead' : 'Lead Generation'}
-                          </span>
-                        </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                          {
+                            key: 'appointment',
+                            labelTr: 'Randevu (Görüşme & Seans)',
+                            labelEn: 'Appointments (Sessions)',
+                            icon: '🗓️'
+                          },
+                          {
+                            key: 'reservation',
+                            labelTr: 'Rezervasyon (Kaynak & Masa)',
+                            labelEn: 'Reservations (Resources)',
+                            icon: '🪑'
+                          },
+                          {
+                            key: 'order',
+                            labelTr: 'Ürün Siparişi',
+                            labelEn: 'Product Ordering',
+                            icon: '🛍️'
+                          },
+                          {
+                            key: 'lead',
+                            labelTr: 'Müşteri Kayıt & Lead',
+                            labelEn: 'Lead Generation',
+                            icon: '👥'
+                          }
+                        ].map(mod => {
+                          const isPlanActive = currentOrg?.plan !== 'starter';
+                          return (
+                            <div 
+                              key={mod.key} 
+                              className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                isPlanActive 
+                                  ? 'bg-primary-500/5 border-primary-500/20 text-gray-200' 
+                                  : 'bg-dark-900/40 border-white/[0.04] text-gray-500'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">{mod.icon}</span>
+                                <span className="text-xs font-medium">
+                                  {language === 'tr' ? mod.labelTr : mod.labelEn}
+                                </span>
+                              </div>
+                              <div>
+                                {isPlanActive ? (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                    {language === 'tr' ? 'Aktif' : 'Active'}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                                    🔒 Pro+
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
